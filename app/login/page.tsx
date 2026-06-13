@@ -15,33 +15,46 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { APP_NAME, ROUTES } from "@/lib/constants";
+import { resolvePostAuthRoute } from "@/lib/auth-redirect";
+import { mapApiUser, useLogin } from "@/service/use-auth";
 import { useAuthStore } from "@/stores/auth-store";
+import type { ApiError } from "@/types";
 
 export default function LoginPage() {
   const router = useRouter();
   const setAuth = useAuthStore((s) => s.setAuth);
+  const setNeedsOnboarding = useAuthStore((s) => s.setNeedsOnboarding);
+  const login = useLogin();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  // NOTE: demo sign-in. Replace with a real TanStack Query mutation later.
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
       toast.error("Enter your email and password");
       return;
     }
-    setAuth(
-      {
-        id: crypto.randomUUID(),
-        name: email.split("@")[0] || "Student",
-        email,
-        role: "student",
-      },
-      "demo-token"
-    );
-    toast.success("Welcome back");
-    router.push(ROUTES.student);
+
+    try {
+      const { access_token, user } = await login.mutateAsync({ email, password });
+      const mappedUser = mapApiUser(user);
+
+      setAuth(mappedUser, access_token);
+
+      if (!mappedUser.role) {
+        setNeedsOnboarding(true);
+        router.replace(ROUTES.onboarding);
+        return;
+      }
+
+      setNeedsOnboarding(false);
+      toast.success("Welcome back");
+      router.replace(resolvePostAuthRoute(mappedUser.role));
+    } catch (error) {
+      const apiError = error as ApiError;
+      toast.error(apiError.message ?? "Sign in failed");
+    }
   };
 
   return (
@@ -80,6 +93,7 @@ export default function LoginPage() {
                   className="h-11 bg-muted/50 pl-9"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  disabled={login.isPending}
                 />
               </div>
             </div>
@@ -108,6 +122,7 @@ export default function LoginPage() {
                   className="h-11 bg-muted/50 px-9"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  disabled={login.isPending}
                 />
                 <button
                   type="button"
@@ -132,9 +147,13 @@ export default function LoginPage() {
               Stay signed in for 30 days
             </Label>
 
-            <Button type="submit" className="h-11 w-full text-sm">
-              Sign In
-              <LogInIcon />
+            <Button
+              type="submit"
+              className="h-11 w-full text-sm"
+              disabled={login.isPending}
+            >
+              {login.isPending ? "Signing in…" : "Sign In"}
+              {!login.isPending && <LogInIcon />}
             </Button>
 
             <Separator className="my-1" />

@@ -1,26 +1,36 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { api } from "@/lib/api-client";
-import {
-  mapApiUser,
-  type ApiResponse,
-  type ApiUser,
-  type RegisterData,
-  type RegisterPayload,
-  type UpdateProfilePayload,
-} from "@/lib/auth";
+import { mapApiUser } from "@/lib/auth";
+import { queryKeys } from "@/lib/query-keys";
+import * as authService from "@/service/auth.service";
 
 export function useRegister() {
   return useMutation({
-    mutationFn: (payload: RegisterPayload) =>
-      api.post<ApiResponse<RegisterData>>("/auth/register", payload),
+    mutationFn: authService.register,
+  });
+}
+
+export function useLogin() {
+  return useMutation({
+    mutationFn: authService.loginWithProfile,
+  });
+}
+
+export function useProfile() {
+  return useQuery({
+    queryKey: queryKeys.auth.me,
+    queryFn: authService.getMe,
   });
 }
 
 export function useUpdateProfile() {
+  const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (payload: UpdateProfilePayload) =>
-      api.patch<ApiResponse<ApiUser>>("/users/me", payload),
+    mutationFn: authService.updateProfile,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.auth.me });
+    },
   });
 }
+
 export { mapApiUser };

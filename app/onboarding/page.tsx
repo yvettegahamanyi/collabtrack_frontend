@@ -8,7 +8,8 @@ import { toast } from "sonner";
 import { Logo } from "@/components/brand/logo";
 import { Card } from "@/components/ui/card";
 import { toApiRole } from "@/lib/auth";
-import { ROLE_HOME, ROUTES } from "@/lib/constants";
+import { ROUTES } from "@/lib/constants";
+import { resolvePostAuthRoute } from "@/lib/auth-redirect";
 import { cn } from "@/lib/utils";
 import { mapApiUser, useUpdateProfile } from "@/service/use-auth";
 import { useAuthStore } from "@/stores/auth-store";
@@ -56,7 +57,7 @@ export default function OnboardingPage() {
     }
 
     if (!needsOnboarding && user?.role) {
-      router.replace(ROLE_HOME[user.role]);
+      router.replace(resolvePostAuthRoute(user.role));
     }
   }, [isAuthenticated, needsOnboarding, user, router]);
 
@@ -75,7 +76,7 @@ export default function OnboardingPage() {
       setUser(updatedUser);
       setNeedsOnboarding(false);
       toast.success(`You're all set, ${updatedUser.name}!`);
-      router.replace(ROLE_HOME[role]);
+      router.replace(resolvePostAuthRoute(role));
     } catch (error) {
       setSelectedRole(null);
       const apiError = error as ApiError;

@@ -1,9 +1,7 @@
 import {
   BarChart3,
-  FileBarChart,
   LayoutDashboard,
   Settings,
-  Upload,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -25,17 +23,12 @@ export const NAVIGATION: Record<Role, NavItem[]> = {
   ],
   instructor: [
     { label: "Dashboard", href: "/instructor", icon: LayoutDashboard },
+    { label: "My Groups", href: "/instructor/group", icon: Users },
     { label: "Settings", href: "/instructor/settings", icon: Settings },
   ],
   student: [
     { label: "Dashboard", href: "/student", icon: LayoutDashboard },
     { label: "My Group", href: "/student/group", icon: Users },
-    {
-      label: "Contribution Report",
-      href: "/student/report",
-      icon: FileBarChart,
-    },
-    { label: "Upload Transcript", href: "/student/upload", icon: Upload },
     { label: "Settings", href: "/student/settings", icon: Settings },
   ],
 };

@@ -25,4 +25,12 @@ export const queryKeys = {
     byProject: (projectId: string) =>
       ["contributions", "project", projectId] as const,
   },
+  groups: {
+    all: ["groups"] as const,
+    list: () => ["groups", "list"] as const,
+    detail: (id: string) => ["groups", "detail", id] as const,
+  },
+  invites: {
+    verify: (token: string) => ["invites", "verify", token] as const,
+  },
 } as const;

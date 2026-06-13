@@ -23,4 +23,22 @@ export const ROUTES = {
   admin: "/admin",
   instructor: "/instructor",
   student: "/student",
+  studentGroups: "/student/group",
+  instructorGroups: "/instructor/group",
 } as const;
+
+export function groupsListPath(role: Role) {
+  return role === "instructor" ? ROUTES.instructorGroups : ROUTES.studentGroups;
+}
+
+export function groupPath(groupId: string, tab?: string, role: Role = "student") {
+  const base =
+    role === "instructor"
+      ? `/instructor/group/${groupId}`
+      : `/student/group/${groupId}`;
+  return tab ? `${base}?tab=${tab}` : base;
+}
+
+export function invitePath(token: string) {
+  return `/invite/${token}`;
+}

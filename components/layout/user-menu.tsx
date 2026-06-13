@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -58,14 +59,16 @@ export function UserMenu() {
         }
       />
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>
-          <div className="flex flex-col">
-            <span className="font-medium">{user.name}</span>
-            <span className="text-xs text-muted-foreground">
-              {user.role ? ROLES[user.role] : "Profile incomplete"}
-            </span>
-          </div>
-        </DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>
+            <div className="flex flex-col">
+              <span className="font-medium">{user.name}</span>
+              <span className="text-xs text-muted-foreground">
+                {user.role ? ROLES[user.role] : "Profile incomplete"}
+              </span>
+            </div>
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem variant="destructive" onClick={handleLogout}>
           <LogOutIcon />

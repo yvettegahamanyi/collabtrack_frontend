@@ -1,6 +1,6 @@
 import type { Role, User } from "@/types";
 
-export type ApiRole = "STUDENT" | "LECTURER" | "ADMIN";
+export type ApiRole = "STUDENT" | "INSTRUCTOR" | "ADMIN";
 
 export interface ApiUser {
   id: string;
@@ -23,6 +23,16 @@ export interface RegisterPayload {
   name: string;
 }
 
+export interface LoginPayload {
+  email: string;
+  password: string;
+}
+
+export interface LoginData {
+  access_token: string;
+  token_type: string;
+}
+
 export interface RegisterData {
   access_token: string;
   token_type: string;
@@ -39,7 +49,7 @@ export function toApiRole(role: Role): ApiRole {
     case "student":
       return "STUDENT";
     case "instructor":
-      return "LECTURER";
+      return "INSTRUCTOR";
     case "admin":
       return "ADMIN";
   }
@@ -51,7 +61,6 @@ export function fromApiRole(apiRole: string | null | undefined): Role | null {
   switch (apiRole.toUpperCase()) {
     case "STUDENT":
       return "student";
-    case "LECTURER":
     case "INSTRUCTOR":
       return "instructor";
     case "ADMIN":
