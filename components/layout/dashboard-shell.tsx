@@ -33,12 +33,14 @@ export function DashboardShell({ role, children }: DashboardShellProps) {
   useEffect(() => {
     if (!isAuthenticated) {
       router.replace(ROUTES.login);
-    } else if (user && user.role !== role) {
+    } else if (user && !user.role) {
+      router.replace(ROUTES.onboarding);
+    } else if (user?.role && user.role !== role) {
       router.replace(`/${user.role}`);
     }
   }, [isAuthenticated, user, role, router]);
 
-  if (!isAuthenticated || !user || user.role !== role) {
+  if (!isAuthenticated || !user || !user.role || user.role !== role) {
     return null;
   }
 

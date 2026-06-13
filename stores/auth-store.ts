@@ -1,60 +1,37 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-import type { Role, User } from "@/types";
-
-interface PendingRegistration {
-  name: string;
-  email: string;
-}
+import type { User } from "@/types";
 
 interface AuthState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
-  /** Set during registration, consumed by the onboarding step. */
-  pendingRegistration: PendingRegistration | null;
+  /** True after registration until the user picks a role on onboarding. */
+  needsOnboarding: boolean;
   setAuth: (user: User, token: string) => void;
   setUser: (user: User) => void;
-  startRegistration: (data: PendingRegistration) => void;
-  completeOnboarding: (role: Role) => User | null;
+  setNeedsOnboarding: (needs: boolean) => void;
   logout: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       user: null,
       token: null,
       isAuthenticated: false,
-      pendingRegistration: null,
+      needsOnboarding: false,
       setAuth: (user, token) =>
-        set({ user, token, isAuthenticated: true, pendingRegistration: null }),
+        set({ user, token, isAuthenticated: true }),
       setUser: (user) => set({ user }),
-      startRegistration: (data) => set({ pendingRegistration: data }),
-      completeOnboarding: (role) => {
-        const pending = get().pendingRegistration;
-        if (!pending) return null;
-        const user: User = {
-          id: crypto.randomUUID(),
-          name: pending.name,
-          email: pending.email,
-          role,
-        };
-        set({
-          user,
-          token: "demo-token",
-          isAuthenticated: true,
-          pendingRegistration: null,
-        });
-        return user;
-      },
+      setNeedsOnboarding: (needs) => set({ needsOnboarding: needs }),
       logout: () =>
         set({
           user: null,
           token: null,
           isAuthenticated: false,
-          pendingRegistration: null,
+          needsOnboarding: false,
         }),
     }),
     {
@@ -63,12 +40,11 @@ export const useAuthStore = create<AuthState>()(
         user: state.user,
         token: state.token,
         isAuthenticated: state.isAuthenticated,
-        pendingRegistration: state.pendingRegistration,
+        needsOnboarding: state.needsOnboarding,
       }),
     }
   )
 );
 
 export const useCurrentUser = () => useAuthStore((s) => s.user);
-export const useRole = (): Role | undefined =>
-  useAuthStore((s) => s.user?.role);
+export const useRole = () => useAuthStore((s) => s.user?.role);

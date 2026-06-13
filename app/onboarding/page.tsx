@@ -2,15 +2,17 @@
 
 import { GraduationCapIcon, UsersIcon, type LucideIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { Logo } from "@/components/brand/logo";
 import { Card } from "@/components/ui/card";
+import { toApiRole } from "@/lib/auth";
 import { ROLE_HOME, ROUTES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import { mapApiUser, useUpdateProfile } from "@/service/use-auth";
 import { useAuthStore } from "@/stores/auth-store";
-import type { Role } from "@/types";
+import type { ApiError, Role } from "@/types";
 
 interface RoleOption {
   role: Extract<Role, "student" | "instructor">;
@@ -37,24 +39,53 @@ const OPTIONS: RoleOption[] = [
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const pendingRegistration = useAuthStore((s) => s.pendingRegistration);
-  const completeOnboarding = useAuthStore((s) => s.completeOnboarding);
+  const user = useAuthStore((s) => s.user);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const needsOnboarding = useAuthStore((s) => s.needsOnboarding);
+  const setUser = useAuthStore((s) => s.setUser);
+  const setNeedsOnboarding = useAuthStore((s) => s.setNeedsOnboarding);
+  const updateProfile = useUpdateProfile();
+  const [selectedRole, setSelectedRole] = useState<RoleOption["role"] | null>(
+    null
+  );
 
   useEffect(() => {
-    if (!pendingRegistration) {
-      router.replace(ROUTES.register);
-    }
-  }, [pendingRegistration, router]);
-
-  const handleSelect = (role: RoleOption["role"]) => {
-    const user = completeOnboarding(role);
-    if (!user) {
+    if (!isAuthenticated) {
       router.replace(ROUTES.register);
       return;
     }
-    toast.success(`You're all set, ${user.name}!`);
-    router.push(ROLE_HOME[role]);
+
+    if (!needsOnboarding && user?.role) {
+      router.replace(ROLE_HOME[user.role]);
+    }
+  }, [isAuthenticated, needsOnboarding, user, router]);
+
+  const handleSelect = async (role: RoleOption["role"]) => {
+    if (!user || updateProfile.isPending) return;
+
+    setSelectedRole(role);
+
+    try {
+      const response = await updateProfile.mutateAsync({
+        name: user.name,
+        role: toApiRole(role),
+      });
+      const updatedUser = mapApiUser(response.data);
+
+      setUser(updatedUser);
+      setNeedsOnboarding(false);
+      toast.success(`You're all set, ${updatedUser.name}!`);
+      router.replace(ROLE_HOME[role]);
+    } catch (error) {
+      setSelectedRole(null);
+      const apiError = error as ApiError;
+      toast.error(apiError.message ?? "Failed to update your profile");
+    }
   };
+
+  if (!isAuthenticated || !needsOnboarding || !user) {
+    return null;
+  }
 
   return (
     <div className="flex min-h-svh flex-col">
@@ -71,34 +102,42 @@ export default function OnboardingPage() {
         </p>
 
         <div className="mt-10 grid w-full max-w-2xl gap-5 sm:grid-cols-2">
-          {OPTIONS.map((option) => (
-            <Card
-              key={option.role}
-              role="button"
-              tabIndex={0}
-              onClick={() => handleSelect(option.role)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  handleSelect(option.role);
-                }
-              }}
-              className={cn(
-                "cursor-pointer items-center p-8 text-center transition-all",
-                "hover:border-primary/40 hover:shadow-md focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
-              )}
-            >
-              <span className="flex size-14 items-center justify-center rounded-full bg-secondary text-primary">
-                <option.icon className="size-7" />
-              </span>
-              <h2 className="mt-4 text-lg font-semibold text-primary">
-                {option.title}
-              </h2>
-              <p className="mt-1 max-w-xs text-sm text-muted-foreground">
-                {option.description}
-              </p>
-            </Card>
-          ))}
+          {OPTIONS.map((option) => {
+            const isLoading =
+              updateProfile.isPending && selectedRole === option.role;
+
+            return (
+              <Card
+                key={option.role}
+                role="button"
+                tabIndex={updateProfile.isPending ? -1 : 0}
+                aria-busy={isLoading}
+                onClick={() => handleSelect(option.role)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    handleSelect(option.role);
+                  }
+                }}
+                className={cn(
+                  "cursor-pointer items-center p-8 text-center transition-all",
+                  "hover:border-primary/40 hover:shadow-md focus-visible:border-primary focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none",
+                  updateProfile.isPending && "pointer-events-none opacity-60",
+                  isLoading && "border-primary/40 opacity-100"
+                )}
+              >
+                <span className="flex size-14 items-center justify-center rounded-full bg-secondary text-primary">
+                  <option.icon className="size-7" />
+                </span>
+                <h2 className="mt-4 text-lg font-semibold text-primary">
+                  {isLoading ? "Saving…" : option.title}
+                </h2>
+                <p className="mt-1 max-w-xs text-sm text-muted-foreground">
+                  {option.description}
+                </p>
+              </Card>
+            );
+          })}
         </div>
       </main>
     </div>

@@ -47,7 +47,7 @@ export function UserMenu() {
             <span className="hidden text-right leading-tight sm:block">
               <span className="block text-sm font-semibold">{user.name}</span>
               <span className="block text-xs text-muted-foreground">
-                {ROLES[user.role]}
+                {user.role ? ROLES[user.role] : "Profile incomplete"}
               </span>
             </span>
             <Avatar className="size-9">
@@ -62,7 +62,7 @@ export function UserMenu() {
           <div className="flex flex-col">
             <span className="font-medium">{user.name}</span>
             <span className="text-xs text-muted-foreground">
-              {ROLES[user.role]}
+              {user.role ? ROLES[user.role] : "Profile incomplete"}
             </span>
           </div>
         </DropdownMenuLabel>

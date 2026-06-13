@@ -2,7 +2,6 @@ import { ArrowRightIcon, BarChart3, FolderKanban, Users } from "lucide-react";
 import Link from "next/link";
 
 import { Logo } from "@/components/brand/logo";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -38,7 +37,7 @@ export default function Home() {
       <header className="flex h-16 items-center justify-between px-6">
         <Logo />
         <div className="flex items-center gap-2">
-          <ThemeToggle />
+          {/* <ThemeToggle /> */}
           <Button nativeButton={false} render={<Link href={ROUTES.login} />}>
             Sign in
           </Button>

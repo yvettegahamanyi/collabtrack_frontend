@@ -13,27 +13,43 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { APP_NAME, ROUTES } from "@/lib/constants";
+import { mapApiUser, useRegister } from "@/service/use-auth";
 import { useAuthStore } from "@/stores/auth-store";
+import type { ApiError } from "@/types";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const startRegistration = useAuthStore((s) => s.startRegistration);
+  const setAuth = useAuthStore((s) => s.setAuth);
+  const setNeedsOnboarding = useAuthStore((s) => s.setNeedsOnboarding);
+  const register = useRegister();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email || !password) {
       toast.error("Please fill in all fields");
       return;
     }
     if (password.length < 8 || !/\d/.test(password)) {
-      toast.error("Password must be at least 8 characters and include a number");
+      toast.error(
+        "Password must be at least 8 characters and include a number"
+      );
       return;
     }
-    startRegistration({ name, email });
-    router.push(ROUTES.onboarding);
+
+    try {
+      const response = await register.mutateAsync({ name, email, password });
+      const { access_token, user } = response.data;
+
+      setAuth(mapApiUser(user), access_token);
+      setNeedsOnboarding(true);
+      router.push(ROUTES.onboarding);
+    } catch (error) {
+      const apiError = error as ApiError;
+      toast.error(apiError.message ?? "Registration failed");
+    }
   };
 
   return (
@@ -66,6 +82,7 @@ export default function RegisterPage() {
                 className="h-11 bg-muted/50 pl-9"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                disabled={register.isPending}
               />
             </FieldBlock>
 
@@ -78,6 +95,7 @@ export default function RegisterPage() {
                 className="h-11 bg-muted/50 pl-9"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                disabled={register.isPending}
               />
             </FieldBlock>
 
@@ -86,11 +104,12 @@ export default function RegisterPage() {
                 <LockIcon className="auth-input-icon" />
                 <Input
                   id="password"
-                type="password"
-                placeholder="••••••••"
-                className="h-11 bg-muted/50 pl-9"
+                  type="password"
+                  placeholder="••••••••"
+                  className="h-11 bg-muted/50 pl-9"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  disabled={register.isPending}
                 />
               </FieldBlock>
               <p className="mt-1.5 text-xs text-muted-foreground italic">
@@ -98,9 +117,13 @@ export default function RegisterPage() {
               </p>
             </div>
 
-            <Button type="submit" className="mt-2 h-11 w-full text-sm">
-              Register
-              <ArrowRightIcon />
+            <Button
+              type="submit"
+              className="mt-2 h-11 w-full text-sm"
+              disabled={register.isPending}
+            >
+              {register.isPending ? "Creating account…" : "Register"}
+              {!register.isPending && <ArrowRightIcon />}
             </Button>
           </form>
         </CardContent>
