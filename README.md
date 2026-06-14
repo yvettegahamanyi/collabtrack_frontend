@@ -8,6 +8,17 @@ Next.js frontend for **CollabTrack** — CollabTrack is a collaboration analytic
 
 ---
 
+## Deployment
+
+The frontend, backend, and database are deployed on **[Railway](https://railway.app)**.
+
+| Service                   | Hosted URL                                                |
+| ------------------------- | --------------------------------------------------------- |
+| Frontend                  | https://collabtrackfrontend-production.up.railway.app     |
+| Backend API documentation | https://collabtrackbackend-production.up.railway.app/docs |
+
+---
+
 ## Tech stack
 
 - **Framework:** [Next.js](https://nextjs.org) 16 (App Router)
@@ -68,16 +79,16 @@ collabtrack-frontend/
 
 ### Key routes
 
-| Route | Description |
-|-------|-------------|
-| `/login`, `/register` | Authentication |
-| `/onboarding` | Role selection (student / instructor) |
-| `/student/group` | Student group list |
+| Route                      | Description                                                 |
+| -------------------------- | ----------------------------------------------------------- |
+| `/login`, `/register`      | Authentication                                              |
+| `/onboarding`              | Role selection (student / instructor)                       |
+| `/student/group`           | Student group list                                          |
 | `/student/group/[groupId]` | Group detail (overview, members, contribution, transcripts) |
-| `/student/settings` | Account settings and GitHub/Google integrations |
-| `/instructor/group` | Instructor group list (read-only) |
-| `/instructor/settings` | Instructor account settings |
-| `/invite/[token]` | Accept a group invitation |
+| `/student/settings`        | Account settings and GitHub/Google integrations             |
+| `/instructor/group`        | Instructor group list (read-only)                           |
+| `/instructor/settings`     | Instructor account settings                                 |
+| `/invite/[token]`          | Accept a group invitation                                   |
 
 ---
 
@@ -97,8 +108,8 @@ Create a `.env.local` file in the project root:
 NEXT_PUBLIC_API_URL=http://localhost:8000/api
 ```
 
-| Variable | Description |
-|----------|-------------|
+| Variable              | Description                                            |
+| --------------------- | ------------------------------------------------------ |
 | `NEXT_PUBLIC_API_URL` | Base URL for the CollabTrack API (must include `/api`) |
 
 For local development, point this at your backend (default: `http://localhost:8000/api`). In production on Railway, set it to your deployed backend URL.
@@ -123,12 +134,12 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### Scripts
 
-| Command | Description |
-|---------|-------------|
-| `pnpm dev` | Start development server |
-| `pnpm build` | Production build |
-| `pnpm start` | Start production server |
-| `pnpm lint` | Run ESLint |
+| Command      | Description              |
+| ------------ | ------------------------ |
+| `pnpm dev`   | Start development server |
+| `pnpm build` | Production build         |
+| `pnpm start` | Start production server  |
+| `pnpm lint`  | Run ESLint               |
 
 ### Type checking
 
@@ -142,11 +153,11 @@ npx tsc --noEmit
 
 The frontend, backend, and database are deployed on **[Railway](https://railway.app)**.
 
-| Service | Hosted URL |
-|---------|------------|
-| Frontend | _Add link here_ |
-| Backend API | _Add link here_ |
-| Database | Managed by Railway (no public URL) |
+| Service     | Hosted URL                         |
+| ----------- | ---------------------------------- |
+| Frontend    | _Add link here_                    |
+| Backend API | _Add link here_                    |
+| Database    | Managed by Railway (no public URL) |
 
 ### Frontend deployment notes
 
@@ -166,5 +177,4 @@ Ensure the backend CORS settings allow requests from your frontend Railway URL.
 ## Related documentation
 
 - [Backend repository](https://github.com/yvettegahamanyi/collabtrack_backend/tree/main)
-- [Integrations API contract](./docs/integrations-backend.md) — GitHub and Google Docs OAuth, sync, and participation metrics
 - [Figma designs](https://www.figma.com/design/8ABtyvdgwjShvJcZnGHaVw/CollabTrack?node-id=0-1&t=FrTbk1dqAEqgkY1S-1)

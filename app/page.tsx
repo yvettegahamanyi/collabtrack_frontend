@@ -27,7 +27,7 @@ const features = [
   {
     icon: Users,
     title: "Built for everyone",
-    description: "Tailored views for system admins, instructors, and students.",
+    description: "Tailored views for system instructors, and students.",
   },
 ];
 

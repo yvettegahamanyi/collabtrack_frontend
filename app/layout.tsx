@@ -12,12 +12,12 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: `${APP_NAME} — Track group project contributions`,
+    default: `${APP_NAME}`,
     template: `%s · ${APP_NAME}`,
   },
   description:
     "CollabTrack helps students and instructors track individual contributions to group work and group projects.",
-  icons: { icon: "/images/collabTrackLogo.png" },
+  icons: { icon: "/images/collabTrackLogo.svg" },
 };
 
 export default function RootLayout({

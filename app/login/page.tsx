@@ -183,9 +183,9 @@ export default function LoginPage() {
         </CardContent>
       </Card>
 
-      <p className="mt-6 text-center text-xs text-muted-foreground">
+      {/* <p className="mt-6 text-center text-xs text-muted-foreground">
         © {new Date().getFullYear()} {APP_NAME} v2.4.1. All rights reserved.
-      </p>
+      </p> */}
     </AuthLayout>
   );
 }
