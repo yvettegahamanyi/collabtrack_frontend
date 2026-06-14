@@ -4,7 +4,7 @@ Next.js frontend for **CollabTrack** — CollabTrack is a collaboration analytic
 
 **Colab notebook:** [Scoring Modal Notebook](https://colab.research.google.com/drive/1x8Tya-B6-TqggDVnVJf2u85wK_biDo7Z?usp=sharing)
 
-**Backend repository:** [collabtrack_backend](https://github.com/yvettegahamanyi/collabtrack_backend/tree/main)
+**Backend repository:** [collabtrack_backend](https://github.com/yvettegahamanyi/collabtrack_backend)
 
 **Designs:** [CollabTrack on Figma](https://www.figma.com/design/8ABtyvdgwjShvJcZnGHaVw/CollabTrack?node-id=0-1&t=FrTbk1dqAEqgkY1S-1)
 
@@ -104,17 +104,15 @@ collabtrack-frontend/
 
 ### Environment variables
 
-Create a `.env.local` file in the project root:
+Create a `.env` file in the project root:
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:8000/api
+NEXT_PUBLIC_API_URL=https://collabtrackfrontend-production.up.railway.app
 ```
 
-| Variable              | Description                                            |
-| --------------------- | ------------------------------------------------------ |
-| `NEXT_PUBLIC_API_URL` | Base URL for the CollabTrack API (must include `/api`) |
-
-For local development, point this at your backend (default: `http://localhost:8000/api`). In production on Railway, set it to your deployed backend URL.
+| Variable              | Description                      |
+| --------------------- | -------------------------------- |
+| `NEXT_PUBLIC_API_URL` | Base URL for the CollabTrack API |
 
 ---
 
@@ -148,31 +146,6 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 ```bash
 npx tsc --noEmit
 ```
-
----
-
-## Deployment
-
-The frontend, backend, and database are deployed on **[Railway](https://railway.app)**.
-
-| Service     | Hosted URL                         |
-| ----------- | ---------------------------------- |
-| Frontend    | _Add link here_                    |
-| Backend API | _Add link here_                    |
-| Database    | Managed by Railway (no public URL) |
-
-### Frontend deployment notes
-
-1. Connect this repository to a Railway service.
-2. Set the environment variable:
-   ```env
-   NEXT_PUBLIC_API_URL=https://<your-backend-domain>/api
-   ```
-3. Use the default build/start commands:
-   - **Build:** `pnpm build` (or `npm run build`)
-   - **Start:** `pnpm start` (or `npm run start`)
-
-Ensure the backend CORS settings allow requests from your frontend Railway URL.
 
 ---
 
