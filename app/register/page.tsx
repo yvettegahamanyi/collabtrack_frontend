@@ -1,6 +1,13 @@
 "use client";
 
-import { ArrowRightIcon, LockIcon, MailIcon, UserIcon } from "lucide-react";
+import {
+  ArrowRightIcon,
+  EyeIcon,
+  EyeOffIcon,
+  LockIcon,
+  MailIcon,
+  UserIcon,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -25,6 +32,7 @@ export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,13 +112,25 @@ export default function RegisterPage() {
                 <LockIcon className="auth-input-icon" />
                 <Input
                   id="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
-                  className="h-11 bg-muted/50 pl-9"
+                  className="h-11 bg-muted/50 px-9"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={register.isPending}
                 />
+                <button
+                  type="button"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showPassword ? (
+                    <EyeOffIcon className="size-4" />
+                  ) : (
+                    <EyeIcon className="size-4" />
+                  )}
+                </button>
               </FieldBlock>
               <p className="mt-1.5 text-xs text-muted-foreground italic">
                 At least 8 characters with a number.

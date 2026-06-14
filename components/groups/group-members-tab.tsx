@@ -1,5 +1,6 @@
 "use client";
 
+import { UserMinusIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -7,6 +8,14 @@ import { InviteDialog } from "@/components/groups/invite-dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -16,8 +25,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { memberInitials } from "@/lib/groups";
-import { useAuthStore } from "@/stores/auth-store";
 import { useRemoveMember } from "@/service/use-groups";
+import { useAuthStore } from "@/stores/auth-store";
 import type { ApiError } from "@/types";
 import type { Group } from "@/types/groups";
 
@@ -29,15 +38,20 @@ export function GroupMembersTab({ group }: GroupMembersTabProps) {
   const currentUser = useAuthStore((s) => s.user);
   const removeMember = useRemoveMember(group.id);
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [removeTarget, setRemoveTarget] = useState<{
+    userId: string;
+    name: string;
+  } | null>(null);
   const isOwner = currentUser?.id === group.owner_id;
   const members = group.members ?? [];
 
-  const handleRemove = async (userId: string, name: string) => {
-    if (!confirm(`Remove ${name} from this group?`)) return;
+  const handleRemoveConfirm = async () => {
+    if (!removeTarget) return;
 
     try {
-      await removeMember.mutateAsync(userId);
-      toast.success(`${name} removed from the group`);
+      await removeMember.mutateAsync(removeTarget.userId);
+      toast.success(`${removeTarget.name} removed from the group`);
+      setRemoveTarget(null);
     } catch (error) {
       const apiError = error as ApiError;
       toast.error(apiError.message ?? "Failed to remove member");
@@ -107,7 +121,10 @@ export function GroupMembersTab({ group }: GroupMembersTabProps) {
                         className="text-destructive"
                         disabled={removeMember.isPending}
                         onClick={() =>
-                          handleRemove(member.user_id, member.name)
+                          setRemoveTarget({
+                            userId: member.user_id,
+                            name: member.name,
+                          })
                         }
                       >
                         Remove
@@ -127,6 +144,69 @@ export function GroupMembersTab({ group }: GroupMembersTabProps) {
         open={inviteOpen}
         onOpenChange={setInviteOpen}
       />
+
+      <Dialog
+        open={Boolean(removeTarget)}
+        onOpenChange={(open) => {
+          if (!open) setRemoveTarget(null);
+        }}
+      >
+        <DialogContent showCloseButton={false} className="gap-0 overflow-hidden p-0 sm:max-w-md">
+          <DialogHeader className="gap-3 border-b bg-muted/20 px-6 py-5">
+            <div className="flex size-10 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+              <UserMinusIcon className="size-5" />
+            </div>
+            <div className="space-y-1.5">
+              <DialogTitle className="text-lg font-semibold">
+                Remove member
+              </DialogTitle>
+              <DialogDescription className="text-sm leading-relaxed">
+                This action cannot be undone. The member will lose access to
+                group resources and contribution data.
+              </DialogDescription>
+            </div>
+          </DialogHeader>
+
+          {removeTarget && (
+            <div className="px-6 py-5">
+              <div className="flex items-center gap-3 rounded-xl border bg-muted/30 p-4">
+                <Avatar size="lg">
+                  <AvatarFallback>
+                    {memberInitials(removeTarget.name)}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <p className="font-medium">{removeTarget.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Will be removed from {group.group_name}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="mx-0 mb-0 gap-3 border-t bg-muted/30 px-6 py-4 sm:justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              className="h-10 min-w-24"
+              onClick={() => setRemoveTarget(null)}
+              disabled={removeMember.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              className="h-10 min-w-32"
+              onClick={handleRemoveConfirm}
+              disabled={removeMember.isPending}
+            >
+              {removeMember.isPending ? "Removing…" : "Remove member"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

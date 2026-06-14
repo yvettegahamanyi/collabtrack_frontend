@@ -2,6 +2,8 @@
 
 Next.js frontend for **CollabTrack** — CollabTrack is a collaboration analytics system that helps make individual contributions in online student group work more visible, trackable, and fairly evaluated.
 
+**Colab notebook:** [Scoring Modal Notebook](https://colab.research.google.com/drive/1x8Tya-B6-TqggDVnVJf2u85wK_biDo7Z?usp=sharing)
+
 **Backend repository:** [collabtrack_backend](https://github.com/yvettegahamanyi/collabtrack_backend/tree/main)
 
 **Designs:** [CollabTrack on Figma](https://www.figma.com/design/8ABtyvdgwjShvJcZnGHaVw/CollabTrack?node-id=0-1&t=FrTbk1dqAEqgkY1S-1)
