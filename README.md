@@ -1,36 +1,170 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CollabTrack Frontend
 
-## Getting Started
+Next.js frontend for **CollabTrack** — CollabTrack is a collaboration analytics system that helps make individual contributions in online student group work more visible, trackable, and fairly evaluated.
 
-First, run the development server:
+**Backend repository:** [collabtrack_backend](https://github.com/yvettegahamanyi/collabtrack_backend/tree/main)
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+**Designs:** [CollabTrack on Figma](https://www.figma.com/design/8ABtyvdgwjShvJcZnGHaVw/CollabTrack?node-id=0-1&t=FrTbk1dqAEqgkY1S-1)
+
+---
+
+## Tech stack
+
+- **Framework:** [Next.js](https://nextjs.org) 16 (App Router)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS 4, shadcn/ui
+- **Data fetching:** TanStack Query
+- **State:** Zustand (auth)
+- **HTTP client:** Axios
+- **Forms & validation:** React Hook Form, Zod
+
+---
+
+## Project structure
+
+```
+collabtrack-frontend/
+├── app/                          # Next.js App Router pages
+│   ├── admin/                    # Admin dashboard
+│   ├── instructor/               # Instructor routes (groups, settings)
+│   ├── student/                  # Student routes (groups, settings)
+│   ├── invite/[token]/           # Group invite acceptance
+│   ├── login/                    # Login
+│   ├── register/                 # Registration
+│   ├── onboarding/               # Role selection after signup
+│   ├── layout.tsx                # Root layout
+│   └── page.tsx                  # Landing page
+├── components/
+│   ├── auth/                     # Auth layout wrappers
+│   ├── brand/                    # Logo and branding
+│   ├── groups/                   # Group list, detail tabs, integrations UI
+│   ├── layout/                   # Dashboard shell, headers, user menu
+│   ├── providers/                # Theme, React Query providers
+│   ├── settings/                 # Settings and integrations cards
+│   └── ui/                       # shadcn/ui primitives
+├── docs/
+│   └── integrations-backend.md   # Backend API contract for GitHub/Google integrations
+├── hooks/                        # Legacy/shared hooks
+├── lib/
+│   ├── api-client.ts             # Axios instance and API helpers
+│   ├── auth.ts                   # Auth mapping utilities
+│   ├── constants.ts              # Routes, roles, app constants
+│   ├── navigation.ts             # Role-aware navigation helpers
+│   └── query-keys.ts             # TanStack Query cache keys
+├── service/                      # API services and React Query hooks
+│   ├── auth.service.ts
+│   ├── groups.service.ts
+│   ├── integrations.service.ts
+│   ├── participation.service.ts
+│   ├── use-auth.ts
+│   ├── use-groups.ts
+│   ├── use-integrations.ts
+│   └── use-participation.ts
+├── stores/
+│   ├── auth-store.ts             # Auth token and user session
+│   └── ui-store.ts               # UI state
+└── types/                        # Shared TypeScript types
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Key routes
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Route | Description |
+|-------|-------------|
+| `/login`, `/register` | Authentication |
+| `/onboarding` | Role selection (student / instructor) |
+| `/student/group` | Student group list |
+| `/student/group/[groupId]` | Group detail (overview, members, contribution, transcripts) |
+| `/student/settings` | Account settings and GitHub/Google integrations |
+| `/instructor/group` | Instructor group list (read-only) |
+| `/instructor/settings` | Instructor account settings |
+| `/invite/[token]` | Accept a group invitation |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Environment setup
 
-To learn more about Next.js, take a look at the following resources:
+### Prerequisites
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Node.js** 20+
+- **pnpm** (recommended) or npm
+- Running [CollabTrack backend](https://github.com/yvettegahamanyi/collabtrack_backend/tree/main) (local or deployed)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Environment variables
 
-## Deploy on Vercel
+Create a `.env.local` file in the project root:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000/api
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Variable | Description |
+|----------|-------------|
+| `NEXT_PUBLIC_API_URL` | Base URL for the CollabTrack API (must include `/api`) |
+
+For local development, point this at your backend (default: `http://localhost:8000/api`). In production on Railway, set it to your deployed backend URL.
+
+---
+
+## Getting started
+
+Install dependencies:
+
+```bash
+pnpm install
+```
+
+Run the development server:
+
+```bash
+pnpm dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Scripts
+
+| Command | Description |
+|---------|-------------|
+| `pnpm dev` | Start development server |
+| `pnpm build` | Production build |
+| `pnpm start` | Start production server |
+| `pnpm lint` | Run ESLint |
+
+### Type checking
+
+```bash
+npx tsc --noEmit
+```
+
+---
+
+## Deployment
+
+The frontend, backend, and database are deployed on **[Railway](https://railway.app)**.
+
+| Service | Hosted URL |
+|---------|------------|
+| Frontend | _Add link here_ |
+| Backend API | _Add link here_ |
+| Database | Managed by Railway (no public URL) |
+
+### Frontend deployment notes
+
+1. Connect this repository to a Railway service.
+2. Set the environment variable:
+   ```env
+   NEXT_PUBLIC_API_URL=https://<your-backend-domain>/api
+   ```
+3. Use the default build/start commands:
+   - **Build:** `pnpm build` (or `npm run build`)
+   - **Start:** `pnpm start` (or `npm run start`)
+
+Ensure the backend CORS settings allow requests from your frontend Railway URL.
+
+---
+
+## Related documentation
+
+- [Backend repository](https://github.com/yvettegahamanyi/collabtrack_backend/tree/main)
+- [Integrations API contract](./docs/integrations-backend.md) — GitHub and Google Docs OAuth, sync, and participation metrics
+- [Figma designs](https://www.figma.com/design/8ABtyvdgwjShvJcZnGHaVw/CollabTrack?node-id=0-1&t=FrTbk1dqAEqgkY1S-1)
