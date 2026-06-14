@@ -1,6 +1,12 @@
 "use client";
 
-import { EyeIcon, EyeOffIcon, LockIcon, LogInIcon, MailIcon } from "lucide-react";
+import {
+  EyeIcon,
+  EyeOffIcon,
+  LockIcon,
+  LogInIcon,
+  MailIcon,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -10,12 +16,11 @@ import { toast } from "sonner";
 import { AuthLayout } from "@/components/auth/auth-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { APP_NAME, ROUTES } from "@/lib/constants";
 import { resolvePostAuthRoute } from "@/lib/auth-redirect";
+import { APP_NAME, ROUTES } from "@/lib/constants";
 import { mapApiUser, useLogin } from "@/service/use-auth";
 import { useAuthStore } from "@/stores/auth-store";
 import type { ApiError } from "@/types";
@@ -37,7 +42,10 @@ export default function LoginPage() {
     }
 
     try {
-      const { access_token, user } = await login.mutateAsync({ email, password });
+      const { access_token, user } = await login.mutateAsync({
+        email,
+        password,
+      });
       const mappedUser = mapApiUser(user);
 
       setAuth(mappedUser, access_token);
@@ -139,13 +147,13 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <Label
+            {/* <Label
               htmlFor="stay"
               className="flex items-center gap-2 text-sm font-normal text-muted-foreground"
             >
               <Checkbox id="stay" />
               Stay signed in for 30 days
-            </Label>
+            </Label> */}
 
             <Button
               type="submit"

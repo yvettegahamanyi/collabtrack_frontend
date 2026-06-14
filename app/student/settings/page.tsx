@@ -1,5 +1,11 @@
+import { Suspense } from "react";
+
 import { SettingsPage } from "@/components/settings/settings-page";
 
 export default function StudentSettingsPage() {
-  return <SettingsPage role="student" showIntegrations />;
+  return (
+    <Suspense fallback={null}>
+      <SettingsPage role="student" showIntegrations />
+    </Suspense>
+  );
 }

@@ -2,9 +2,6 @@
 
 import {
   ArrowRightIcon,
-  ChevronRightIcon,
-  FileTextIcon,
-  GitBranchIcon,
   PencilIcon,
   ShieldIcon,
   UserIcon,
@@ -13,8 +10,8 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/layout/page-header";
+import { IntegrationsCard } from "@/components/settings/integrations-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -249,68 +246,6 @@ function AccountSettingsCard({
             </div>
           </>
         )}
-      </CardContent>
-    </Card>
-  );
-}
-
-function IntegrationsCard() {
-  const integrations = [
-    {
-      id: "github",
-      name: "GitHub",
-      icon: GitBranchIcon,
-      status: "connected" as const,
-    },
-    {
-      id: "google-docs",
-      name: "Google Docs",
-      icon: FileTextIcon,
-      status: "disconnected" as const,
-    },
-  ];
-
-  return (
-    <Card>
-      <CardHeader className="border-b">
-        <CardTitle className="text-base">Apps & Integrations</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-3 pt-6">
-        {integrations.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            onClick={() =>
-              toast.info(`${item.name} integration will be available soon.`)
-            }
-            className="flex w-full items-center justify-between rounded-lg border bg-muted/20 px-4 py-3 text-left transition-colors hover:bg-muted/40"
-          >
-            <div className="flex items-center gap-3">
-              <span className="flex size-9 items-center justify-center rounded-lg bg-background text-primary">
-                <item.icon className="size-4" />
-              </span>
-              <span className="font-medium">{item.name}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Badge
-                variant="outline"
-                className={cn(
-                  item.status === "connected"
-                    ? "border-success/30 bg-success/10 text-success"
-                    : "border-destructive/30 bg-destructive/10 text-destructive"
-                )}
-              >
-                {item.status === "connected" ? "Connected" : "Disconnected"}
-              </Badge>
-              <ChevronRightIcon className="size-4 text-muted-foreground" />
-            </div>
-          </button>
-        ))}
-
-        <p className="text-xs leading-relaxed text-muted-foreground">
-          Connecting these services allows CollabTrack to analyze commit
-          histories and document collaboration metrics.
-        </p>
       </CardContent>
     </Card>
   );

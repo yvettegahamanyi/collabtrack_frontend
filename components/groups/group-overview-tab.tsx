@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { statusLabel } from "@/lib/groups";
+import { LinkResourcesSection } from "@/components/groups/link-resources-section";
 import { useAuthStore } from "@/stores/auth-store";
 import { useDeleteGroup, useUpdateGroup } from "@/service/use-groups";
 import type { ApiError } from "@/types";
@@ -71,7 +72,8 @@ export function GroupOverviewTab({ group, onDeleted }: GroupOverviewTabProps) {
   };
 
   return (
-    <div className="grid gap-6 lg:grid-cols-3">
+    <div className="space-y-6">
+      <div className="grid gap-6 lg:grid-cols-3">
       <Card className="lg:col-span-2">
         <CardHeader>
           <CardTitle>Group Details</CardTitle>
@@ -175,6 +177,9 @@ export function GroupOverviewTab({ group, onDeleted }: GroupOverviewTabProps) {
           </p>
         </CardContent>
       </Card>
+      </div>
+
+      <LinkResourcesSection groupId={group.id} isOwner={isOwner} />
     </div>
   );
 }
