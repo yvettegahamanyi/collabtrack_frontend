@@ -8,6 +8,8 @@ Next.js frontend for **CollabTrack** — CollabTrack is a collaboration analytic
 
 **Designs:** [CollabTrack on Figma](https://www.figma.com/design/8ABtyvdgwjShvJcZnGHaVw/CollabTrack?node-id=0-1&t=FrTbk1dqAEqgkY1S-1)
 
+**Demo video:** [Google Drive Video](https://drive.google.com/file/d/1WiNtncC6x5H_uxOI730WvOxP07xOC8eM/view?usp=sharing)
+
 ---
 
 ## Deployment
@@ -140,12 +142,6 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 | `pnpm build` | Production build         |
 | `pnpm start` | Start production server  |
 | `pnpm lint`  | Run ESLint               |
-
-### Type checking
-
-```bash
-npx tsc --noEmit
-```
 
 ---
 
