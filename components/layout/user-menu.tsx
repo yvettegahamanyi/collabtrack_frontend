@@ -16,7 +16,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ROLES, ROUTES } from "@/lib/constants";
+import { clearIntegrationsCache } from "@/service/use-integrations";
 import { useAuthStore } from "@/stores/auth-store";
+import { useQueryClient } from "@tanstack/react-query";
 
 function initials(name: string) {
   return name
@@ -29,12 +31,14 @@ function initials(name: string) {
 
 export function UserMenu() {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
 
   if (!user) return null;
 
   const handleLogout = () => {
+    clearIntegrationsCache(queryClient);
     logout();
     toast.success("Signed out");
     router.push(ROUTES.login);

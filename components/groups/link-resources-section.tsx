@@ -24,16 +24,15 @@ import type { ApiError } from "@/types";
 
 interface LinkResourcesSectionProps {
   groupId: string;
-  isOwner: boolean;
+  canManage: boolean;
 }
 
 export function LinkResourcesSection({
   groupId,
-  isOwner,
+  canManage,
 }: LinkResourcesSectionProps) {
   const { data: reposData, isLoading: reposLoading } = useGroupRepos(groupId);
-  const { data: docsData, isLoading: docsLoading } =
-    useGroupDocuments(groupId);
+  const { data: docsData, isLoading: docsLoading } = useGroupDocuments(groupId);
   const linkRepo = useLinkGroupRepo(groupId);
   const unlinkRepo = useUnlinkGroupRepo(groupId);
   const linkDoc = useLinkGroupDocument(groupId);
@@ -82,7 +81,7 @@ export function LinkResourcesSection({
     }
   };
 
-  if (!isOwner) {
+  if (!canManage) {
     return (
       <Card>
         <CardHeader>
@@ -95,8 +94,8 @@ export function LinkResourcesSection({
             <>
               {repos.length === 0 && docs.length === 0 ? (
                 <p className="text-muted-foreground">
-                  No resources linked yet. The group owner can link a GitHub
-                  repo and Google Doc.
+                  No resources linked yet. The group owner or instructor can
+                  link a GitHub repo and Google Doc.
                 </p>
               ) : (
                 <>
@@ -108,7 +107,11 @@ export function LinkResourcesSection({
                     />
                   ))}
                   {docs.map((doc) => (
-                    <ResourceRow key={doc.id} label={doc.title} href={doc.url} />
+                    <ResourceRow
+                      key={doc.id}
+                      label={doc.title}
+                      href={doc.url}
+                    />
                   ))}
                 </>
               )}
@@ -139,7 +142,7 @@ export function LinkResourcesSection({
         <p className="text-sm text-muted-foreground">
           Link a GitHub repository and Google Doc for participation tracking.
           Connect integrations in{" "}
-          <Link href={ROUTES.student + "/settings"} className="text-primary underline">
+          <Link href={ROUTES.settings} className="text-primary underline">
             Settings
           </Link>{" "}
           first.

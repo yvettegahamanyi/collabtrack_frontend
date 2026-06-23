@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  ArrowRightIcon,
-  PencilIcon,
-  ShieldIcon,
-  UserIcon,
-} from "lucide-react";
+import { ArrowRightIcon, PencilIcon, ShieldIcon, UserIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
@@ -18,8 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ROLES } from "@/lib/constants";
 import { mapApiUser, toApiRole } from "@/lib/auth";
+import { ROLES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { useProfile, useUpdateProfile } from "@/service/use-auth";
 import { useAuthStore } from "@/stores/auth-store";
@@ -29,7 +24,7 @@ const fieldLabelClass =
   "text-xs font-semibold tracking-wide text-muted-foreground uppercase";
 
 interface SettingsPageProps {
-  role: Extract<Role, "student" | "instructor">;
+  role?: Role;
   showIntegrations?: boolean;
 }
 
@@ -44,12 +39,16 @@ function initials(name: string) {
 
 export function SettingsPage({
   role,
-  showIntegrations = false,
+  showIntegrations,
 }: SettingsPageProps) {
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
   const { data, isLoading } = useProfile();
   const updateProfile = useUpdateProfile();
+
+  const resolvedShowIntegrations =
+    showIntegrations ??
+    (user?.role === "student" || user?.role === "instructor");
 
   const [name, setName] = useState(user?.name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
@@ -103,13 +102,13 @@ export function SettingsPage({
       <div
         className={cn(
           "grid gap-6",
-          showIntegrations ? "lg:grid-cols-2" : "max-w-3xl"
+          resolvedShowIntegrations ? "lg:grid-cols-2" : "max-w-3xl"
         )}
       >
         <AccountSettingsCard
           name={name}
           email={email}
-          role={role}
+          role={role ?? user?.role ?? undefined}
           avatarUrl={user?.avatarUrl}
           isLoading={isLoading}
           isSaving={updateProfile.isPending}
@@ -117,7 +116,7 @@ export function SettingsPage({
           onSave={handleSave}
         />
 
-        {showIntegrations && <IntegrationsCard />}
+        {resolvedShowIntegrations && <IntegrationsCard />}
       </div>
 
       <SecurityBanner />
@@ -137,7 +136,7 @@ function AccountSettingsCard({
 }: {
   name: string;
   email: string;
-  role: Extract<Role, "student" | "instructor">;
+  role?: Role;
   avatarUrl?: string;
   isLoading: boolean;
   isSaving: boolean;
@@ -185,7 +184,7 @@ function AccountSettingsCard({
                   JPG, GIF or PNG. Max size of 800K
                 </p>
                 <p className="mt-1 text-xs text-muted-foreground">
-                  {ROLES[role]}
+                  {role ? ROLES[role] : "Account"}
                 </p>
               </div>
             </div>

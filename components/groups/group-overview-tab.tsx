@@ -25,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { statusLabel } from "@/lib/groups";
+import { statusLabel, canManageGroupResources } from "@/lib/groups";
 import { useDeleteGroup, useUpdateGroup } from "@/service/use-groups";
 import { useAuthStore } from "@/stores/auth-store";
 import type { ApiError } from "@/types";
@@ -41,6 +41,7 @@ export function GroupOverviewTab({ group, onDeleted }: GroupOverviewTabProps) {
   const updateGroup = useUpdateGroup(group.id);
   const deleteGroup = useDeleteGroup();
   const isOwner = currentUser?.id === group.owner_id;
+  const canManageResources = canManageGroupResources(currentUser, group);
 
   const [groupName, setGroupName] = useState(group.group_name);
   const [description, setDescription] = useState(group.description ?? "");
@@ -188,7 +189,10 @@ export function GroupOverviewTab({ group, onDeleted }: GroupOverviewTabProps) {
         </Card>
       </div>
 
-      <LinkResourcesSection groupId={group.id} isOwner={isOwner} />
+      <LinkResourcesSection
+        groupId={group.id}
+        canManage={canManageResources}
+      />
 
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent

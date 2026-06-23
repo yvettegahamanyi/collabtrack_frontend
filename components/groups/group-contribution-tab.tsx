@@ -40,6 +40,9 @@ export function GroupContributionTab({ group }: GroupContributionTabProps) {
 
   const contributions = data?.data;
   const members = contributions?.members ?? [];
+  const hasMeetingEngagement = members.some((m) => m.meeting_engagement);
+
+  const formatRatio = (value: number) => `${Math.round(value * 100)}%`;
 
   const handleSync = async () => {
     try {
@@ -68,6 +71,9 @@ export function GroupContributionTab({ group }: GroupContributionTabProps) {
       "GitHub Comments",
       "Doc Edits",
       "Doc Comments",
+      ...(hasMeetingEngagement
+        ? ["Attendance", "Speaking", "Chat", "Meeting Leads"]
+        : []),
     ];
     const rows = members.map((m) => [
       m.name,
@@ -79,6 +85,20 @@ export function GroupContributionTab({ group }: GroupContributionTabProps) {
       m.github?.comments ?? "",
       m.google_docs?.edits ?? "",
       m.google_docs?.comments ?? "",
+      ...(hasMeetingEngagement
+        ? [
+            m.meeting_engagement
+              ? `${Math.round(m.meeting_engagement.attendance_ratio * 100)}%`
+              : "",
+            m.meeting_engagement
+              ? `${Math.round(m.meeting_engagement.speaking_ratio * 100)}%`
+              : "",
+            m.meeting_engagement
+              ? `${Math.round(m.meeting_engagement.chat_participation * 100)}%`
+              : "",
+            m.meeting_engagement?.meeting_lead_count ?? "",
+          ]
+        : []),
     ]);
 
     const csv = [headers, ...rows].map((row) => row.join(",")).join("\n");
@@ -143,10 +163,7 @@ export function GroupContributionTab({ group }: GroupContributionTabProps) {
               <p>Failed to load contribution data.</p>
               <p className="mt-2">
                 Link resources in Overview, connect integrations in{" "}
-                <Link
-                  href={`${ROUTES.student}/settings`}
-                  className="text-primary underline"
-                >
+                <Link href={ROUTES.settings} className="text-primary underline">
                   Settings
                 </Link>
                 , then sync.
@@ -178,12 +195,20 @@ export function GroupContributionTab({ group }: GroupContributionTabProps) {
                   <TableHead className="text-right">PRs</TableHead>
                   <TableHead className="text-right">Doc Edits</TableHead>
                   <TableHead className="text-right">Comments</TableHead>
+                  {hasMeetingEngagement && (
+                    <>
+                      <TableHead className="text-right">Attendance</TableHead>
+                      <TableHead className="text-right">Speaking</TableHead>
+                      <TableHead className="text-right">Chat</TableHead>
+                    </>
+                  )}
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {members.map((member) => {
                   const gh = member.github;
                   const docs = member.google_docs;
+                  const meeting = member.meeting_engagement;
                   const totalComments =
                     (gh?.comments ?? 0) + (docs?.comments ?? 0);
 
@@ -215,9 +240,7 @@ export function GroupContributionTab({ group }: GroupContributionTabProps) {
                         {gh?.lines_changed ?? "—"}
                       </TableCell>
                       <TableCell className="text-right tabular-nums">
-                        {gh
-                          ? `${gh.prs_created}/${gh.prs_reviewed}`
-                          : "—"}
+                        {gh ? `${gh.prs_created}/${gh.prs_reviewed}` : "—"}
                       </TableCell>
                       <TableCell className="text-right tabular-nums">
                         {docs?.edits ?? "—"}
@@ -225,6 +248,25 @@ export function GroupContributionTab({ group }: GroupContributionTabProps) {
                       <TableCell className="text-right tabular-nums">
                         {totalComments || "—"}
                       </TableCell>
+                      {hasMeetingEngagement && (
+                        <>
+                          <TableCell className="text-right tabular-nums">
+                            {meeting
+                              ? formatRatio(meeting.attendance_ratio)
+                              : "—"}
+                          </TableCell>
+                          <TableCell className="text-right tabular-nums">
+                            {meeting
+                              ? formatRatio(meeting.speaking_ratio)
+                              : "—"}
+                          </TableCell>
+                          <TableCell className="text-right tabular-nums">
+                            {meeting
+                              ? formatRatio(meeting.chat_participation)
+                              : "—"}
+                          </TableCell>
+                        </>
+                      )}
                     </TableRow>
                   );
                 })}

@@ -56,4 +56,14 @@ export const api = {
     unwrap<T>(apiClient.patch<T>(url, data, config)),
   delete: <T>(url: string, config?: AxiosRequestConfig) =>
     unwrap<T>(apiClient.delete<T>(url, config)),
+  postForm: <T>(url: string, data: FormData, config?: AxiosRequestConfig) =>
+    unwrap<T>(
+      apiClient.post<T>(url, data, {
+        ...config,
+        headers: {
+          ...config?.headers,
+          "Content-Type": "multipart/form-data",
+        },
+      })
+    ),
 };

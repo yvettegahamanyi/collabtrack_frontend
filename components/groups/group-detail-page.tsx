@@ -5,15 +5,16 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import { GroupContributionTab } from "@/components/groups/group-contribution-tab";
+import { GroupMeetingSessionsTab } from "@/components/groups/group-meeting-sessions-tab";
 import { GroupMembersTab } from "@/components/groups/group-members-tab";
 import { GroupOverviewTab } from "@/components/groups/group-overview-tab";
-import { GroupTranscriptsTab } from "@/components/groups/group-transcripts-tab";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { groupPath, groupsListPath } from "@/lib/constants";
-import { mergeGroupWithMembers, statusLabel } from "@/lib/groups";
+import { canManageGroupResources, mergeGroupWithMembers, statusLabel } from "@/lib/groups";
 import { useGroup, useGroups } from "@/service/use-groups";
+import { useAuthStore } from "@/stores/auth-store";
 import type { Role } from "@/types";
 import type { GroupTab } from "@/types/groups";
 
@@ -21,7 +22,7 @@ const TABS: { value: GroupTab; label: string }[] = [
   { value: "overview", label: "Overview" },
   { value: "members", label: "Members" },
   { value: "contribution", label: "Contribution Report" },
-  { value: "transcripts", label: "Transcripts" },
+  { value: "transcripts", label: "Meeting Sessions" },
 ];
 
 interface GroupDetailPageProps {
@@ -34,6 +35,7 @@ export function GroupDetailPage({ groupId, role }: GroupDetailPageProps) {
   const searchParams = useSearchParams();
   const tab = (searchParams.get("tab") as GroupTab) || "overview";
   const listPath = groupsListPath(role);
+  const user = useAuthStore((s) => s.user);
 
   const { data: listData, isLoading: listLoading } = useGroups();
   const { data: detailData, isLoading: detailLoading } = useGroup(groupId);
@@ -123,7 +125,10 @@ export function GroupDetailPage({ groupId, role }: GroupDetailPageProps) {
           <GroupContributionTab group={group} />
         </TabsContent>
         <TabsContent value="transcripts" className="mt-6">
-          <GroupTranscriptsTab group={group} />
+          <GroupMeetingSessionsTab
+            group={group}
+            canManage={canManageGroupResources(user, group)}
+          />
         </TabsContent>
       </Tabs>
     </div>

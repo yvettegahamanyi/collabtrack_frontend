@@ -19,16 +19,21 @@ export const NAVIGATION: Record<Role, NavItem[]> = {
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { label: "Users", href: "/admin/users", icon: Users },
     { label: "Reports", href: "/admin/reports", icon: BarChart3 },
-    { label: "Settings", href: "/admin/settings", icon: Settings },
+    { label: "Settings", href: "/settings", icon: Settings },
   ],
   instructor: [
     { label: "Dashboard", href: "/instructor", icon: LayoutDashboard },
     { label: "My Groups", href: "/instructor/group", icon: Users },
-    { label: "Settings", href: "/instructor/settings", icon: Settings },
+    {
+      label: "Contribution Report",
+      href: "/instructor/contribution-report",
+      icon: BarChart3,
+    },
+    { label: "Settings", href: "/settings", icon: Settings },
   ],
   student: [
     { label: "Dashboard", href: "/student", icon: LayoutDashboard },
     { label: "My Group", href: "/student/group", icon: Users },
-    { label: "Settings", href: "/student/settings", icon: Settings },
+    { label: "Settings", href: "/settings", icon: Settings },
   ],
 };

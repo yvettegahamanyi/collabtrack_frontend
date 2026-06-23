@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { toApiRole } from "@/lib/auth";
 import { ROUTES } from "@/lib/constants";
 import { resolvePostAuthRoute } from "@/lib/auth-redirect";
+import { useAuthHydrated } from "@/lib/use-auth-hydrated";
 import { cn } from "@/lib/utils";
 import { mapApiUser, useUpdateProfile } from "@/service/use-auth";
 import { useAuthStore } from "@/stores/auth-store";
@@ -40,6 +41,7 @@ const OPTIONS: RoleOption[] = [
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const hydrated = useAuthHydrated();
   const user = useAuthStore((s) => s.user);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const needsOnboarding = useAuthStore((s) => s.needsOnboarding);
@@ -51,6 +53,8 @@ export default function OnboardingPage() {
   );
 
   useEffect(() => {
+    if (!hydrated) return;
+
     if (!isAuthenticated) {
       router.replace(ROUTES.register);
       return;
@@ -59,7 +63,7 @@ export default function OnboardingPage() {
     if (!needsOnboarding && user?.role) {
       router.replace(resolvePostAuthRoute(user.role));
     }
-  }, [isAuthenticated, needsOnboarding, user, router]);
+  }, [hydrated, isAuthenticated, needsOnboarding, user, router]);
 
   const handleSelect = async (role: RoleOption["role"]) => {
     if (!user || updateProfile.isPending) return;
@@ -84,7 +88,7 @@ export default function OnboardingPage() {
     }
   };
 
-  if (!isAuthenticated || !needsOnboarding || !user) {
+  if (!hydrated || !isAuthenticated || !needsOnboarding || !user) {
     return null;
   }
 

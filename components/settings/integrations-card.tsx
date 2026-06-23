@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { ROUTES } from "@/lib/constants";
 import {
   useConnectIntegration,
   useDisconnectIntegration,
@@ -46,18 +47,19 @@ export function IntegrationsCard() {
     const integrationStatus = searchParams.get("status");
     const message = searchParams.get("message");
 
-    if (!integration || !integrationStatus) return;
+    if (!integration) return;
 
-    if (integrationStatus === "success") {
-      toast.success(
-        `${integration === "github" ? "GitHub" : "Google Docs"} connected successfully`
-      );
-      refetch();
-    } else {
-      toast.error(message ?? "Failed to connect integration");
-    }
+    void refetch().finally(() => {
+      if (integrationStatus === "success") {
+        toast.success(
+          `${integration === "github" ? "GitHub" : "Google Docs"} connected successfully`
+        );
+      } else if (integrationStatus === "error") {
+        toast.error(message ?? "Failed to connect integration");
+      }
 
-    router.replace("/student/settings");
+      router.replace(ROUTES.settings);
+    });
   }, [searchParams, router, refetch]);
 
   const handleAction = async (provider: IntegrationProvider, connected: boolean) => {

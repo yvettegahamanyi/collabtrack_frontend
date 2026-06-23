@@ -25,6 +25,8 @@ export const ROUTES = {
   student: "/student",
   studentGroups: "/student/group",
   instructorGroups: "/instructor/group",
+  instructorContributionReport: "/instructor/contribution-report",
+  settings: "/settings",
 } as const;
 
 export function groupsListPath(role: Role) {

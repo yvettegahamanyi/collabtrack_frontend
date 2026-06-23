@@ -5,6 +5,7 @@ import * as groupsService from "@/service/groups.service";
 import type {
   CreateGroupPayload,
   CreateInvitePayload,
+  AddGroupMemberPayload,
   UpdateGroupPayload,
 } from "@/types/groups";
 
@@ -62,6 +63,20 @@ export function useCreateInvite(groupId: string) {
   return useMutation({
     mutationFn: (payload: CreateInvitePayload) =>
       groupsService.createInvite(groupId, payload),
+  });
+}
+
+export function useAddGroupMember(groupId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: AddGroupMemberPayload) =>
+      groupsService.addGroupMember(groupId, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.groups.all });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.groups.detail(groupId),
+      });
+    },
   });
 }
 

@@ -1,4 +1,13 @@
 import type { AssignmentStatus, Group } from "@/types/groups";
+import type { User } from "@/types";
+
+export function canManageGroupResources(
+  user: Pick<User, "id" | "role"> | null | undefined,
+  group: Pick<Group, "owner_id">
+): boolean {
+  if (!user) return false;
+  return user.id === group.owner_id || user.role === "instructor";
+}
 
 export function formatRelativeTime(dateString: string): string {
   const date = new Date(dateString);

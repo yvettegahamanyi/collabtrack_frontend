@@ -34,7 +34,8 @@ export const queryKeys = {
     verify: (token: string) => ["invites", "verify", token] as const,
   },
   integrations: {
-    status: ["integrations", "status"] as const,
+    all: ["integrations"] as const,
+    status: (userId: string) => ["integrations", "status", userId] as const,
   },
   participation: {
     group: (groupId: string) => ["participation", "group", groupId] as const,
@@ -43,5 +44,13 @@ export const queryKeys = {
     repos: (groupId: string) => ["participation", "repos", groupId] as const,
     documents: (groupId: string) =>
       ["participation", "documents", groupId] as const,
+  },
+  meetings: {
+    all: ["meetings"] as const,
+    list: (groupId: string) => ["meetings", "list", groupId] as const,
+    detail: (groupId: string, meetingId: string) =>
+      ["meetings", "detail", groupId, meetingId] as const,
+    engagement: (groupId: string) =>
+      ["meetings", "engagement", groupId] as const,
   },
 } as const;

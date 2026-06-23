@@ -1,6 +1,7 @@
 import { api } from "@/lib/api-client";
 import type {
   AcceptInviteResponse,
+  AddGroupMemberPayload,
   CreateGroupPayload,
   CreateInvitePayload,
   GroupResponse,
@@ -34,6 +35,10 @@ export function deleteGroup(groupId: string) {
 
 export function createInvite(groupId: string, payload: CreateInvitePayload) {
   return api.post<InviteLinkResponse>(`/groups/${groupId}/invite`, payload);
+}
+
+export function addGroupMember(groupId: string, payload: AddGroupMemberPayload) {
+  return api.post<GroupResponse>(`/groups/${groupId}/members`, payload);
 }
 
 export function removeMember(groupId: string, userId: string) {

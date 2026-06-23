@@ -43,6 +43,11 @@ export interface CreateInvitePayload {
   expires_in_hours: number;
 }
 
+export interface AddGroupMemberPayload {
+  name: string;
+  email: string;
+}
+
 export interface InviteLink {
   token: string;
   invite_url: string;
@@ -70,8 +75,4 @@ export type InviteLinkResponse = ApiResponse<InviteLink>;
 export type InviteDetailsResponse = ApiResponse<InviteDetails>;
 export type AcceptInviteResponse = ApiResponse<AcceptInviteResult>;
 
-export type GroupTab =
-  | "overview"
-  | "members"
-  | "contribution"
-  | "transcripts";
+export type GroupTab = "overview" | "members" | "contribution" | "transcripts";

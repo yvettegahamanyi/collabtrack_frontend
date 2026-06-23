@@ -11,12 +11,13 @@ import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { APP_NAME, ROUTES } from "@/lib/constants";
 import { NAVIGATION } from "@/lib/navigation";
+import { useAuthHydrated } from "@/lib/use-auth-hydrated";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/stores/auth-store";
 import type { Role } from "@/types";
 
 interface DashboardShellProps {
-  role: Role;
+  role?: Role;
   children: React.ReactNode;
 }
 
@@ -27,29 +28,39 @@ interface DashboardShellProps {
 export function DashboardShell({ role, children }: DashboardShellProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const hydrated = useAuthHydrated();
   const user = useAuthStore((s) => s.user);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
 
   useEffect(() => {
+    if (!hydrated) return;
+
     if (!isAuthenticated) {
       router.replace(ROUTES.login);
     } else if (user && !user.role) {
       router.replace(ROUTES.onboarding);
-    } else if (user?.role && user.role !== role) {
+    } else if (role && user?.role && user.role !== role) {
       router.replace(`/${user.role}`);
     }
-  }, [isAuthenticated, user, role, router]);
+  }, [hydrated, isAuthenticated, user, role, router]);
 
-  if (!isAuthenticated || !user || !user.role || user.role !== role) {
+  if (
+    !hydrated ||
+    !isAuthenticated ||
+    !user ||
+    !user.role ||
+    (role && user.role !== role)
+  ) {
     return null;
   }
 
-  const items = NAVIGATION[role];
+  const items = NAVIGATION[user.role];
+  const homeHref = `/${user.role}`;
 
   return (
-    <div className="flex min-h-svh bg-muted/30">
-      <aside className="hidden w-64 shrink-0 flex-col border-r bg-sidebar text-sidebar-foreground md:flex">
-        <div className="flex h-16 items-center gap-2.5 border-b px-5">
+    <div className="flex h-svh overflow-hidden bg-muted/30">
+      <aside className="fixed inset-y-0 left-0 z-20 hidden h-svh w-64 flex-col border-r bg-sidebar text-sidebar-foreground md:flex">
+        <div className="flex h-16 shrink-0 items-center gap-2.5 border-b px-5">
           <Image
             src="/images/collabTrackLogo.png"
             alt={`${APP_NAME} logo`}
@@ -63,11 +74,11 @@ export function DashboardShell({ role, children }: DashboardShellProps) {
             <p className="text-xs text-muted-foreground">Academic Analytics</p>
           </div>
         </div>
-        <nav className="flex-1 space-y-1 p-3">
+        <nav className="flex-1 space-y-1 overflow-y-auto p-3">
           {items.map((item) => {
             const active =
               pathname === item.href ||
-              (item.href !== `/${role}` && pathname.startsWith(`${item.href}/`));
+              (item.href !== homeHref && pathname.startsWith(`${item.href}/`));
             return (
               <Link
                 key={item.href}
@@ -87,8 +98,8 @@ export function DashboardShell({ role, children }: DashboardShellProps) {
         </nav>
       </aside>
 
-      <div className="flex flex-1 flex-col">
-        <header className="flex h-16 items-center justify-between gap-3 border-b bg-background px-4 sm:px-6">
+      <div className="flex h-svh min-h-0 flex-1 flex-col md:ml-64">
+        <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b bg-background px-4 sm:px-6">
           <span className="md:hidden">
             <Image
               src="/images/collabTrackLogo.png"
@@ -112,7 +123,7 @@ export function DashboardShell({ role, children }: DashboardShellProps) {
             <UserMenu />
           </div>
         </header>
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
+        <main className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
     </div>
   );

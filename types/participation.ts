@@ -13,6 +13,13 @@ export interface GoogleDocsMetrics {
   comments: number;
 }
 
+export interface MeetingEngagementMetrics {
+  attendance_ratio: number;
+  speaking_ratio: number;
+  chat_participation: number;
+  meeting_lead_count: number;
+}
+
 export interface MemberParticipation {
   user_id: string;
   name: string;
@@ -23,6 +30,7 @@ export interface MemberParticipation {
   google_email_matched?: boolean | null;
   github: GitHubMetrics | null;
   google_docs: GoogleDocsMetrics | null;
+  meeting_engagement?: MeetingEngagementMetrics | null;
 }
 
 export interface GroupContributionsData {
