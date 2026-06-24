@@ -13,6 +13,17 @@ export interface GoogleDocsMetrics {
   comments: number;
 }
 
+export interface GoogleDocSyncEvent {
+  type: "edit" | "comment" | "comment_reply";
+  file_id: string;
+  source_id?: string | null;
+  author_email?: string | null;
+  author_name?: string | null;
+  matched_email?: string | null;
+  match_method?: string | null;
+  timestamp?: string | null;
+}
+
 export interface MeetingEngagementMetrics {
   attendance_ratio: number;
   speaking_ratio: number;
@@ -30,6 +41,7 @@ export interface MemberParticipation {
   google_email_matched?: boolean | null;
   github: GitHubMetrics | null;
   google_docs: GoogleDocsMetrics | null;
+  google_docs_events?: GoogleDocSyncEvent[];
   meeting_engagement?: MeetingEngagementMetrics | null;
 }
 
@@ -62,6 +74,7 @@ export interface SyncGroupData {
   group_id: string;
   synced_at: string;
   members_synced: number;
+  warnings?: string[];
 }
 
 export type GroupContributionsResponse = ApiResponse<GroupContributionsData>;

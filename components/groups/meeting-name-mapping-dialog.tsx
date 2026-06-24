@@ -56,6 +56,10 @@ function createMappingRow(displayName = "", userId = ""): MappingRow {
   };
 }
 
+function getMemberLabel(member: GroupMember): string {
+  return member.name?.trim() || member.email;
+}
+
 export function MeetingNameMappingDialog({
   groupId,
   session,
@@ -75,6 +79,14 @@ export function MeetingNameMappingDialog({
       ? students
       : members.filter((member) => member.role.toUpperCase() !== "INSTRUCTOR");
   }, [members]);
+
+  const memberLabelById = useMemo(() => {
+    const labels: Record<string, string> = {};
+    for (const member of studentMembers) {
+      labels[member.user_id] = getMemberLabel(member);
+    }
+    return labels;
+  }, [studentMembers]);
 
   useEffect(() => {
     if (!open || !session) return;
@@ -138,7 +150,7 @@ export function MeetingNameMappingDialog({
         meetingId: session.id,
         payload: { mappings: payload },
       });
-      toast.success("Name mappings saved — reprocessing session");
+      toast.success("Name mappings saved");
       onSubmitted(response.data);
       onOpenChange(false);
     } catch (error) {
@@ -220,12 +232,20 @@ export function MeetingNameMappingDialog({
                     disabled={submitMapping.isPending}
                   >
                     <SelectTrigger className={cn("w-full", fieldInputClass)}>
-                      <SelectValue placeholder="Select member" />
+                      <SelectValue placeholder="Select member">
+                        {(value: string | null) =>
+                          value ? memberLabelById[value] : null
+                        }
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent>
                       {studentMembers.map((member) => (
-                        <SelectItem key={member.user_id} value={member.user_id}>
-                          {member.name}
+                        <SelectItem
+                          key={member.user_id}
+                          value={member.user_id}
+                          label={getMemberLabel(member)}
+                        >
+                          {getMemberLabel(member)}
                         </SelectItem>
                       ))}
                     </SelectContent>

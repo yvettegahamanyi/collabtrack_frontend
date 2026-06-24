@@ -46,9 +46,14 @@ export function GroupContributionTab({ group }: GroupContributionTabProps) {
 
   const handleSync = async () => {
     try {
-      await syncGroup.mutateAsync();
+      const response = await syncGroup.mutateAsync();
       await refetch();
-      toast.success("Participation data synced");
+      const warnings = response.data.warnings ?? [];
+      if (warnings.length > 0) {
+        toast.warning(warnings.join(" "));
+      } else {
+        toast.success("Participation data synced");
+      }
     } catch (error) {
       const apiError = error as ApiError;
       toast.error(apiError.message ?? "Sync failed");

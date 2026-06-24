@@ -6,7 +6,7 @@ import {
   GitBranchIcon,
   LoaderIcon,
 } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { toast } from "sonner";
 
@@ -35,6 +35,7 @@ const PROVIDERS: {
 
 export function IntegrationsCard() {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const { data, isLoading, isError, refetch } = useIntegrations();
   const connect = useConnectIntegration();
@@ -58,9 +59,9 @@ export function IntegrationsCard() {
         toast.error(message ?? "Failed to connect integration");
       }
 
-      router.replace(ROUTES.settings);
+      router.replace(pathname || ROUTES.settings);
     });
-  }, [searchParams, router, refetch]);
+  }, [searchParams, router, pathname, refetch]);
 
   const handleAction = async (provider: IntegrationProvider, connected: boolean) => {
     try {

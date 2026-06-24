@@ -63,12 +63,39 @@ export function GroupMeetingSessionsTab({
     }
   }, [pollingSession, pollingMeetingId, group.id, queryClient]);
 
-  const handleUploaded = (session: MeetingSession) => {
+  const handleSessionProcessed = (session: MeetingSession) => {
+    invalidateMeetingQueries(queryClient, group.id);
+
+    if (session.status === "COMPLETED") {
+      toast.success("Meeting session processed successfully");
+      setPollingMeetingId(null);
+      return;
+    }
+
+    if (session.status === "FAILED") {
+      toast.error(
+        session.error_message ?? "Meeting session processing failed"
+      );
+      setPollingMeetingId(null);
+      return;
+    }
+
+    if (session.status === "NEEDS_MAPPING") {
+      setMappingSession(session);
+      setMappingOpen(true);
+      setPollingMeetingId(null);
+      return;
+    }
+
     setPollingMeetingId(session.id);
   };
 
+  const handleUploaded = (session: MeetingSession) => {
+    handleSessionProcessed(session);
+  };
+
   const handleMappingSubmitted = (session: MeetingSession) => {
-    setPollingMeetingId(session.id);
+    handleSessionProcessed(session);
   };
 
   const handleMapNames = async (session: MeetingSession) => {

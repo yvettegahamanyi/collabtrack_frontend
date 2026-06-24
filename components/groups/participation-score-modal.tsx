@@ -10,7 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMemberParticipation } from "@/service/use-participation";
-import type { MemberParticipation } from "@/types/participation";
+import type { GoogleDocSyncEvent, MemberParticipation } from "@/types/participation";
 
 interface ParticipationScoreModalProps {
   groupId: string;
@@ -117,6 +117,13 @@ export function ParticipationScoreModal({
                     : []
                 }
               />
+
+              {participation.google_docs_events &&
+                participation.google_docs_events.length > 0 && (
+                  <GoogleDocsEventsSection
+                    events={participation.google_docs_events}
+                  />
+                )}
             </>
           )}
 
@@ -128,6 +135,45 @@ export function ParticipationScoreModal({
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function GoogleDocsEventsSection({ events }: { events: GoogleDocSyncEvent[] }) {
+  return (
+    <div className="rounded-xl border bg-muted/20 p-4">
+      <h3 className="mb-3 text-sm font-semibold">Google Docs — sync breakdown</h3>
+      <p className="mb-3 text-xs text-muted-foreground">
+        Raw events from the Google Drive API that contributed to this member&apos;s
+        score.
+      </p>
+      <ul className="max-h-56 space-y-2 overflow-y-auto text-xs">
+        {events.map((event, index) => (
+          <li
+            key={`${event.type}-${event.source_id ?? index}`}
+            className="rounded-lg bg-background px-3 py-2 font-mono"
+          >
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="outline" className="text-[10px] uppercase">
+                {event.type}
+              </Badge>
+              {event.timestamp && (
+                <span className="text-muted-foreground">
+                  {new Date(event.timestamp).toLocaleString()}
+                </span>
+              )}
+            </div>
+            <p className="mt-1 text-muted-foreground">
+              author: {event.author_name ?? "Unknown"}
+              {event.author_email ? ` (${event.author_email})` : ""}
+              {event.match_method ? ` · matched via ${event.match_method}` : ""}
+            </p>
+            <p className="text-muted-foreground">
+              source: {event.source_id ?? "—"} · file: {event.file_id}
+            </p>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

@@ -130,7 +130,7 @@ export function UploadMeetingSessionDialog({
         },
       });
 
-      toast.success("Meeting session uploaded — processing started");
+      toast.success("Meeting session uploaded and processed");
       onUploaded(uploadResponse.data);
       reset();
       onOpenChange(false);

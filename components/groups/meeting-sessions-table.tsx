@@ -1,6 +1,7 @@
 "use client";
 
-import { LinkIcon, MoreVerticalIcon, TrashIcon } from "lucide-react";
+import { LinkIcon, Loader2Icon, MoreVerticalIcon, TrashIcon } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { Badge } from "@/components/ui/badge";
@@ -74,6 +75,7 @@ export function MeetingSessionsTable({
 }: MeetingSessionsTableProps) {
   const { data, isLoading, isError } = useMeetingSessions(groupId);
   const deleteSession = useDeleteMeetingSession(groupId);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const sessions = data?.data ?? [];
 
   const handleDelete = async (session: MeetingSession) => {
@@ -85,12 +87,15 @@ export function MeetingSessionsTable({
       return;
     }
 
+    setDeletingId(session.id);
     try {
       await deleteSession.mutateAsync(session.id);
       toast.success("Meeting session deleted");
     } catch (error) {
       const apiError = error as ApiError;
       toast.error(apiError.message ?? "Failed to delete session");
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -133,7 +138,10 @@ export function MeetingSessionsTable({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sessions.map((session) => (
+              {sessions.map((session) => {
+                const isDeleting = deletingId === session.id;
+
+                return (
                 <TableRow key={session.id}>
                   <TableCell className="font-medium">
                     {session.session_label}
@@ -163,24 +171,31 @@ export function MeetingSessionsTable({
                               variant="ghost"
                               size="icon-sm"
                               aria-label={`Actions for ${session.session_label}`}
-                              disabled={deleteSession.isPending}
+                              disabled={Boolean(deletingId)}
                             >
-                              <MoreVerticalIcon />
+                              {isDeleting ? (
+                                <Loader2Icon className="animate-spin" />
+                              ) : (
+                                <MoreVerticalIcon />
+                              )}
                             </Button>
                           }
                         />
                         <DropdownMenuContent align="end">
                           <DropdownMenuGroup>
-                            <DropdownMenuItem onClick={() => onMapNames(session)}>
-                              <LinkIcon />
-                              Map names
-                            </DropdownMenuItem>
+                            {session.status === "NEEDS_MAPPING" && (
+                              <DropdownMenuItem onClick={() => onMapNames(session)}>
+                                <LinkIcon />
+                                Map names
+                              </DropdownMenuItem>
+                            )}
                             <DropdownMenuItem
                               variant="destructive"
+                              disabled={isDeleting}
                               onClick={() => handleDelete(session)}
                             >
                               <TrashIcon />
-                              Delete
+                              {isDeleting ? "Deleting…" : "Delete"}
                             </DropdownMenuItem>
                           </DropdownMenuGroup>
                         </DropdownMenuContent>
@@ -188,7 +203,8 @@ export function MeetingSessionsTable({
                     </TableCell>
                   )}
                 </TableRow>
-              ))}
+                );
+              })}
             </TableBody>
           </Table>
         )}
