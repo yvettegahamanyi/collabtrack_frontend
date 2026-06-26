@@ -1,5 +1,5 @@
-import { ContributionReportPage } from "@/components/groups/contribution-report-page";
+import { redirect } from "next/navigation";
 
-export default function InstructorContributionReportPage() {
-  return <ContributionReportPage />;
+export default function InstructorContributionReportRedirect() {
+  redirect("/instructor/classes");
 }

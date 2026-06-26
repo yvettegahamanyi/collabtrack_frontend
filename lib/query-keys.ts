@@ -16,6 +16,21 @@ export const queryKeys = {
     all: ["courses"] as const,
     detail: (id: string) => ["courses", "detail", id] as const,
   },
+  classes: {
+    all: ["classes"] as const,
+    list: () => ["classes", "list"] as const,
+    detail: (id: string) => ["classes", "detail", id] as const,
+  },
+  assignments: {
+    all: ["assignments"] as const,
+    list: (classId: string) => ["assignments", "list", classId] as const,
+    detail: (id: string) => ["assignments", "detail", id] as const,
+  },
+  reports: {
+    list: (assignmentId: string) => ["reports", "list", assignmentId] as const,
+    detail: (assignmentId: string, groupId: string) =>
+      ["reports", "detail", assignmentId, groupId] as const,
+  },
   projects: {
     all: ["projects"] as const,
     detail: (id: string) => ["projects", "detail", id] as const,

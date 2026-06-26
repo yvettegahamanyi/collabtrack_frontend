@@ -1,5 +1,5 @@
-import { GroupsPage } from "@/components/groups/groups-page";
+import { redirect } from "next/navigation";
 
-export default function InstructorGroupsPage() {
-  return <GroupsPage role="instructor" />;
+export default function InstructorGroupsRedirect() {
+  redirect("/instructor/classes");
 }

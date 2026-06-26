@@ -24,13 +24,12 @@ export const ROUTES = {
   instructor: "/instructor",
   student: "/student",
   studentGroups: "/student/group",
-  instructorGroups: "/instructor/group",
-  instructorContributionReport: "/instructor/contribution-report",
+  instructorClasses: "/instructor/classes",
   settings: "/settings",
 } as const;
 
 export function groupsListPath(role: Role) {
-  return role === "instructor" ? ROUTES.instructorGroups : ROUTES.studentGroups;
+  return role === "instructor" ? ROUTES.instructorClasses : ROUTES.studentGroups;
 }
 
 export function groupPath(groupId: string, tab?: string, role: Role = "student") {

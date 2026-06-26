@@ -1,5 +1,6 @@
 import {
   BarChart3,
+  BookOpen,
   LayoutDashboard,
   Settings,
   Users,
@@ -23,12 +24,7 @@ export const NAVIGATION: Record<Role, NavItem[]> = {
   ],
   instructor: [
     { label: "Dashboard", href: "/instructor", icon: LayoutDashboard },
-    { label: "My Groups", href: "/instructor/group", icon: Users },
-    {
-      label: "Contribution Report",
-      href: "/instructor/contribution-report",
-      icon: BarChart3,
-    },
+    { label: "Classes", href: "/instructor/classes", icon: BookOpen },
     { label: "Settings", href: "/settings", icon: Settings },
   ],
   student: [
