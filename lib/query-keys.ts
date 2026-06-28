@@ -68,4 +68,9 @@ export const queryKeys = {
     engagement: (groupId: string) =>
       ["meetings", "engagement", groupId] as const,
   },
+  training: {
+    all: ["training"] as const,
+    list: () => ["training", "list"] as const,
+    detail: (id: string) => ["training", "detail", id] as const,
+  },
 } as const;

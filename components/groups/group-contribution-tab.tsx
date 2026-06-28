@@ -186,7 +186,8 @@ export function GroupContributionTab({ group }: GroupContributionTabProps) {
 
           {!isLoading && !isError && members.length === 0 && (
             <p className="py-8 text-center text-sm text-muted-foreground">
-              No participation data yet. Link a repo and Google Doc, then sync.
+              No participation data yet. Link repos and Google Docs in Overview,
+              then sync.
             </p>
           )}
 

@@ -95,7 +95,7 @@ export function LinkResourcesSection({
               {repos.length === 0 && docs.length === 0 ? (
                 <p className="text-muted-foreground">
                   No resources linked yet. The group owner or instructor can
-                  link a GitHub repo and Google Doc.
+                  link GitHub repos and Google Docs.
                 </p>
               ) : (
                 <>
@@ -140,7 +140,8 @@ export function LinkResourcesSection({
       </CardHeader>
       <CardContent className="space-y-6">
         <p className="text-sm text-muted-foreground">
-          Link a GitHub repository and Google Doc for participation tracking.
+          Link GitHub repositories and Google Docs for participation tracking.
+          Metrics are combined across every linked resource when you sync.
           Connect integrations in{" "}
           <Link href={ROUTES.settings} className="text-primary underline">
             Settings

@@ -30,6 +30,7 @@ export const NAVIGATION: Record<Role, NavItem[]> = {
   student: [
     { label: "Dashboard", href: "/student", icon: LayoutDashboard },
     { label: "My Group", href: "/student/group", icon: Users },
+    { label: "Training Data", href: "/student/training", icon: BarChart3 },
     { label: "Settings", href: "/settings", icon: Settings },
   ],
 };
