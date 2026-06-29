@@ -82,3 +82,22 @@ export type MemberParticipationResponse = ApiResponse<MemberParticipation>;
 export type GroupReposResponse = ApiResponse<GroupGithubRepo[]>;
 export type GroupDocumentsResponse = ApiResponse<GroupGoogleDoc[]>;
 export type SyncGroupResponse = ApiResponse<SyncGroupData>;
+
+export interface ParticipationScore {
+  user_id: string;
+  name: string | null;
+  predicted_score: number;
+  contributor_tier: "strong" | "average" | "below" | string;
+  features: Record<string, number>;
+  generated_at: string;
+}
+
+export interface ParticipationScoresSummary {
+  group_id: string;
+  generated_at: string;
+  scores: ParticipationScore[];
+  warnings?: string[];
+}
+
+export type ParticipationScoresResponse = ApiResponse<ParticipationScoresSummary>;
+export type ParticipationScoreResponse = ApiResponse<ParticipationScore>;

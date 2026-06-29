@@ -7,6 +7,8 @@ import type {
   GroupGithubRepo,
   GroupReposResponse,
   MemberParticipationResponse,
+  ParticipationScoreResponse,
+  ParticipationScoresResponse,
   SyncGroupResponse,
 } from "@/types/participation";
 
@@ -58,4 +60,22 @@ export function unlinkGroupDocument(groupId: string, docId: string) {
 
 export function syncGroup(groupId: string) {
   return api.post<SyncGroupResponse>(`/groups/${groupId}/sync`);
+}
+
+export function generateParticipationScores(groupId: string) {
+  return api.post<ParticipationScoresResponse>(
+    `/groups/${groupId}/participation-scores/generate`
+  );
+}
+
+export function getGroupParticipationScores(groupId: string) {
+  return api.get<ParticipationScoresResponse>(
+    `/groups/${groupId}/participation-scores`
+  );
+}
+
+export function getMemberParticipationScore(groupId: string, userId: string) {
+  return api.get<ParticipationScoreResponse>(
+    `/groups/${groupId}/members/${userId}/participation-score`
+  );
 }

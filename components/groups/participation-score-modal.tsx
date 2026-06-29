@@ -9,7 +9,14 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useMemberParticipation } from "@/service/use-participation";
+import {
+  contributorTierBadgeVariant,
+  contributorTierLabel,
+} from "@/lib/groups";
+import {
+  useMemberParticipation,
+  useMemberParticipationScore,
+} from "@/service/use-participation";
 import type { GoogleDocSyncEvent, MemberParticipation } from "@/types/participation";
 
 interface ParticipationScoreModalProps {
@@ -21,6 +28,17 @@ interface ParticipationScoreModalProps {
   /** Fallback when API not yet synced */
   fallback?: MemberParticipation | null;
 }
+
+const FEATURE_LABELS: Record<string, string> = {
+  code_commits: "Code commits share",
+  code_share: "Code lines share",
+  review_participation: "Review participation",
+  attendance_ratio: "Meeting attendance",
+  speaking_participation_ratio: "Speaking participation",
+  chat_participation_ratio: "Chat participation",
+  docs_contribution_share: "Docs contribution share",
+  comment_activity: "Comment activity",
+};
 
 export function ParticipationScoreModal({
   groupId,
@@ -34,8 +52,14 @@ export function ParticipationScoreModal({
     groupId,
     userId ?? ""
   );
+  const {
+    data: scoreData,
+    isLoading: scoreLoading,
+    isError: scoreError,
+  } = useMemberParticipationScore(groupId, userId ?? "");
 
   const participation = data?.data ?? fallback;
+  const score = scoreData?.data;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -45,12 +69,56 @@ export function ParticipationScoreModal({
             Participation — {participation?.name ?? memberName ?? "Member"}
           </DialogTitle>
           <DialogDescription className="text-sm leading-relaxed">
-            Raw activity metrics from connected GitHub and Google Docs
-            integrations.
+            Activity metrics and ML participation score from synced integrations.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-5 px-6 py-6">
+        <div className="max-h-[70vh] space-y-5 overflow-y-auto px-6 py-6">
+          {scoreLoading && (
+            <Skeleton className="h-24 w-full" />
+          )}
+
+          {score && (
+            <div className="rounded-xl border bg-primary/5 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    ML participation score
+                  </p>
+                  <p className="text-3xl font-bold tabular-nums text-primary">
+                    {Math.round(score.predicted_score * 100)}%
+                  </p>
+                </div>
+                <Badge variant={contributorTierBadgeVariant(score.contributor_tier)}>
+                  {contributorTierLabel(score.contributor_tier)}
+                </Badge>
+              </div>
+              {Object.keys(score.features).length > 0 && (
+                <dl className="mt-4 grid gap-2 sm:grid-cols-2">
+                  {Object.entries(score.features).map(([key, value]) => (
+                    <div
+                      key={key}
+                      className="flex items-center justify-between rounded-lg bg-background px-3 py-2 text-sm"
+                    >
+                      <dt className="text-muted-foreground">
+                        {FEATURE_LABELS[key] ?? key}
+                      </dt>
+                      <dd className="font-semibold tabular-nums">
+                        {Math.round(value * 100)}%
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+            </div>
+          )}
+
+          {!scoreLoading && scoreError && (
+            <p className="text-sm text-muted-foreground">
+              No ML participation score generated yet for this member.
+            </p>
+          )}
+
           {isLoading && (
             <div className="space-y-3">
               <Skeleton className="h-8 w-full" />
@@ -118,6 +186,31 @@ export function ParticipationScoreModal({
                 }
               />
 
+              {participation.meeting_engagement && (
+                <MetricsSection
+                  title="Meeting engagement"
+                  empty={false}
+                  items={[
+                    {
+                      label: "Attendance",
+                      value: `${Math.round(participation.meeting_engagement.attendance_ratio * 100)}%`,
+                    },
+                    {
+                      label: "Speaking",
+                      value: `${Math.round(participation.meeting_engagement.speaking_ratio * 100)}%`,
+                    },
+                    {
+                      label: "Chat",
+                      value: `${Math.round(participation.meeting_engagement.chat_participation * 100)}%`,
+                    },
+                    {
+                      label: "Meeting leads",
+                      value: participation.meeting_engagement.meeting_lead_count,
+                    },
+                  ]}
+                />
+              )}
+
               {participation.google_docs_events &&
                 participation.google_docs_events.length > 0 && (
                   <GoogleDocsEventsSection
@@ -183,7 +276,7 @@ function MetricsSection({
   empty,
 }: {
   title: string;
-  items: { label: string; value: number }[];
+  items: { label: string; value: number | string }[];
   empty: boolean;
 }) {
   return (

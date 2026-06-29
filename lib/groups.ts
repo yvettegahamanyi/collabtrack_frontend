@@ -9,6 +9,44 @@ export function canManageGroupResources(
   return user.id === group.owner_id || user.role === "instructor";
 }
 
+export function canGenerateParticipationScores(
+  user: Pick<User, "id" | "role"> | null | undefined,
+  group: Pick<Group, "owner_id" | "members">
+): boolean {
+  if (!user) return false;
+  if (user.id === group.owner_id) return true;
+  if (user.role === "instructor") return true;
+  return (
+    group.members?.some(
+      (member) => member.user_id === user.id && member.role === "INSTRUCTOR"
+    ) ?? false
+  );
+}
+
+export function contributorTierLabel(tier: string): string {
+  switch (tier) {
+    case "strong":
+      return "Strong contributor";
+    case "average":
+      return "Average contributor";
+    default:
+      return "Below average contributor";
+  }
+}
+
+export function contributorTierBadgeVariant(
+  tier: string
+): "default" | "secondary" | "outline" {
+  switch (tier) {
+    case "strong":
+      return "default";
+    case "average":
+      return "secondary";
+    default:
+      return "outline";
+  }
+}
+
 export function formatRelativeTime(dateString: string): string {
   const date = new Date(dateString);
   const diffMs = Date.now() - date.getTime();

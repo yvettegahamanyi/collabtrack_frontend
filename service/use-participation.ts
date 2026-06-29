@@ -104,3 +104,33 @@ export function useSyncGroup(groupId: string) {
     },
   });
 }
+
+export function useGroupParticipationScores(groupId: string) {
+  return useQuery({
+    queryKey: queryKeys.participation.scores(groupId),
+    queryFn: () => participationService.getGroupParticipationScores(groupId),
+    enabled: Boolean(groupId),
+  });
+}
+
+export function useMemberParticipationScore(groupId: string, userId: string) {
+  return useQuery({
+    queryKey: queryKeys.participation.memberScore(groupId, userId),
+    queryFn: () =>
+      participationService.getMemberParticipationScore(groupId, userId),
+    enabled: Boolean(groupId) && Boolean(userId),
+  });
+}
+
+export function useGenerateParticipationScores(groupId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () =>
+      participationService.generateParticipationScores(groupId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.participation.scores(groupId),
+      });
+    },
+  });
+}

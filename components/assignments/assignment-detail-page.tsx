@@ -5,8 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { CreateAssignmentReportWizard } from "@/components/reports/create-assignment-report-wizard";
 import { PageHeader } from "@/components/layout/page-header";
+import { CreateAssignmentReportWizard } from "@/components/reports/create-assignment-report-wizard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -47,7 +47,9 @@ function formatDate(value: string) {
   });
 }
 
-export function AssignmentDetailPage({ assignmentId }: AssignmentDetailPageProps) {
+export function AssignmentDetailPage({
+  assignmentId,
+}: AssignmentDetailPageProps) {
   const router = useRouter();
   const { data, isLoading, isError } = useAssignment(assignmentId);
   const [wizardOpen, setWizardOpen] = useState(false);
@@ -125,10 +127,10 @@ export function AssignmentDetailPage({ assignmentId }: AssignmentDetailPageProps
               {assignment.status === "ACTIVE" ? "Active" : "Done"}
             </Badge>
           </div>
-          <div>
-            <span className="text-muted-foreground">Supervisor: </span>
+          {/* <div>
+            <span className="text-muted-foreground">Instructor: </span>
             <span>{assignment.supervisor_email ?? "Your account email"}</span>
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -136,8 +138,8 @@ export function AssignmentDetailPage({ assignmentId }: AssignmentDetailPageProps
         <div>
           <h2 className="text-lg font-semibold">Reports</h2>
           <p className="text-sm text-muted-foreground">
-            {reports.length} group report{reports.length === 1 ? "" : "s"} for this
-            assignment
+            {reports.length} group report{reports.length === 1 ? "" : "s"} for
+            this assignment
           </p>
         </div>
 
@@ -154,8 +156,12 @@ export function AssignmentDetailPage({ assignmentId }: AssignmentDetailPageProps
                 <TableRow>
                   <TableHead>Group</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="hidden sm:table-cell">Created</TableHead>
-                  <TableHead className="hidden md:table-cell">Notification</TableHead>
+                  <TableHead className="hidden sm:table-cell">
+                    Created
+                  </TableHead>
+                  <TableHead className="hidden md:table-cell">
+                    Notification
+                  </TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -171,7 +177,9 @@ export function AssignmentDetailPage({ assignmentId }: AssignmentDetailPageProps
                       </Link>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={reportStatusVariant(report.report_status)}>
+                      <Badge
+                        variant={reportStatusVariant(report.report_status)}
+                      >
                         {report.report_status ?? "DRAFT"}
                       </Badge>
                     </TableCell>

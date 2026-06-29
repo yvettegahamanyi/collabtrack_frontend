@@ -59,6 +59,10 @@ export const queryKeys = {
     repos: (groupId: string) => ["participation", "repos", groupId] as const,
     documents: (groupId: string) =>
       ["participation", "documents", groupId] as const,
+    scores: (groupId: string) =>
+      ["participation", "scores", groupId] as const,
+    memberScore: (groupId: string, userId: string) =>
+      ["participation", "score", groupId, userId] as const,
   },
   meetings: {
     all: ["meetings"] as const,

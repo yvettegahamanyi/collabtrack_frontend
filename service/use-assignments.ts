@@ -20,6 +20,14 @@ export function useAssignment(assignmentId: string) {
     queryKey: queryKeys.assignments.detail(assignmentId),
     queryFn: () => assignmentsService.getAssignment(assignmentId),
     enabled: Boolean(assignmentId),
+    refetchInterval: (query) => {
+      const reports = query.state.data?.data?.reports ?? [];
+      const hasProcessing = reports.some(
+        (report) =>
+          report.report_status === "PROCESSING" || report.report_status === "DRAFT"
+      );
+      return hasProcessing ? 5000 : false;
+    },
   });
 }
 

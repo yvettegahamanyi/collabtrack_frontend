@@ -31,7 +31,7 @@ export function AssignmentReportDetailPage({
   const handleNotify = async () => {
     try {
       await notifySupervisor.mutateAsync();
-      toast.success("Supervisor notification sent");
+      toast.success("Instructor notification sent");
     } catch (error) {
       const apiError = error as ApiError;
       toast.error(apiError.message ?? "Failed to send notification");
@@ -91,7 +91,7 @@ export function AssignmentReportDetailPage({
               disabled={notifySupervisor.isPending}
             >
               <MailIcon />
-              {report.notification_sent_at ? "Resend Email" : "Email Supervisor"}
+              {report.notification_sent_at ? "Resend Email" : "Email Instructor"}
             </Button>
           ) : undefined
         }
@@ -132,7 +132,10 @@ export function AssignmentReportDetailPage({
       )}
 
       {(report.report_status === "READY" || report.report_status === "PROCESSING") && (
-        <GroupContributionTab group={groupForTab} />
+        <GroupContributionTab
+          group={groupForTab}
+          reportStatus={report.report_status}
+        />
       )}
     </div>
   );
