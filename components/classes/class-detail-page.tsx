@@ -19,8 +19,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useClass, useDeleteClass } from "@/service/use-classes";
 import { useDeleteAssignment } from "@/service/use-assignments";
+import { useClass, useDeleteClass } from "@/service/use-classes";
 import type { ApiError } from "@/types";
 import type { Assignment } from "@/types/assignments";
 
@@ -100,7 +100,9 @@ export function ClassDetailPage({ classId }: ClassDetailPageProps) {
 
       <PageHeader
         title={courseClass.name}
-        description={courseClass.description ?? "Manage assignments for this class."}
+        description={
+          courseClass.description ?? "Manage assignments for this class."
+        }
         action={
           <div className="flex gap-2">
             <Button onClick={() => setCreateAssignmentOpen(true)}>
@@ -139,10 +141,9 @@ export function ClassDetailPage({ classId }: ClassDetailPageProps) {
                   <TableHead>Title</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Reports</TableHead>
-                  <TableHead className="hidden lg:table-cell">
-                    Supervisor email
+                  <TableHead className="hidden md:table-cell">
+                    Created
                   </TableHead>
-                  <TableHead className="hidden md:table-cell">Created</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -167,7 +168,9 @@ export function ClassDetailPage({ classId }: ClassDetailPageProps) {
                     <TableCell>
                       <Badge
                         variant={
-                          assignment.status === "ACTIVE" ? "default" : "secondary"
+                          assignment.status === "ACTIVE"
+                            ? "default"
+                            : "secondary"
                         }
                       >
                         {assignment.status === "ACTIVE" ? "Active" : "Done"}
@@ -175,15 +178,6 @@ export function ClassDetailPage({ classId }: ClassDetailPageProps) {
                     </TableCell>
                     <TableCell className="text-right tabular-nums">
                       {assignment.report_count}
-                    </TableCell>
-                    <TableCell className="hidden max-w-[220px] truncate lg:table-cell">
-                      {assignment.supervisor_email ? (
-                        <span className="text-muted-foreground">
-                          {assignment.supervisor_email}
-                        </span>
-                      ) : (
-                        <span className="text-muted-foreground">Your email</span>
-                      )}
                     </TableCell>
                     <TableCell className="hidden text-muted-foreground md:table-cell">
                       {formatDate(assignment.created_at)}

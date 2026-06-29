@@ -1,5 +1,33 @@
 "use client";
 
+import { ConstructionIcon } from "lucide-react";
+
+import { Card, CardContent } from "@/components/ui/card";
+
+export default function InstructorDashboardPage() {
+  return (
+    <div className="space-y-6">
+      <Card className="border-dashed">
+        <CardContent className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+          <span className="flex size-14 items-center justify-center rounded-full bg-secondary text-primary">
+            <ConstructionIcon className="size-7" />
+          </span>
+          <div>
+            <h2 className="text-xl font-semibold">Coming Soon</h2>
+            <p className="mt-1 max-w-md text-sm text-muted-foreground">
+              The instructor dashboard is under development. Check back soon for
+              cohort insights, engagement metrics, and more.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+/*
+"use client";
+
 import {
   ClockIcon,
   ListFilterIcon,
@@ -234,3 +262,4 @@ function MetricRow({ metric }: { metric: DetailedMetric }) {
     </TableRow>
   );
 }
+*/
