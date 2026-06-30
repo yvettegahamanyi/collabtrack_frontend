@@ -47,6 +47,66 @@ export function contributorTierBadgeVariant(
   }
 }
 
+export function outlierTypeLabel(type: string): string {
+  switch (type) {
+    case "free_rider":
+      return "Free-rider risk";
+    case "over_contributor":
+      return "Over-contributor";
+    case "unusual_profile":
+      return "Unusual profile";
+    default:
+      return "Typical";
+  }
+}
+
+export function outlierBadgeVariant(
+  outlierType: string,
+  isOutlier: boolean
+): "default" | "secondary" | "outline" | "destructive" {
+  if (!isOutlier) return "outline";
+  switch (outlierType) {
+    case "free_rider":
+      return "destructive";
+    case "over_contributor":
+      return "default";
+    default:
+      return "secondary";
+  }
+}
+
+export function teamArchetypeDescription(archetype: string): string {
+  switch (archetype) {
+    case "balanced_team":
+      return "Members contribute evenly across code, docs, and meetings.";
+    case "one_dominant_contributor":
+      return "One member carries most of the workload — high variance across the team.";
+    case "uniformly_disengaged":
+      return "Low activity across all collaboration channels.";
+    case "high_performing_cohesive":
+      return "Strong, balanced participation with low variance between members.";
+    default:
+      return "Team collaboration pattern identified from aggregated member features.";
+  }
+}
+
+export function teamArchetypeBadgeVariant(
+  archetype: string
+): "default" | "secondary" | "outline" | "destructive" {
+  switch (archetype) {
+    case "high_performing_cohesive":
+      return "default";
+    case "balanced_team":
+      return "secondary";
+    case "one_dominant_contributor":
+      return "outline";
+    case "uniformly_disengaged":
+      return "destructive";
+    default:
+      return "secondary";
+  }
+}
+
 export function formatRelativeTime(dateString: string): string {
   const date = new Date(dateString);
   const diffMs = Date.now() - date.getTime();

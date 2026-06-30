@@ -131,6 +131,7 @@ export function useGenerateParticipationScores(groupId: string) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.participation.scores(groupId),
       });
+      queryClient.invalidateQueries({ queryKey: queryKeys.instructor.all });
     },
   });
 }

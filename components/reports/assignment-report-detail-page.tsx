@@ -5,11 +5,13 @@ import Link from "next/link";
 import { toast } from "sonner";
 
 import { GroupContributionTab } from "@/components/groups/group-contribution-tab";
+import { TeamArchetypeCard } from "@/components/groups/team-archetype-card";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useGroupParticipationScores } from "@/service/use-participation";
 import { useNotifySupervisor, useReport } from "@/service/use-reports";
 import type { ApiError } from "@/types";
 import type { Group } from "@/types/groups";
@@ -25,8 +27,11 @@ export function AssignmentReportDetailPage({
 }: AssignmentReportDetailPageProps) {
   const { data, isLoading, isError } = useReport(assignmentId, groupId);
   const notifySupervisor = useNotifySupervisor(assignmentId, groupId);
+  const { data: scoresData } = useGroupParticipationScores(groupId);
 
   const report = data?.data;
+  const teamArchetype = scoresData?.data.team_archetype;
+  const analyzedMemberCount = scoresData?.data.scores.length;
 
   const handleNotify = async () => {
     try {
@@ -70,7 +75,7 @@ export function AssignmentReportDetailPage({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 max-w-full space-y-6">
       <div className="flex flex-wrap items-center gap-3">
         <Link href={`/instructor/assignments/${assignmentId}`}>
           <Button variant="ghost" size="sm">
@@ -132,10 +137,18 @@ export function AssignmentReportDetailPage({
       )}
 
       {(report.report_status === "READY" || report.report_status === "PROCESSING") && (
-        <GroupContributionTab
-          group={groupForTab}
-          reportStatus={report.report_status}
-        />
+        <>
+          {teamArchetype && (
+            <TeamArchetypeCard
+              teamArchetype={teamArchetype}
+              memberCount={analyzedMemberCount}
+            />
+          )}
+          <GroupContributionTab
+            group={groupForTab}
+            reportStatus={report.report_status}
+          />
+        </>
       )}
     </div>
   );

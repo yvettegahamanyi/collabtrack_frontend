@@ -25,6 +25,8 @@ import {
   contributorTierBadgeVariant,
   contributorTierLabel,
   memberInitials,
+  outlierBadgeVariant,
+  outlierTypeLabel,
 } from "@/lib/groups";
 import {
   useGenerateParticipationScores,
@@ -65,6 +67,7 @@ export function GroupContributionTab({
     scores.map((score) => [score.user_id, score])
   );
   const hasScores = scores.length > 0;
+  const hasOutlierInsights = scores.some((score) => score.outlier != null);
   const hasMeetingFromScores = scores.some(
     (score) => (score.features.attendance_ratio ?? 0) > 0
   );
@@ -145,6 +148,9 @@ export function GroupContributionTab({
       "Doc Edits",
       "Doc Comments",
       ...(hasScores ? ["Participation Score", "Contributor Tier"] : []),
+      ...(hasOutlierInsights
+        ? ["Outlier Flag", "Outlier Type", "Anomaly Score"]
+        : []),
       ...(hasMeetingEngagement
         ? ["Attendance", "Speaking", "Chat", "Meeting Leads"]
         : []),
@@ -165,6 +171,17 @@ export function GroupContributionTab({
           ? [
               score ? `${Math.round(score.predicted_score * 100)}%` : "",
               score ? contributorTierLabel(score.contributor_tier) : "",
+            ]
+          : []),
+        ...(hasOutlierInsights
+          ? [
+              score?.outlier?.is_outlier ? "Yes" : score ? "No" : "",
+              score?.outlier
+                ? outlierTypeLabel(score.outlier.outlier_type)
+                : "",
+              score?.outlier
+                ? score.outlier.anomaly_score.toFixed(3)
+                : "",
             ]
           : []),
         ...(hasMeetingEngagement
@@ -195,7 +212,7 @@ export function GroupContributionTab({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 max-w-full space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-xl font-semibold">Contribution Breakdown</h2>
@@ -217,19 +234,22 @@ export function GroupContributionTab({
             )}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex w-full flex-wrap gap-2 sm:w-auto sm:justify-end">
           {canGenerate && (
             <Button
+              className="flex-1 sm:flex-none"
               onClick={handleGenerateScores}
               disabled={generateScores.isPending || !hasSyncedData}
             >
               <SparklesIcon
                 className={generateScores.isPending ? "animate-pulse" : undefined}
               />
-              Generate participation score
+              <span className="hidden sm:inline">Generate participation score</span>
+              <span className="sm:hidden">Generate score</span>
             </Button>
           )}
           <Button
+            className="flex-1 sm:flex-none"
             variant="outline"
             onClick={handleSync}
             disabled={syncGroup.isPending}
@@ -239,9 +259,14 @@ export function GroupContributionTab({
             />
             Sync
           </Button>
-          <Button variant="outline" onClick={handleDownload}>
+          <Button
+            className="flex-1 sm:flex-none"
+            variant="outline"
+            onClick={handleDownload}
+          >
             <DownloadIcon />
-            Download Report
+            <span className="hidden sm:inline">Download Report</span>
+            <span className="sm:hidden">Download</span>
           </Button>
         </div>
       </div>
@@ -252,11 +277,11 @@ export function GroupContributionTab({
         </p>
       )}
 
-      <Card>
+      <Card className="min-w-0">
         <CardHeader>
           <CardTitle>Member Activity</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="min-w-0">
           {(isLoading || scoresLoading) && (
             <div className="space-y-3">
               <Skeleton className="h-10 w-full" />
@@ -294,129 +319,180 @@ export function GroupContributionTab({
           )}
 
           {!isLoading && members.length > 0 && (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Member</TableHead>
-                  {hasScores && (
-                    <TableHead className="text-right">Participation score</TableHead>
-                  )}
-                  <TableHead className="text-right">Commits</TableHead>
-                  <TableHead className="text-right">Lines</TableHead>
-                  <TableHead className="text-right">PRs</TableHead>
-                  <TableHead className="text-right">Doc Edits</TableHead>
-                  <TableHead className="text-right">Comments</TableHead>
-                  {hasMeetingEngagement && (
-                    <>
-                      <TableHead className="text-right">Attendance</TableHead>
-                      <TableHead className="text-right">Speaking</TableHead>
-                      <TableHead className="text-right">Chat</TableHead>
-                    </>
-                  )}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {members.map((member) => {
-                  const gh = member.github;
-                  const docs = member.google_docs;
-                  const score = scoresByUserId[member.user_id];
-                  const meeting =
-                    member.meeting_engagement ??
-                    (score?.features
-                      ? {
-                          attendance_ratio:
-                            score.features.attendance_ratio ?? 0,
-                          speaking_ratio:
-                            score.features.speaking_participation_ratio ?? 0,
-                          chat_participation:
-                            score.features.chat_participation_ratio ?? 0,
-                          meeting_lead_count: 0,
-                        }
-                      : null);
-                  const totalComments =
-                    (gh?.comments ?? 0) + (docs?.comments ?? 0);
-
-                  return (
-                    <TableRow
-                      key={member.user_id}
-                      className="cursor-pointer hover:bg-muted/50"
-                      onClick={() => setSelectedMember(member)}
-                    >
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar size="sm">
-                            <AvatarFallback>
-                              {memberInitials(member.name)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="font-medium">{member.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {member.email}
-                            </p>
-                          </div>
-                        </div>
-                      </TableCell>
+            <>
+              <p className="mb-3 text-xs text-muted-foreground lg:hidden">
+                Swipe horizontally to see all metrics.
+              </p>
+              <div className="-mx-4 overflow-x-auto px-4 sm:-mx-6 sm:px-6">
+                <Table className="min-w-4xl">
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="sticky left-0 z-10 min-w-36 bg-card shadow-[4px_0_8px_-4px_rgba(0,0,0,0.08)]">
+                        Member
+                      </TableHead>
                       {hasScores && (
-                        <TableCell className="text-right">
-                          {score ? (
-                            <div className="flex flex-col items-end gap-1">
-                              <span className="font-semibold tabular-nums">
-                                {formatRatio(score.predicted_score)}
-                              </span>
-                              <Badge
-                                variant={contributorTierBadgeVariant(
-                                  score.contributor_tier
-                                )}
-                                className="text-[10px]"
-                              >
-                                {contributorTierLabel(score.contributor_tier)}
-                              </Badge>
-                            </div>
-                          ) : (
-                            "—"
-                          )}
-                        </TableCell>
+                        <TableHead className="text-right">Score</TableHead>
                       )}
-                      <TableCell className="text-right tabular-nums">
-                        {gh?.total_commits ?? "—"}
-                      </TableCell>
-                      <TableCell className="text-right tabular-nums">
-                        {gh?.lines_changed ?? "—"}
-                      </TableCell>
-                      <TableCell className="text-right tabular-nums">
-                        {gh ? `${gh.prs_created}/${gh.prs_reviewed}` : "—"}
-                      </TableCell>
-                      <TableCell className="text-right tabular-nums">
-                        {docs?.edits ?? "—"}
-                      </TableCell>
-                      <TableCell className="text-right tabular-nums">
-                        {totalComments || "—"}
-                      </TableCell>
+                      {hasOutlierInsights && (
+                        <TableHead>Outlier</TableHead>
+                      )}
+                      <TableHead className="text-right">Commits</TableHead>
+                      <TableHead className="hidden text-right md:table-cell">
+                        Lines
+                      </TableHead>
+                      <TableHead className="hidden text-right lg:table-cell">
+                        PRs
+                      </TableHead>
+                      <TableHead className="hidden text-right lg:table-cell">
+                        Doc Edits
+                      </TableHead>
+                      <TableHead className="hidden text-right xl:table-cell">
+                        Comments
+                      </TableHead>
                       {hasMeetingEngagement && (
                         <>
-                          <TableCell className="text-right tabular-nums">
-                            {meeting
-                              ? formatRatio(meeting.attendance_ratio)
-                              : "—"}
-                          </TableCell>
-                          <TableCell className="text-right tabular-nums">
-                            {meeting
-                              ? formatRatio(meeting.speaking_ratio)
-                              : "—"}
-                          </TableCell>
-                          <TableCell className="text-right tabular-nums">
-                            {meeting
-                              ? formatRatio(meeting.chat_participation)
-                              : "—"}
-                          </TableCell>
+                          <TableHead className="text-right">Attendance</TableHead>
+                          <TableHead className="hidden text-right md:table-cell">
+                            Speaking
+                          </TableHead>
+                          <TableHead className="hidden text-right lg:table-cell">
+                            Chat
+                          </TableHead>
                         </>
                       )}
                     </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {members.map((member) => {
+                      const gh = member.github;
+                      const docs = member.google_docs;
+                      const score = scoresByUserId[member.user_id];
+                      const meeting =
+                        member.meeting_engagement ??
+                        (score?.features
+                          ? {
+                              attendance_ratio:
+                                score.features.attendance_ratio ?? 0,
+                              speaking_ratio:
+                                score.features.speaking_participation_ratio ??
+                                0,
+                              chat_participation:
+                                score.features.chat_participation_ratio ?? 0,
+                              meeting_lead_count: 0,
+                            }
+                          : null);
+                      const totalComments =
+                        (gh?.comments ?? 0) + (docs?.comments ?? 0);
+
+                      return (
+                        <TableRow
+                          key={member.user_id}
+                          className="cursor-pointer hover:bg-muted/50"
+                          onClick={() => setSelectedMember(member)}
+                        >
+                          <TableCell className="sticky left-0 z-10 min-w-36 bg-card whitespace-normal shadow-[4px_0_8px_-4px_rgba(0,0,0,0.08)]">
+                            <div className="flex items-center gap-2 sm:gap-3">
+                              <Avatar size="sm" className="shrink-0">
+                                <AvatarFallback>
+                                  {memberInitials(member.name)}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="min-w-0">
+                                <p className="truncate font-medium">
+                                  {member.name}
+                                </p>
+                                <p className="hidden truncate text-xs text-muted-foreground sm:block">
+                                  {member.email}
+                                </p>
+                              </div>
+                            </div>
+                          </TableCell>
+                          {hasScores && (
+                            <TableCell className="text-right">
+                              {score ? (
+                                <div className="flex flex-col items-end gap-1">
+                                  <span className="font-semibold tabular-nums">
+                                    {formatRatio(score.predicted_score)}
+                                  </span>
+                                  <Badge
+                                    variant={contributorTierBadgeVariant(
+                                      score.contributor_tier
+                                    )}
+                                    className="text-[10px]"
+                                  >
+                                    {contributorTierLabel(score.contributor_tier)}
+                                  </Badge>
+                                </div>
+                              ) : (
+                                "—"
+                              )}
+                            </TableCell>
+                          )}
+                          {hasOutlierInsights && (
+                            <TableCell>
+                              {score?.outlier ? (
+                                <div className="flex flex-col gap-1">
+                                  <Badge
+                                    variant={outlierBadgeVariant(
+                                      score.outlier.outlier_type,
+                                      score.outlier.is_outlier
+                                    )}
+                                    className="w-fit text-[10px]"
+                                  >
+                                    {outlierTypeLabel(score.outlier.outlier_type)}
+                                  </Badge>
+                                  {score.outlier.is_outlier && (
+                                    <span className="text-[11px] tabular-nums text-muted-foreground">
+                                      {score.outlier.anomaly_score.toFixed(2)}
+                                    </span>
+                                  )}
+                                </div>
+                              ) : (
+                                "—"
+                              )}
+                            </TableCell>
+                          )}
+                          <TableCell className="text-right tabular-nums">
+                            {gh?.total_commits ?? "—"}
+                          </TableCell>
+                          <TableCell className="hidden text-right tabular-nums md:table-cell">
+                            {gh?.lines_changed ?? "—"}
+                          </TableCell>
+                          <TableCell className="hidden text-right tabular-nums lg:table-cell">
+                            {gh ? `${gh.prs_created}/${gh.prs_reviewed}` : "—"}
+                          </TableCell>
+                          <TableCell className="hidden text-right tabular-nums lg:table-cell">
+                            {docs?.edits ?? "—"}
+                          </TableCell>
+                          <TableCell className="hidden text-right tabular-nums xl:table-cell">
+                            {totalComments || "—"}
+                          </TableCell>
+                          {hasMeetingEngagement && (
+                            <>
+                              <TableCell className="text-right tabular-nums">
+                                {meeting
+                                  ? formatRatio(meeting.attendance_ratio)
+                                  : "—"}
+                              </TableCell>
+                              <TableCell className="hidden text-right tabular-nums md:table-cell">
+                                {meeting
+                                  ? formatRatio(meeting.speaking_ratio)
+                                  : "—"}
+                              </TableCell>
+                              <TableCell className="hidden text-right tabular-nums lg:table-cell">
+                                {meeting
+                                  ? formatRatio(meeting.chat_participation)
+                                  : "—"}
+                              </TableCell>
+                            </>
+                          )}
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           )}
 
           <p className="mt-4 text-xs text-muted-foreground">

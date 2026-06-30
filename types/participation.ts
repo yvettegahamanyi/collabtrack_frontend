@@ -83,6 +83,18 @@ export type GroupReposResponse = ApiResponse<GroupGithubRepo[]>;
 export type GroupDocumentsResponse = ApiResponse<GroupGoogleDoc[]>;
 export type SyncGroupResponse = ApiResponse<SyncGroupData>;
 
+export interface OutlierDetection {
+  is_outlier: boolean;
+  anomaly_score: number;
+  outlier_type: "typical" | "free_rider" | "over_contributor" | "unusual_profile" | string;
+}
+
+export interface TeamArchetype {
+  cluster_id: number;
+  archetype: string;
+  archetype_label: string;
+}
+
 export interface ParticipationScore {
   user_id: string;
   name: string | null;
@@ -90,6 +102,7 @@ export interface ParticipationScore {
   contributor_tier: "strong" | "average" | "below" | string;
   features: Record<string, number>;
   generated_at: string;
+  outlier?: OutlierDetection | null;
 }
 
 export interface ParticipationScoresSummary {
@@ -97,6 +110,7 @@ export interface ParticipationScoresSummary {
   generated_at: string;
   scores: ParticipationScore[];
   warnings?: string[];
+  team_archetype?: TeamArchetype | null;
 }
 
 export type ParticipationScoresResponse = ApiResponse<ParticipationScoresSummary>;

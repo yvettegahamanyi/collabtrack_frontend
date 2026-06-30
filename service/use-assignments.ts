@@ -44,6 +44,7 @@ export function useCreateAssignment(classId: string) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.assignments.list(classId),
       });
+      queryClient.invalidateQueries({ queryKey: queryKeys.instructor.all });
     },
   });
 }
@@ -63,6 +64,7 @@ export function useUpdateAssignment(assignmentId: string, classId?: string) {
           queryKey: queryKeys.classes.detail(classId),
         });
       }
+      queryClient.invalidateQueries({ queryKey: queryKeys.instructor.all });
     },
   });
 }
@@ -80,6 +82,7 @@ export function useDeleteAssignment(classId: string) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.assignments.list(classId),
       });
+      queryClient.invalidateQueries({ queryKey: queryKeys.instructor.all });
     },
   });
 }

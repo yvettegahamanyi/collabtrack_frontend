@@ -46,6 +46,7 @@ export function useCreateReport(assignmentId: string) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.assignments.detail(assignmentId),
       });
+      queryClient.invalidateQueries({ queryKey: queryKeys.instructor.all });
     },
   });
 }

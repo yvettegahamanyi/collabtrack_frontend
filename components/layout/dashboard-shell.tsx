@@ -98,7 +98,7 @@ export function DashboardShell({ role, children }: DashboardShellProps) {
         </nav>
       </aside>
 
-      <div className="flex h-svh min-h-0 flex-1 flex-col md:ml-64">
+      <div className="flex h-svh min-h-0 min-w-0 flex-1 flex-col md:ml-64">
         <header className="flex h-16 shrink-0 items-center justify-between gap-3 border-b bg-background px-4 sm:px-6">
           <span className="md:hidden">
             <Image
@@ -123,7 +123,9 @@ export function DashboardShell({ role, children }: DashboardShellProps) {
             <UserMenu />
           </div>
         </header>
-        <main className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">{children}</main>
+        <main className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-6 lg:p-8">
+          {children}
+        </main>
       </div>
     </div>
   );

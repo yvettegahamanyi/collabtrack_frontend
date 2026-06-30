@@ -31,6 +31,10 @@ export const queryKeys = {
     detail: (assignmentId: string, groupId: string) =>
       ["reports", "detail", assignmentId, groupId] as const,
   },
+  instructor: {
+    all: ["instructor"] as const,
+    dashboard: () => ["instructor", "dashboard"] as const,
+  },
   projects: {
     all: ["projects"] as const,
     detail: (id: string) => ["projects", "detail", id] as const,

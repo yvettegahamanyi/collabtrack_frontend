@@ -26,6 +26,7 @@ export function useCreateClass() {
       classesService.createClass(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.classes.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.instructor.all });
     },
   });
 }
@@ -40,6 +41,7 @@ export function useUpdateClass(classId: string) {
       queryClient.invalidateQueries({
         queryKey: queryKeys.classes.detail(classId),
       });
+      queryClient.invalidateQueries({ queryKey: queryKeys.instructor.all });
     },
   });
 }
@@ -50,6 +52,7 @@ export function useDeleteClass() {
     mutationFn: (classId: string) => classesService.deleteClass(classId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.classes.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.instructor.all });
     },
   });
 }
