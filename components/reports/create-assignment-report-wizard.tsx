@@ -25,7 +25,10 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { useCreateReport, usePreviewAttendance } from "@/service/use-reports";
 import type { ApiError } from "@/types";
-import type { AttendanceMemberPreview, MeetingInputMeta } from "@/types/reports";
+import type {
+  AttendanceMemberPreview,
+  MeetingInputMeta,
+} from "@/types/reports";
 
 interface CreateAssignmentReportWizardProps {
   assignmentId: string;
@@ -86,7 +89,7 @@ export function CreateAssignmentReportWizard({
   const [members, setMembers] = useState<AttendanceMemberPreview[]>([]);
   const [githubUrls, setGithubUrls] = useState<string[]>([""]);
   const [docUrls, setDocUrls] = useState<string[]>([""]);
-  const [meetings, setMeetings] = useState<MeetingDraft[]>([createMeetingDraft()]);
+  const [meetings, setMeetings] = useState<MeetingDraft[]>([]);
   const [nextGroupLabel, setNextGroupLabel] = useState("Group N");
 
   const pending = previewAttendance.isPending || createReport.isPending;
@@ -97,7 +100,7 @@ export function CreateAssignmentReportWizard({
     setMembers([]);
     setGithubUrls([""]);
     setDocUrls([""]);
-    setMeetings([createMeetingDraft()]);
+    setMeetings([]);
     setNextGroupLabel("Group N");
   };
 
@@ -138,7 +141,9 @@ export function CreateAssignmentReportWizard({
     try {
       const response = await previewAttendance.mutateAsync(file);
       setMembers(response.data.members);
-      setNextGroupLabel(`Group ${response.data.members.length > 0 ? "N" : "?"}`);
+      setNextGroupLabel(
+        `Group ${response.data.members.length > 0 ? "N" : "?"}`
+      );
     } catch (error) {
       const apiError = error as ApiError;
       toast.error(apiError.message ?? "Could not parse attendance file");
@@ -153,7 +158,9 @@ export function CreateAssignmentReportWizard({
         return false;
       }
       if (members.length === 0) {
-        toast.error("Upload a valid attendance CSV with Name, Email, Duration_Minutes, Facilitator");
+        toast.error(
+          "Upload a valid attendance CSV with Name, Email, Duration_Minutes, Facilitator"
+        );
         return false;
       }
       return true;
@@ -170,10 +177,6 @@ export function CreateAssignmentReportWizard({
     }
 
     if (currentStep === 3) {
-      if (meetings.length === 0) {
-        toast.error("At least one meeting is required");
-        return false;
-      }
       for (const [index, meeting] of meetings.entries()) {
         if (!meeting.session_label.trim()) {
           toast.error(`Meeting ${index + 1}: session label is required`);
@@ -188,15 +191,24 @@ export function CreateAssignmentReportWizard({
           toast.error(`Meeting ${index + 1}: duration must be greater than 0`);
           return false;
         }
-        if (!meeting.attendance_file || !validateExtension(meeting.attendance_file, ".csv")) {
+        if (
+          !meeting.attendance_file ||
+          !validateExtension(meeting.attendance_file, ".csv")
+        ) {
           toast.error(`Meeting ${index + 1}: attendance .csv is required`);
           return false;
         }
-        if (!meeting.transcript_file || !validateExtension(meeting.transcript_file, ".txt")) {
+        if (
+          !meeting.transcript_file ||
+          !validateExtension(meeting.transcript_file, ".txt")
+        ) {
           toast.error(`Meeting ${index + 1}: transcript .txt is required`);
           return false;
         }
-        if (!meeting.chat_file || !validateExtension(meeting.chat_file, ".txt")) {
+        if (
+          !meeting.chat_file ||
+          !validateExtension(meeting.chat_file, ".txt")
+        ) {
           toast.error(`Meeting ${index + 1}: chat .txt is required`);
           return false;
         }
@@ -289,11 +301,11 @@ export function CreateAssignmentReportWizard({
           </div>
           <div className="space-y-1.5">
             <DialogTitle className="text-lg font-semibold text-primary">
-              Create Assignment Report
+              Create Group Report
             </DialogTitle>
             <DialogDescription className="text-sm leading-relaxed">
               Upload attendance to auto-create the next group, link resources,
-              and add meeting sessions for contribution analysis.
+              and optionally add meeting sessions for engagement analysis.
             </DialogDescription>
           </div>
         </DialogHeader>
@@ -308,8 +320,8 @@ export function CreateAssignmentReportWizard({
                   step === item.id
                     ? "bg-primary text-primary-foreground"
                     : step > item.id
-                      ? "bg-primary/10 text-primary"
-                      : "bg-muted text-muted-foreground"
+                    ? "bg-primary/10 text-primary"
+                    : "bg-muted text-muted-foreground"
                 )}
               >
                 {item.id}. {item.label}
@@ -346,13 +358,19 @@ export function CreateAssignmentReportWizard({
               {members.length > 0 && (
                 <div className="rounded-xl border">
                   <div className="border-b px-4 py-2 text-sm font-medium">
-                    {members.length} member{members.length === 1 ? "" : "s"} detected
+                    {members.length} member{members.length === 1 ? "" : "s"}{" "}
+                    detected
                   </div>
                   <ul className="max-h-48 divide-y overflow-y-auto text-sm">
                     {members.map((member) => (
-                      <li key={member.email} className="flex justify-between px-4 py-2">
+                      <li
+                        key={member.email}
+                        className="flex justify-between px-4 py-2"
+                      >
                         <span>{member.name}</span>
-                        <span className="text-muted-foreground">{member.email}</span>
+                        <span className="text-muted-foreground">
+                          {member.email}
+                        </span>
                       </li>
                     ))}
                   </ul>
@@ -400,8 +418,10 @@ export function CreateAssignmentReportWizard({
                 <div className="flex items-start gap-3">
                   <VideoIcon className="mt-0.5 size-4 shrink-0 text-primary" />
                   <p>
-                    Add at least one meeting session with attendance, transcript,
-                    and chat files. Meeting attendance also drives engagement metrics.
+                    Optionally add meeting sessions with attendance, transcript,
+                    and chat files. Skip this step if you have no meeting data —
+                    the report will still be generated from GitHub and Google Docs
+                    activity.
                   </p>
                 </div>
               </div>
@@ -413,21 +433,19 @@ export function CreateAssignmentReportWizard({
                 >
                   <div className="flex items-center justify-between">
                     <p className="text-sm font-medium">Meeting {index + 1}</p>
-                    {meetings.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() =>
-                          setMeetings((current) =>
-                            current.filter((item) => item.id !== meeting.id)
-                          )
-                        }
-                        disabled={pending}
-                      >
-                        <TrashIcon className="size-4 text-destructive" />
-                      </Button>
-                    )}
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() =>
+                        setMeetings((current) =>
+                          current.filter((item) => item.id !== meeting.id)
+                        )
+                      }
+                      disabled={pending}
+                    >
+                      <TrashIcon className="size-4 text-destructive" />
+                    </Button>
                   </div>
                   <div className="space-y-2">
                     <Label className={fieldLabelClass}>Session label</Label>
@@ -436,7 +454,11 @@ export function CreateAssignmentReportWizard({
                       className={fieldInputClass}
                       value={meeting.session_label}
                       onChange={(e) =>
-                        updateMeeting(meeting.id, "session_label", e.target.value)
+                        updateMeeting(
+                          meeting.id,
+                          "session_label",
+                          e.target.value
+                        )
                       }
                       disabled={pending}
                     />
@@ -449,13 +471,19 @@ export function CreateAssignmentReportWizard({
                         className={fieldInputClass}
                         value={meeting.session_date}
                         onChange={(e) =>
-                          updateMeeting(meeting.id, "session_date", e.target.value)
+                          updateMeeting(
+                            meeting.id,
+                            "session_date",
+                            e.target.value
+                          )
                         }
                         disabled={pending}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label className={fieldLabelClass}>Duration (minutes)</Label>
+                      <Label className={fieldLabelClass}>
+                        Duration (minutes)
+                      </Label>
                       <Input
                         type="number"
                         min={1}
@@ -497,7 +525,9 @@ export function CreateAssignmentReportWizard({
                     label="Chat export (.txt)"
                     accept=".txt"
                     file={meeting.chat_file}
-                    onChange={(file) => updateMeeting(meeting.id, "chat_file", file)}
+                    onChange={(file) =>
+                      updateMeeting(meeting.id, "chat_file", file)
+                    }
                     disabled={pending}
                   />
                 </div>
@@ -520,7 +550,10 @@ export function CreateAssignmentReportWizard({
 
           {step === 4 && (
             <div className="space-y-4 text-sm">
-              <ReviewRow label="Members" value={`${members.length} from attendance`} />
+              <ReviewRow
+                label="Members"
+                value={`${members.length} from attendance`}
+              />
               <ReviewRow
                 label="GitHub links"
                 value={`${githubUrls.filter((u) => u.trim()).length} linked`}
@@ -531,11 +564,19 @@ export function CreateAssignmentReportWizard({
               />
               <ReviewRow
                 label="Meetings"
-                value={`${meetings.length} session${meetings.length === 1 ? "" : "s"}`}
+                value={
+                  meetings.length === 0
+                    ? "None (optional)"
+                    : `${meetings.length} session${
+                        meetings.length === 1 ? "" : "s"
+                      }`
+                }
               />
               <p className="text-xs text-muted-foreground">
-                Submitting will create the next auto-named group, provision members,
-                sync GitHub/Docs data, process meetings, and email the supervisor when ready.
+                Submitting will create the next auto-named group, provision
+                members, sync GitHub/Docs data
+                {meetings.length > 0 ? ", process meetings," : ","} and email
+                the supervisor when ready.
               </p>
             </div>
           )}
@@ -546,14 +587,20 @@ export function CreateAssignmentReportWizard({
             type="button"
             variant="outline"
             className="h-10 min-w-24"
-            onClick={step === 1 ? () => onOpenChange(false) : () => setStep(step - 1)}
+            onClick={
+              step === 1 ? () => onOpenChange(false) : () => setStep(step - 1)
+            }
             disabled={pending}
           >
             {step === 1 ? "Cancel" : "Back"}
           </Button>
 
           {step < STEPS.length ? (
-            <Button type="button" className="h-10 min-w-28" onClick={handleNext}>
+            <Button
+              type="button"
+              className="h-10 min-w-28"
+              onClick={handleNext}
+            >
               Continue
             </Button>
           ) : (
@@ -594,7 +641,13 @@ function UrlListSection({
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <Label className={fieldLabelClass}>{label}</Label>
-        <Button type="button" variant="outline" size="sm" onClick={onAdd} disabled={disabled}>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={onAdd}
+          disabled={disabled}
+        >
           <PlusIcon />
           Add
         </Button>
