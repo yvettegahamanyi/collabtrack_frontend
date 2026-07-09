@@ -1,5 +1,5 @@
-import type { AssignmentStatus, Group } from "@/types/groups";
 import type { User } from "@/types";
+import type { AssignmentStatus, Group } from "@/types/groups";
 
 export function canManageGroupResources(
   user: Pick<User, "id" | "role"> | null | undefined,
@@ -82,9 +82,9 @@ export function teamArchetypeDescription(archetype: string): string {
     case "one_dominant_contributor":
       return "One member carries most of the workload — high variance across the team.";
     case "uniformly_disengaged":
-      return "Low activity across all collaboration channels.";
+      return "Some members are not participating in the group.";
     case "high_performing_cohesive":
-      return "Strong, balanced participation with low variance between members.";
+      return "Members are actively participating in the group.";
     default:
       return "Team collaboration pattern identified from aggregated member features.";
   }
@@ -157,10 +157,7 @@ export function memberInitials(name: string): string {
     .toUpperCase();
 }
 
-export function mergeGroupWithMembers(
-  detail: Group,
-  listItem?: Group
-): Group {
+export function mergeGroupWithMembers(detail: Group, listItem?: Group): Group {
   return {
     ...detail,
     members: listItem?.members ?? detail.members,

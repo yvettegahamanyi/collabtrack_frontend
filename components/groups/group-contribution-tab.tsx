@@ -257,17 +257,20 @@ export function GroupContributionTab({
               <span className="sm:hidden">Generate score</span>
             </Button>
           )}
-          <Button
-            className="flex-1 sm:flex-none"
-            variant="outline"
-            onClick={handleSync}
-            disabled={syncGroup.isPending}
-          >
-            <RefreshCwIcon
-              className={syncGroup.isPending ? "animate-spin" : undefined}
-            />
-            Sync
-          </Button>
+          {/* if account role is instructor don't show the sync button */}
+          {user?.role !== "instructor" && (
+            <Button
+              className="flex-1 sm:flex-none"
+              variant="outline"
+              onClick={handleSync}
+              disabled={syncGroup.isPending}
+            >
+              <RefreshCwIcon
+                className={syncGroup.isPending ? "animate-spin" : undefined}
+              />
+              Sync
+            </Button>
+          )}
           <Button
             className="flex-1 sm:flex-none"
             variant="outline"

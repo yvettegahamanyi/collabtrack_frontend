@@ -33,18 +33,19 @@ export function TeamArchetypeCard({
             {teamArchetype.archetype_label}
           </Badge>
           <span className="text-xs text-muted-foreground">
-            Cluster {teamArchetype.cluster_id}
-            {memberCount !== undefined ? ` · ${memberCount} members analyzed` : ""}
+            {memberCount !== undefined
+              ? ` ${memberCount} members analyzed`
+              : ""}
           </span>
         </div>
         <p className="text-sm text-muted-foreground">
           {teamArchetypeDescription(teamArchetype.archetype)}
         </p>
-        <p className="text-xs text-muted-foreground">
+        {/* <p className="text-xs text-muted-foreground">
           Based on group-level mean and variance of participation features across
           all members — a program-level view distinct from individual benchmark
           scores.
-        </p>
+        </p> */}
       </CardContent>
     </Card>
   );
