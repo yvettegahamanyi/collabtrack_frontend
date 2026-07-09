@@ -16,8 +16,8 @@ export interface MeetingSession {
   id: string;
   group_id: string;
   session_label: string;
-  session_date: string;
-  duration_minutes: number;
+  session_date: string | null;
+  duration_minutes: number | null;
   status: MeetingSessionStatus;
   uploaded_at: string | null;
   processed_at: string | null;

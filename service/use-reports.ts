@@ -27,10 +27,10 @@ export function useReport(assignmentId: string, groupId: string) {
   });
 }
 
-export function usePreviewAttendance(assignmentId: string) {
+export function usePreviewMembers(assignmentId: string) {
   return useMutation({
     mutationFn: (file: File) =>
-      reportsService.previewAttendance(assignmentId, file),
+      reportsService.previewMembers(assignmentId, file),
   });
 }
 

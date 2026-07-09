@@ -1,32 +1,32 @@
 import { api } from "@/lib/api-client";
 import type {
-  AttendancePreviewResponse,
   CreateReportPayload,
   CreateReportResponse,
+  MembersPreviewResponse,
   ReportDetailResponse,
   ReportsResponse,
 } from "@/types/reports";
 
-export function previewAttendance(assignmentId: string, attendanceFile: File) {
+export function previewMembers(assignmentId: string, membersFile: File) {
   const form = new FormData();
-  form.append("attendance_file", attendanceFile);
-  return api.postForm<AttendancePreviewResponse>(
-    `/assignments/${assignmentId}/reports/preview-attendance`,
+  form.append("members_file", membersFile);
+  return api.postForm<MembersPreviewResponse>(
+    `/assignments/${assignmentId}/reports/preview-members`,
     form
   );
 }
 
 export function createReport(assignmentId: string, payload: CreateReportPayload) {
   const form = new FormData();
-  form.append("attendance_file", payload.attendance_file);
+  form.append("members", JSON.stringify(payload.members));
   form.append("github_urls", JSON.stringify(payload.github_urls));
   form.append("google_doc_urls", JSON.stringify(payload.google_doc_urls));
-  form.append("meetings", JSON.stringify(payload.meetings));
 
   payload.meeting_files.forEach((files, index) => {
-    form.append(`meeting_${index}_attendance`, files.attendance);
     form.append(`meeting_${index}_transcript`, files.transcript);
-    form.append(`meeting_${index}_chat`, files.chat);
+    if (files.chat) {
+      form.append(`meeting_${index}_chat`, files.chat);
+    }
   });
 
   return api.postForm<CreateReportResponse>(

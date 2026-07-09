@@ -23,12 +23,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import { useCreateReport, usePreviewAttendance } from "@/service/use-reports";
+import { useCreateReport, usePreviewMembers } from "@/service/use-reports";
 import type { ApiError } from "@/types";
-import type {
-  AttendanceMemberPreview,
-  MeetingInputMeta,
-} from "@/types/reports";
+import type { MemberInput } from "@/types/reports";
 
 interface CreateAssignmentReportWizardProps {
   assignmentId: string;
@@ -37,38 +34,38 @@ interface CreateAssignmentReportWizardProps {
   onCreated: (groupId: string) => void;
 }
 
+interface MemberDraft {
+  id: string;
+  name: string;
+  email: string;
+}
+
 interface MeetingDraft {
   id: string;
-  session_label: string;
-  session_date: string;
-  duration_minutes: string;
-  attendance_file: File | null;
   transcript_file: File | null;
   chat_file: File | null;
 }
 
 const STEPS = [
-  { id: 1, label: "Attendance" },
+  { id: 1, label: "Members" },
   { id: 2, label: "Resources" },
   { id: 3, label: "Meetings" },
   { id: 4, label: "Review" },
 ] as const;
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 const fieldLabelClass =
   "text-xs font-semibold tracking-wide text-muted-foreground uppercase";
 
 const fieldInputClass = "h-11 bg-muted/50";
 
+function createMemberDraft(name = "", email = ""): MemberDraft {
+  return { id: crypto.randomUUID(), name, email };
+}
+
 function createMeetingDraft(): MeetingDraft {
-  return {
-    id: crypto.randomUUID(),
-    session_label: "",
-    session_date: "",
-    duration_minutes: "",
-    attendance_file: null,
-    transcript_file: null,
-    chat_file: null,
-  };
+  return { id: crypto.randomUUID(), transcript_file: null, chat_file: null };
 }
 
 function validateExtension(file: File, ext: string) {
@@ -81,27 +78,23 @@ export function CreateAssignmentReportWizard({
   onOpenChange,
   onCreated,
 }: CreateAssignmentReportWizardProps) {
-  const previewAttendance = usePreviewAttendance(assignmentId);
+  const previewMembers = usePreviewMembers(assignmentId);
   const createReport = useCreateReport(assignmentId);
 
   const [step, setStep] = useState(1);
-  const [attendanceFile, setAttendanceFile] = useState<File | null>(null);
-  const [members, setMembers] = useState<AttendanceMemberPreview[]>([]);
+  const [members, setMembers] = useState<MemberDraft[]>([createMemberDraft()]);
   const [githubUrls, setGithubUrls] = useState<string[]>([""]);
   const [docUrls, setDocUrls] = useState<string[]>([""]);
   const [meetings, setMeetings] = useState<MeetingDraft[]>([]);
-  const [nextGroupLabel, setNextGroupLabel] = useState("Group N");
 
-  const pending = previewAttendance.isPending || createReport.isPending;
+  const pending = previewMembers.isPending || createReport.isPending;
 
   const reset = () => {
     setStep(1);
-    setAttendanceFile(null);
-    setMembers([]);
+    setMembers([createMemberDraft()]);
     setGithubUrls([""]);
     setDocUrls([""]);
     setMeetings([]);
-    setNextGroupLabel("Group N");
   };
 
   const updateUrlList = (
@@ -125,10 +118,87 @@ export function CreateAssignmentReportWizard({
     setUrls(urls.length === 1 ? [""] : urls.filter((_, i) => i !== index));
   };
 
+  const updateMember = (
+    id: string,
+    field: "name" | "email",
+    value: string
+  ) => {
+    setMembers((current) =>
+      current.map((member) =>
+        member.id === id ? { ...member, [field]: value } : member
+      )
+    );
+  };
+
+  const removeMember = (id: string) => {
+    setMembers((current) =>
+      current.length === 1
+        ? [createMemberDraft()]
+        : current.filter((member) => member.id !== id)
+    );
+  };
+
+  const importMembersFile = async (file: File) => {
+    try {
+      const response = await previewMembers.mutateAsync(file);
+      const imported = response.data.members;
+      setMembers((current) => {
+        const existingEmails = new Set(
+          current
+            .map((member) => member.email.trim().toLowerCase())
+            .filter(Boolean)
+        );
+        const newRows = imported
+          .filter(
+            (member) => !existingEmails.has(member.email.trim().toLowerCase())
+          )
+          .map((member) => createMemberDraft(member.name, member.email));
+        const kept = current.filter(
+          (member) => member.name.trim() || member.email.trim()
+        );
+        return [...kept, ...newRows];
+      });
+      toast.success(
+        `Imported ${imported.length} member${imported.length === 1 ? "" : "s"}`
+      );
+    } catch (error) {
+      const apiError = error as ApiError;
+      toast.error(apiError.message ?? "Could not parse the member list file");
+    }
+  };
+
+  const collectMembers = (): MemberInput[] | null => {
+    const filled = members.filter(
+      (member) => member.name.trim() || member.email.trim()
+    );
+    if (filled.length === 0) {
+      toast.error("Add at least one group member");
+      return null;
+    }
+    const result: MemberInput[] = [];
+    const seen = new Set<string>();
+    for (const [index, member] of filled.entries()) {
+      const name = member.name.trim();
+      const email = member.email.trim().toLowerCase();
+      if (!name) {
+        toast.error(`Member ${index + 1}: name is required`);
+        return null;
+      }
+      if (!EMAIL_PATTERN.test(email)) {
+        toast.error(`Member ${index + 1}: enter a valid email`);
+        return null;
+      }
+      if (seen.has(email)) continue;
+      seen.add(email);
+      result.push({ name, email });
+    }
+    return result;
+  };
+
   const updateMeeting = (
     id: string,
-    field: keyof Omit<MeetingDraft, "id">,
-    value: string | File | null
+    field: "transcript_file" | "chat_file",
+    value: File | null
   ) => {
     setMeetings((current) =>
       current.map((meeting) =>
@@ -137,33 +207,9 @@ export function CreateAssignmentReportWizard({
     );
   };
 
-  const parseAttendance = async (file: File) => {
-    try {
-      const response = await previewAttendance.mutateAsync(file);
-      setMembers(response.data.members);
-      setNextGroupLabel(
-        `Group ${response.data.members.length > 0 ? "N" : "?"}`
-      );
-    } catch (error) {
-      const apiError = error as ApiError;
-      toast.error(apiError.message ?? "Could not parse attendance file");
-      setMembers([]);
-    }
-  };
-
   const validateStep = (currentStep: number) => {
     if (currentStep === 1) {
-      if (!attendanceFile) {
-        toast.error("Attendance file is required");
-        return false;
-      }
-      if (members.length === 0) {
-        toast.error(
-          "Upload a valid attendance CSV with Name, Email, Duration_Minutes, Facilitator"
-        );
-        return false;
-      }
-      return true;
+      return collectMembers() !== null;
     }
 
     if (currentStep === 2) {
@@ -178,26 +224,6 @@ export function CreateAssignmentReportWizard({
 
     if (currentStep === 3) {
       for (const [index, meeting] of meetings.entries()) {
-        if (!meeting.session_label.trim()) {
-          toast.error(`Meeting ${index + 1}: session label is required`);
-          return false;
-        }
-        if (!meeting.session_date) {
-          toast.error(`Meeting ${index + 1}: session date is required`);
-          return false;
-        }
-        const duration = Number(meeting.duration_minutes);
-        if (!duration || duration <= 0) {
-          toast.error(`Meeting ${index + 1}: duration must be greater than 0`);
-          return false;
-        }
-        if (
-          !meeting.attendance_file ||
-          !validateExtension(meeting.attendance_file, ".csv")
-        ) {
-          toast.error(`Meeting ${index + 1}: attendance .csv is required`);
-          return false;
-        }
         if (
           !meeting.transcript_file ||
           !validateExtension(meeting.transcript_file, ".txt")
@@ -205,11 +231,8 @@ export function CreateAssignmentReportWizard({
           toast.error(`Meeting ${index + 1}: transcript .txt is required`);
           return false;
         }
-        if (
-          !meeting.chat_file ||
-          !validateExtension(meeting.chat_file, ".txt")
-        ) {
-          toast.error(`Meeting ${index + 1}: chat .txt is required`);
+        if (meeting.chat_file && !validateExtension(meeting.chat_file, ".txt")) {
+          toast.error(`Meeting ${index + 1}: chat file must be a .txt`);
           return false;
         }
       }
@@ -219,59 +242,26 @@ export function CreateAssignmentReportWizard({
     return true;
   };
 
-  const handleNext = async () => {
-    if (step === 1) {
-      if (!attendanceFile) {
-        toast.error("Attendance file is required");
-        return;
-      }
-      let parsedMembers = members;
-      if (parsedMembers.length === 0) {
-        try {
-          const response = await previewAttendance.mutateAsync(attendanceFile);
-          parsedMembers = response.data.members;
-          setMembers(parsedMembers);
-        } catch (error) {
-          const apiError = error as ApiError;
-          toast.error(apiError.message ?? "Could not parse attendance file");
-          return;
-        }
-      }
-      if (parsedMembers.length === 0) {
-        toast.error(
-          "Upload a valid attendance CSV with Name, Email, Duration_Minutes, Facilitator"
-        );
-        return;
-      }
-      setStep(2);
-      return;
-    }
-
+  const handleNext = () => {
     if (!validateStep(step)) return;
     setStep((current) => Math.min(current + 1, STEPS.length));
   };
 
   const handleSubmit = async () => {
-    if (!validateStep(4) || !attendanceFile) return;
+    const memberInputs = collectMembers();
+    if (!memberInputs || !validateStep(2) || !validateStep(3)) return;
 
     const github = githubUrls.map((u) => u.trim()).filter(Boolean);
     const docs = docUrls.map((u) => u.trim()).filter(Boolean);
-    const meetingsMeta: MeetingInputMeta[] = meetings.map((meeting) => ({
-      session_label: meeting.session_label.trim(),
-      session_date: meeting.session_date,
-      duration_minutes: Number(meeting.duration_minutes),
-    }));
 
     try {
       const response = await createReport.mutateAsync({
-        attendance_file: attendanceFile,
+        members: memberInputs,
         github_urls: github,
         google_doc_urls: docs,
-        meetings: meetingsMeta,
         meeting_files: meetings.map((meeting) => ({
-          attendance: meeting.attendance_file!,
           transcript: meeting.transcript_file!,
-          chat: meeting.chat_file!,
+          chat: meeting.chat_file,
         })),
       });
       toast.success(
@@ -285,6 +275,10 @@ export function CreateAssignmentReportWizard({
       toast.error(apiError.message ?? "Failed to create report");
     }
   };
+
+  const memberCount = members.filter(
+    (member) => member.name.trim() && member.email.trim()
+  ).length;
 
   return (
     <Dialog
@@ -304,8 +298,8 @@ export function CreateAssignmentReportWizard({
               Create Group Report
             </DialogTitle>
             <DialogDescription className="text-sm leading-relaxed">
-              Upload attendance to auto-create the next group, link resources,
-              and optionally add meeting sessions for engagement analysis.
+              Add the group members, link resources, and optionally add meeting
+              transcripts for engagement analysis.
             </DialogDescription>
           </div>
         </DialogHeader>
@@ -332,51 +326,93 @@ export function CreateAssignmentReportWizard({
 
         <div className="max-h-[60vh] space-y-5 overflow-y-auto px-6 py-6">
           {step === 1 && (
-            <>
+            <div className="space-y-5">
               <div className="rounded-xl border bg-muted/20 p-4 text-sm text-muted-foreground">
                 <div className="flex items-start gap-3">
                   <UsersIcon className="mt-0.5 size-4 shrink-0 text-primary" />
                   <p>
-                    Upload an attendance CSV with columns: Name, Email,
-                    Duration_Minutes, Facilitator. Members will be provisioned
-                    automatically and the group will be named {nextGroupLabel}.
+                    Add group members manually, or import them from a file with
+                    names and emails (.csv with Name/Email columns, or a .txt
+                    with one member per line).
                   </p>
                 </div>
               </div>
-              <MeetingFilePicker
-                id="report-attendance"
-                label="Attendance list (.csv)"
-                accept=".csv"
-                file={attendanceFile}
-                onChange={async (file) => {
-                  setAttendanceFile(file);
-                  setMembers([]);
-                  if (file) await parseAttendance(file);
-                }}
-                disabled={pending}
-              />
-              {members.length > 0 && (
-                <div className="rounded-xl border">
-                  <div className="border-b px-4 py-2 text-sm font-medium">
-                    {members.length} member{members.length === 1 ? "" : "s"}{" "}
-                    detected
-                  </div>
-                  <ul className="max-h-48 divide-y overflow-y-auto text-sm">
-                    {members.map((member) => (
-                      <li
-                        key={member.email}
-                        className="flex justify-between px-4 py-2"
-                      >
-                        <span>{member.name}</span>
-                        <span className="text-muted-foreground">
-                          {member.email}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
+
+              <div className="space-y-2">
+                <Label htmlFor="report-members-file" className={fieldLabelClass}>
+                  Import from file (optional)
+                </Label>
+                <Input
+                  id="report-members-file"
+                  type="file"
+                  accept=".csv,.txt"
+                  className={fieldInputClass}
+                  disabled={pending}
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0] ?? null;
+                    if (file) await importMembersFile(file);
+                    e.target.value = "";
+                  }}
+                />
+                {previewMembers.isPending && (
+                  <p className="text-xs text-muted-foreground">
+                    Parsing member list…
+                  </p>
+                )}
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label className={fieldLabelClass}>
+                    Members{memberCount > 0 ? ` (${memberCount})` : ""}
+                  </Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setMembers((current) => [...current, createMemberDraft()])
+                    }
+                    disabled={pending}
+                  >
+                    <PlusIcon />
+                    Add member
+                  </Button>
                 </div>
-              )}
-            </>
+                {members.map((member) => (
+                  <div key={member.id} className="flex gap-2">
+                    <Input
+                      placeholder="Full name"
+                      className={fieldInputClass}
+                      value={member.name}
+                      onChange={(e) =>
+                        updateMember(member.id, "name", e.target.value)
+                      }
+                      disabled={pending}
+                    />
+                    <Input
+                      type="email"
+                      placeholder="email@example.com"
+                      className={fieldInputClass}
+                      value={member.email}
+                      onChange={(e) =>
+                        updateMember(member.id, "email", e.target.value)
+                      }
+                      disabled={pending}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeMember(member.id)}
+                      disabled={pending}
+                    >
+                      <TrashIcon className="size-4 text-destructive" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
 
           {step === 2 && (
@@ -418,10 +454,10 @@ export function CreateAssignmentReportWizard({
                 <div className="flex items-start gap-3">
                   <VideoIcon className="mt-0.5 size-4 shrink-0 text-primary" />
                   <p>
-                    Optionally add meeting sessions with attendance, transcript,
-                    and chat files. Skip this step if you have no meeting data —
-                    the report will still be generated from GitHub and Google Docs
-                    activity.
+                    Optionally add meetings by uploading each meeting&apos;s
+                    transcript.txt and chat.txt. Attendance and duration are
+                    detected automatically from who spoke or chatted. Skip this
+                    step if you have no meeting data.
                   </p>
                 </div>
               </div>
@@ -447,69 +483,6 @@ export function CreateAssignmentReportWizard({
                       <TrashIcon className="size-4 text-destructive" />
                     </Button>
                   </div>
-                  <div className="space-y-2">
-                    <Label className={fieldLabelClass}>Session label</Label>
-                    <Input
-                      placeholder="e.g. Sprint 1 Review"
-                      className={fieldInputClass}
-                      value={meeting.session_label}
-                      onChange={(e) =>
-                        updateMeeting(
-                          meeting.id,
-                          "session_label",
-                          e.target.value
-                        )
-                      }
-                      disabled={pending}
-                    />
-                  </div>
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label className={fieldLabelClass}>Session date</Label>
-                      <Input
-                        type="date"
-                        className={fieldInputClass}
-                        value={meeting.session_date}
-                        onChange={(e) =>
-                          updateMeeting(
-                            meeting.id,
-                            "session_date",
-                            e.target.value
-                          )
-                        }
-                        disabled={pending}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className={fieldLabelClass}>
-                        Duration (minutes)
-                      </Label>
-                      <Input
-                        type="number"
-                        min={1}
-                        className={fieldInputClass}
-                        value={meeting.duration_minutes}
-                        onChange={(e) =>
-                          updateMeeting(
-                            meeting.id,
-                            "duration_minutes",
-                            e.target.value
-                          )
-                        }
-                        disabled={pending}
-                      />
-                    </div>
-                  </div>
-                  <MeetingFilePicker
-                    id={`meeting-${meeting.id}-attendance`}
-                    label="Attendance (.csv)"
-                    accept=".csv"
-                    file={meeting.attendance_file}
-                    onChange={(file) =>
-                      updateMeeting(meeting.id, "attendance_file", file)
-                    }
-                    disabled={pending}
-                  />
                   <MeetingFilePicker
                     id={`meeting-${meeting.id}-transcript`}
                     label="Transcript (.txt)"
@@ -522,7 +495,7 @@ export function CreateAssignmentReportWizard({
                   />
                   <MeetingFilePicker
                     id={`meeting-${meeting.id}-chat`}
-                    label="Chat export (.txt)"
+                    label="Chat (.txt) — optional if there was no chat"
                     accept=".txt"
                     file={meeting.chat_file}
                     onChange={(file) =>
@@ -552,7 +525,7 @@ export function CreateAssignmentReportWizard({
             <div className="space-y-4 text-sm">
               <ReviewRow
                 label="Members"
-                value={`${members.length} from attendance`}
+                value={`${memberCount} member${memberCount === 1 ? "" : "s"}`}
               />
               <ReviewRow
                 label="GitHub links"
@@ -567,7 +540,7 @@ export function CreateAssignmentReportWizard({
                 value={
                   meetings.length === 0
                     ? "None (optional)"
-                    : `${meetings.length} session${
+                    : `${meetings.length} meeting${
                         meetings.length === 1 ? "" : "s"
                       }`
                 }

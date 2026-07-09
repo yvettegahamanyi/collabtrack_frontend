@@ -49,6 +49,7 @@ export interface GroupContributionsData {
   group_id: string;
   last_synced_at: string | null;
   members: MemberParticipation[];
+  warnings?: string[];
 }
 
 export interface GroupGithubRepo {

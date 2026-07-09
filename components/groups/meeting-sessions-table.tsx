@@ -147,10 +147,14 @@ export function MeetingSessionsTable({
                     {session.session_label}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {new Date(session.session_date).toLocaleDateString()}
+                    {session.session_date
+                      ? new Date(session.session_date).toLocaleDateString()
+                      : "—"}
                   </TableCell>
                   <TableCell className="text-right tabular-nums text-muted-foreground">
-                    {session.duration_minutes} min
+                    {session.duration_minutes != null
+                      ? `${session.duration_minutes} min`
+                      : "—"}
                   </TableCell>
                   <TableCell>
                     <Badge variant={statusVariant(session.status)}>

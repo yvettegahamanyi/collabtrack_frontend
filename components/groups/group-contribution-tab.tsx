@@ -1,6 +1,11 @@
 "use client";
 
-import { DownloadIcon, RefreshCwIcon, SparklesIcon } from "lucide-react";
+import {
+  AlertTriangleIcon,
+  DownloadIcon,
+  RefreshCwIcon,
+  SparklesIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -25,7 +30,6 @@ import {
   contributorTierBadgeVariant,
   contributorTierLabel,
   memberInitials,
-  outlierBadgeVariant,
   outlierTypeLabel,
 } from "@/lib/groups";
 import {
@@ -62,6 +66,7 @@ export function GroupContributionTab({
 
   const contributions = data?.data;
   const members = contributions?.members ?? [];
+  const contributionWarnings = contributions?.warnings ?? [];
   const scores = scoresData?.data.scores ?? [];
   const scoresByUserId = Object.fromEntries(
     scores.map((score) => [score.user_id, score])
@@ -179,9 +184,7 @@ export function GroupContributionTab({
               score?.outlier
                 ? outlierTypeLabel(score.outlier.outlier_type)
                 : "",
-              score?.outlier
-                ? score.outlier.anomaly_score.toFixed(3)
-                : "",
+              score?.outlier ? score.outlier.anomaly_score.toFixed(3) : "",
             ]
           : []),
         ...(hasMeetingEngagement
@@ -193,7 +196,9 @@ export function GroupContributionTab({
                 ? `${Math.round(m.meeting_engagement.speaking_ratio * 100)}%`
                 : "",
               m.meeting_engagement
-                ? `${Math.round(m.meeting_engagement.chat_participation * 100)}%`
+                ? `${Math.round(
+                    m.meeting_engagement.chat_participation * 100
+                  )}%`
                 : "",
               m.meeting_engagement?.meeting_lead_count ?? "",
             ]
@@ -242,9 +247,13 @@ export function GroupContributionTab({
               disabled={generateScores.isPending || !hasSyncedData}
             >
               <SparklesIcon
-                className={generateScores.isPending ? "animate-pulse" : undefined}
+                className={
+                  generateScores.isPending ? "animate-pulse" : undefined
+                }
               />
-              <span className="hidden sm:inline">Generate participation score</span>
+              <span className="hidden sm:inline">
+                Generate participation score
+              </span>
               <span className="sm:hidden">Generate score</span>
             </Button>
           )}
@@ -275,6 +284,24 @@ export function GroupContributionTab({
         <p className="text-sm text-muted-foreground">
           Sync participation data first, then generate ML participation scores.
         </p>
+      )}
+
+      {contributionWarnings.length > 0 && (
+        <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 dark:border-amber-900/60 dark:bg-amber-950/30">
+          <div className="flex items-start gap-3">
+            <AlertTriangleIcon className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-400" />
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-amber-900 dark:text-amber-200">
+                Some data could not be matched
+              </p>
+              <ul className="list-disc space-y-1 pl-4 text-sm text-amber-800 dark:text-amber-300">
+                {contributionWarnings.map((warning, index) => (
+                  <li key={index}>{warning}</li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
       )}
 
       <Card className="min-w-0">
@@ -333,9 +360,9 @@ export function GroupContributionTab({
                       {hasScores && (
                         <TableHead className="text-right">Score</TableHead>
                       )}
-                      {hasOutlierInsights && (
+                      {/* {hasOutlierInsights && (
                         <TableHead>Outlier</TableHead>
-                      )}
+                      )} */}
                       <TableHead className="text-right">Commits</TableHead>
                       <TableHead className="hidden text-right md:table-cell">
                         Lines
@@ -351,7 +378,9 @@ export function GroupContributionTab({
                       </TableHead>
                       {hasMeetingEngagement && (
                         <>
-                          <TableHead className="text-right">Attendance</TableHead>
+                          <TableHead className="text-right">
+                            Attendance
+                          </TableHead>
                           <TableHead className="hidden text-right md:table-cell">
                             Speaking
                           </TableHead>
@@ -420,7 +449,9 @@ export function GroupContributionTab({
                                     )}
                                     className="text-[10px]"
                                   >
-                                    {contributorTierLabel(score.contributor_tier)}
+                                    {contributorTierLabel(
+                                      score.contributor_tier
+                                    )}
                                   </Badge>
                                 </div>
                               ) : (
@@ -428,7 +459,7 @@ export function GroupContributionTab({
                               )}
                             </TableCell>
                           )}
-                          {hasOutlierInsights && (
+                          {/* {hasOutlierInsights && (
                             <TableCell>
                               {score?.outlier ? (
                                 <div className="flex flex-col gap-1">
@@ -451,7 +482,7 @@ export function GroupContributionTab({
                                 "—"
                               )}
                             </TableCell>
-                          )}
+                          )} */}
                           <TableCell className="text-right tabular-nums">
                             {gh?.total_commits ?? "—"}
                           </TableCell>

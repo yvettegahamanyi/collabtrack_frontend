@@ -5,11 +5,9 @@ import type { GroupContributionsData } from "@/types/participation";
 export type ReportStatus = "DRAFT" | "PROCESSING" | "READY" | "FAILED";
 export type ContributionReportStatus = "PENDING" | "READY" | "FAILED";
 
-export interface AttendanceMemberPreview {
+export interface MemberInput {
   name: string;
   email: string;
-  duration_minutes: number;
-  was_facilitator: boolean;
 }
 
 export interface AssignmentReport {
@@ -28,21 +26,13 @@ export interface AssignmentReportDetail extends AssignmentReport {
   contributions: GroupContributionsData | null;
 }
 
-export interface MeetingInputMeta {
-  session_label: string;
-  session_date: string;
-  duration_minutes: number;
-}
-
 export interface CreateReportPayload {
-  attendance_file: File;
+  members: MemberInput[];
   github_urls: string[];
   google_doc_urls: string[];
-  meetings: MeetingInputMeta[];
   meeting_files: Array<{
-    attendance: File;
     transcript: File;
-    chat: File;
+    chat: File | null;
   }>;
 }
 
@@ -56,8 +46,8 @@ export interface CreateReportResult {
   meetings_created: number;
 }
 
-export type AttendancePreviewResponse = ApiResponse<{
-  members: AttendanceMemberPreview[];
+export type MembersPreviewResponse = ApiResponse<{
+  members: MemberInput[];
 }>;
 export type ReportsResponse = ApiResponse<AssignmentReport[]>;
 export type ReportDetailResponse = ApiResponse<AssignmentReportDetail>;
