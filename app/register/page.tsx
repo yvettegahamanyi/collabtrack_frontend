@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { AuthLayout } from "@/components/auth/auth-layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { APP_NAME, ROUTES } from "@/lib/constants";
@@ -33,9 +34,14 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!acceptedTerms) {
+      toast.error("Please accept the Terms of Service and Privacy Policy");
+      return;
+    }
     if (!name || !email || !password) {
       toast.error("Please fill in all fields");
       return;
@@ -137,10 +143,46 @@ export default function RegisterPage() {
               </p>
             </div>
 
+            <div className="flex items-start gap-3 pt-1">
+              <Checkbox
+                id="accept-terms"
+                checked={acceptedTerms}
+                onCheckedChange={(checked) =>
+                  setAcceptedTerms(checked === true)
+                }
+                disabled={register.isPending}
+                className="mt-0.5"
+              />
+              <Label
+                htmlFor="accept-terms"
+                className="text-sm leading-snug font-normal text-muted-foreground"
+              >
+                I agree to the{" "}
+                <Link
+                  href={ROUTES.terms}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-primary hover:underline"
+                >
+                  Terms of Service
+                </Link>{" "}
+                and{" "}
+                <Link
+                  href={ROUTES.privacy}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-primary hover:underline"
+                >
+                  Privacy Policy
+                </Link>
+                .
+              </Label>
+            </div>
+
             <Button
               type="submit"
               className="mt-2 h-11 w-full text-sm"
-              disabled={register.isPending}
+              disabled={register.isPending || !acceptedTerms}
             >
               {register.isPending ? "Creating account…" : "Register"}
               {!register.isPending && <ArrowRightIcon />}
@@ -150,13 +192,16 @@ export default function RegisterPage() {
       </Card>
 
       <div className="mt-4 flex items-center justify-between px-2 text-xs text-muted-foreground">
-        <span className="cursor-pointer hover:text-foreground">Need help?</span>
+        <Link href={ROUTES.login} className="hover:text-foreground">
+          Sign in
+        </Link>
         <span className="flex gap-4">
-          <Link href={ROUTES.login} className="hover:text-foreground">
-            Sign in
+          <Link href={ROUTES.privacy} className="hover:text-foreground">
+            Privacy
           </Link>
-          <span className="cursor-pointer hover:text-foreground">Privacy</span>
-          <span className="cursor-pointer hover:text-foreground">Terms</span>
+          <Link href={ROUTES.terms} className="hover:text-foreground">
+            Terms
+          </Link>
         </span>
       </div>
     </AuthLayout>

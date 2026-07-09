@@ -1,18 +1,15 @@
 "use client";
 
+import { type ColumnDef } from "@tanstack/react-table";
+import { useMemo } from "react";
+
+import { DataTable } from "@/components/data-table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { memberInitials } from "@/lib/groups";
 import { useGroupEngagement } from "@/service/use-meetings";
+import type { StudentEngagement } from "@/types/meetings";
 
 interface MeetingEngagementSummaryProps {
   groupId: string;
@@ -28,6 +25,83 @@ export function MeetingEngagementSummary({
   const { data, isLoading, isError } = useGroupEngagement(groupId);
   const report = data?.data;
   const scores = report?.engagement_scores ?? [];
+
+  const columns = useMemo<ColumnDef<StudentEngagement>[]>(
+    () => [
+      {
+        id: "member",
+        accessorFn: (row) => row.student_name,
+        header: "Member",
+        meta: {
+          isPrimary: true,
+          exportLabel: "Member",
+        },
+        cell: ({ row }) => (
+          <div className="flex items-center gap-3">
+            <Avatar size="sm">
+              <AvatarFallback>
+                {memberInitials(row.original.student_name)}
+              </AvatarFallback>
+            </Avatar>
+            <span className="font-semibold">{row.original.student_name}</span>
+          </div>
+        ),
+      },
+      {
+        id: "attendance_ratio",
+        accessorFn: (row) => formatRatio(row.attendance_ratio),
+        header: "Attendance",
+        meta: {
+          align: "right",
+          exportLabel: "Attendance",
+          exportValue: (row) => formatRatio(row.attendance_ratio),
+        },
+      },
+      {
+        id: "speaking_ratio",
+        accessorFn: (row) => formatRatio(row.speaking_ratio),
+        header: "Speaking",
+        meta: {
+          align: "right",
+          exportLabel: "Speaking",
+          exportValue: (row) => formatRatio(row.speaking_ratio),
+        },
+      },
+      {
+        id: "chat_participation",
+        accessorFn: (row) => formatRatio(row.chat_participation),
+        header: "Chat",
+        meta: {
+          align: "right",
+          exportLabel: "Chat",
+          exportValue: (row) => formatRatio(row.chat_participation),
+        },
+      },
+      {
+        accessorKey: "meeting_lead_count",
+        header: "Lead count",
+        meta: { align: "right", exportLabel: "Lead count" },
+      },
+      {
+        id: "sessions",
+        accessorFn: (row) =>
+          `${row.sessions_attended}/${row.total_sessions}`,
+        header: "Sessions",
+        meta: {
+          align: "right",
+          exportLabel: "Sessions",
+          exportValue: (row) =>
+            `${row.sessions_attended}/${row.total_sessions}`,
+        },
+        cell: ({ row }) => (
+          <span className="text-muted-foreground">
+            {row.original.sessions_attended}/{row.original.total_sessions}
+          </span>
+        ),
+      },
+    ],
+    []
+  );
 
   return (
     <Card>
@@ -64,49 +138,14 @@ export function MeetingEngagementSummary({
         )}
 
         {!isLoading && scores.length > 0 && (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Member</TableHead>
-                <TableHead className="text-right">Attendance</TableHead>
-                <TableHead className="text-right">Speaking</TableHead>
-                <TableHead className="text-right">Chat</TableHead>
-                <TableHead className="text-right">Lead count</TableHead>
-                <TableHead className="text-right">Sessions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {scores.map((score) => (
-                <TableRow key={score.user_id}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <Avatar size="sm">
-                        <AvatarFallback>
-                          {memberInitials(score.student_name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="font-medium">{score.student_name}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    {formatRatio(score.attendance_ratio)}
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    {formatRatio(score.speaking_ratio)}
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    {formatRatio(score.chat_participation)}
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums">
-                    {score.meeting_lead_count}
-                  </TableCell>
-                  <TableCell className="text-right tabular-nums text-muted-foreground">
-                    {score.sessions_attended}/{score.total_sessions}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <DataTable
+            columns={columns}
+            data={scores}
+            embedded
+            exportable
+            exportFilename="meeting-engagement.csv"
+            searchColumns={[{ id: "member", label: "Member" }]}
+          />
         )}
       </CardContent>
     </Card>

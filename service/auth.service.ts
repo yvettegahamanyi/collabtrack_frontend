@@ -2,10 +2,13 @@ import { api } from "@/lib/api-client";
 import type {
   ApiResponse,
   ApiUser,
+  ChangePasswordPayload,
   LoginData,
   LoginPayload,
   RegisterData,
   RegisterPayload,
+  RequestPasswordResetPayload,
+  ResetPasswordPayload,
   UpdateProfilePayload,
 } from "@/lib/auth";
 import { useAuthStore } from "@/stores/auth-store";
@@ -24,6 +27,21 @@ export function getMe() {
 
 export function updateProfile(payload: UpdateProfilePayload) {
   return api.patch<ApiResponse<ApiUser>>("/users/me", payload);
+}
+
+export function requestPasswordReset(payload: RequestPasswordResetPayload) {
+  return api.post<ApiResponse<Record<string, never>>>(
+    "/auth/request-password-reset",
+    payload
+  );
+}
+
+export function resetPassword(payload: ResetPasswordPayload) {
+  return api.post<ApiResponse<null>>("/auth/reset-password", payload);
+}
+
+export function changePassword(payload: ChangePasswordPayload) {
+  return api.post<ApiResponse<null>>("/auth/change-password", payload);
 }
 
 /** Authenticates, fetches the current profile, and returns both. */

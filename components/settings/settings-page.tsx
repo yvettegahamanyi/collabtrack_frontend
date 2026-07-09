@@ -1,10 +1,12 @@
 "use client";
 
 import { ArrowRightIcon, PencilIcon, ShieldIcon, UserIcon } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/layout/page-header";
+import { ChangePasswordDialog } from "@/components/settings/change-password-dialog";
 import { IntegrationsCard } from "@/components/settings/integrations-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -14,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { mapApiUser, toApiRole } from "@/lib/auth";
-import { ROLES } from "@/lib/constants";
+import { ROLES, ROUTES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import { useProfile, useUpdateProfile } from "@/service/use-auth";
 import { useAuthStore } from "@/stores/auth-store";
@@ -52,6 +54,7 @@ export function SettingsPage({
 
   const [name, setName] = useState(user?.name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
 
   useEffect(() => {
     const profile = data?.data;
@@ -114,12 +117,18 @@ export function SettingsPage({
           isSaving={updateProfile.isPending}
           onNameChange={setName}
           onSave={handleSave}
+          onChangePassword={() => setChangePasswordOpen(true)}
         />
 
         {resolvedShowIntegrations && <IntegrationsCard />}
       </div>
 
       <SecurityBanner />
+
+      <ChangePasswordDialog
+        open={changePasswordOpen}
+        onOpenChange={setChangePasswordOpen}
+      />
     </div>
   );
 }
@@ -133,6 +142,7 @@ function AccountSettingsCard({
   isSaving,
   onNameChange,
   onSave,
+  onChangePassword,
 }: {
   name: string;
   email: string;
@@ -142,6 +152,7 @@ function AccountSettingsCard({
   isSaving: boolean;
   onNameChange: (value: string) => void;
   onSave: () => void;
+  onChangePassword: () => void;
 }) {
   return (
     <Card>
@@ -229,9 +240,7 @@ function AccountSettingsCard({
                 type="button"
                 variant="link"
                 className="h-auto px-0"
-                onClick={() =>
-                  toast.info("Password change will be available soon.")
-                }
+                onClick={onChangePassword}
               >
                 Change Password
                 <ArrowRightIcon className="size-4" />
@@ -270,7 +279,8 @@ function SecurityBanner() {
         <Button
           variant="secondary"
           className="shrink-0 bg-primary-foreground text-primary hover:bg-primary-foreground/90"
-          onClick={() => toast.info("Privacy policy will be available soon.")}
+          nativeButton={false}
+          render={<Link href={ROUTES.privacy} target="_blank" rel="noopener noreferrer" />}
         >
           Privacy Policy
         </Button>

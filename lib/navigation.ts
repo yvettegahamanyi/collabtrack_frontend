@@ -19,7 +19,8 @@ export const NAVIGATION: Record<Role, NavItem[]> = {
   admin: [
     { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
     { label: "Users", href: "/admin/users", icon: Users },
-    { label: "Reports", href: "/admin/reports", icon: BarChart3 },
+    { label: "Training Data", href: "/admin/training", icon: BarChart3 },
+    // { label: "Reports", href: "/admin/reports", icon: BarChart3 },
     { label: "Settings", href: "/settings", icon: Settings },
   ],
   instructor: [

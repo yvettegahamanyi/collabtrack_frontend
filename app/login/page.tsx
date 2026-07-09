@@ -114,12 +114,12 @@ export default function LoginPage() {
                 >
                   Password
                 </Label>
-                <button
-                  type="button"
+                <Link
+                  href={ROUTES.forgotPassword}
                   className="text-xs font-medium text-primary hover:underline"
                 >
                   Forgot?
-                </button>
+                </Link>
               </div>
               <div className="relative">
                 <LockIcon className="auth-input-icon" />
@@ -182,10 +182,6 @@ export default function LoginPage() {
           </form>
         </CardContent>
       </Card>
-
-      {/* <p className="mt-6 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} {APP_NAME} v2.4.1. All rights reserved.
-      </p> */}
     </AuthLayout>
   );
 }

@@ -39,4 +39,22 @@ export function useUpdateProfile() {
   });
 }
 
+export function useRequestPasswordReset() {
+  return useMutation({
+    mutationFn: authService.requestPasswordReset,
+  });
+}
+
+export function useResetPassword() {
+  return useMutation({
+    mutationFn: authService.resetPassword,
+  });
+}
+
+export function useChangePassword() {
+  return useMutation({
+    mutationFn: authService.changePassword,
+  });
+}
+
 export { mapApiUser };

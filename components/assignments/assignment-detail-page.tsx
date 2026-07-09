@@ -1,24 +1,25 @@
 "use client";
 
-import { ChevronLeftIcon, PlusIcon } from "lucide-react";
+import { type ColumnDef } from "@tanstack/react-table";
+import { ChevronLeftIcon, MoreVerticalIcon, PlusIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
+import { DataTable } from "@/components/data-table";
+import { DataTableStatusBadge } from "@/components/data-table-status-badge";
 import { PageHeader } from "@/components/layout/page-header";
 import { CreateAssignmentReportWizard } from "@/components/reports/create-assignment-report-wizard";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAssignment } from "@/service/use-assignments";
 import type { AssignmentReport } from "@/types/reports";
 
@@ -26,16 +27,18 @@ interface AssignmentDetailPageProps {
   assignmentId: string;
 }
 
-function reportStatusVariant(status: AssignmentReport["report_status"]) {
+function reportStatusTone(
+  status: AssignmentReport["report_status"]
+): "success" | "danger" | "warning" | "neutral" {
   switch (status) {
     case "READY":
-      return "default" as const;
+      return "success";
     case "FAILED":
-      return "destructive" as const;
+      return "danger";
     case "PROCESSING":
-      return "secondary" as const;
+      return "warning";
     default:
-      return "outline" as const;
+      return "neutral";
   }
 }
 
@@ -62,6 +65,123 @@ export function AssignmentDetailPage({
       `/instructor/assignments/${assignmentId}/reports/${groupId}?tab=contribution`
     );
   };
+
+  const columns = useMemo<ColumnDef<AssignmentReport>[]>(
+    () => [
+      {
+        id: "group",
+        accessorFn: (row) =>
+          row.group_name ?? `Group ${row.group_number ?? ""}`.trim(),
+        header: "Group",
+        meta: {
+          isPrimary: true,
+          exportLabel: "Group",
+          exportValue: (row) =>
+            row.group_name ?? `Group ${row.group_number ?? ""}`.trim(),
+        },
+        cell: ({ row }) => (
+          <Link
+            href={`/instructor/assignments/${assignmentId}/reports/${row.original.group_id}?tab=contribution`}
+            className="font-semibold text-primary hover:underline"
+          >
+            {row.original.group_name ?? `Group ${row.original.group_number}`}
+          </Link>
+        ),
+      },
+      {
+        id: "report_status",
+        accessorFn: (row) => row.report_status ?? "DRAFT",
+        header: "Status",
+        meta: {
+          exportLabel: "Status",
+          exportValue: (row) => row.report_status ?? "DRAFT",
+        },
+        cell: ({ row }) => (
+          <DataTableStatusBadge
+            label={row.original.report_status ?? "DRAFT"}
+            tone={reportStatusTone(row.original.report_status)}
+          />
+        ),
+      },
+      {
+        id: "created_at",
+        accessorFn: (row) => formatDate(row.created_at),
+        header: "Created",
+        meta: {
+          exportLabel: "Created",
+          exportValue: (row) => formatDate(row.created_at),
+          headerClassName: "hidden sm:table-cell",
+          cellClassName: "hidden sm:table-cell",
+        },
+        cell: ({ row }) => (
+          <span className="text-muted-foreground">
+            {formatDate(row.original.created_at)}
+          </span>
+        ),
+      },
+      {
+        id: "notification",
+        accessorFn: (row) =>
+          row.notification_sent_at
+            ? `Sent ${formatDate(row.notification_sent_at)}`
+            : "Not sent",
+        header: "Notification",
+        meta: {
+          exportLabel: "Notification",
+          exportValue: (row) =>
+            row.notification_sent_at
+              ? formatDate(row.notification_sent_at)
+              : "Not sent",
+          headerClassName: "hidden md:table-cell",
+          cellClassName: "hidden md:table-cell",
+        },
+        cell: ({ row }) =>
+          row.original.notification_sent_at ? (
+            <span className="text-muted-foreground">
+              Sent {formatDate(row.original.notification_sent_at)}
+            </span>
+          ) : (
+            <span className="text-muted-foreground">Not sent</span>
+          ),
+      },
+      {
+        id: "actions",
+        header: "Actions",
+        meta: { align: "right", hideOnExport: true },
+        cell: ({ row }) => (
+          <div className="flex justify-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label={`Actions for ${row.original.group_name ?? "group"}`}
+                  >
+                    <MoreVerticalIcon className="size-4" />
+                  </Button>
+                }
+              />
+              <DropdownMenuContent align="end">
+                <DropdownMenuGroup>
+                  <DropdownMenuItem
+                    render={
+                      <Link
+                        href={`/instructor/assignments/${assignmentId}/reports/${row.original.group_id}?tab=contribution`}
+                      />
+                    }
+                  >
+                    View report
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        ),
+      },
+    ],
+    [assignmentId]
+  );
 
   if (isLoading) {
     return (
@@ -120,17 +240,11 @@ export function AssignmentDetailPage({
           </div>
           <div>
             <span className="text-muted-foreground">Status: </span>
-            <Badge
-              variant={assignment.status === "ACTIVE" ? "default" : "secondary"}
-              className="ml-1"
-            >
-              {assignment.status === "ACTIVE" ? "Active" : "Done"}
-            </Badge>
+            <DataTableStatusBadge
+              label={assignment.status === "ACTIVE" ? "Active" : "Done"}
+              tone={assignment.status === "ACTIVE" ? "success" : "neutral"}
+            />
           </div>
-          {/* <div>
-            <span className="text-muted-foreground">Instructor: </span>
-            <span>{assignment.supervisor_email ?? "Your account email"}</span>
-          </div> */}
         </div>
       </div>
 
@@ -143,73 +257,17 @@ export function AssignmentDetailPage({
           </p>
         </div>
 
-        {reports.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center text-muted-foreground">
-              No reports yet. Upload an attendance file to create Group 1.
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="rounded-lg border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Group</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="hidden sm:table-cell">
-                    Created
-                  </TableHead>
-                  <TableHead className="hidden md:table-cell">
-                    Notification
-                  </TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {reports.map((report) => (
-                  <TableRow key={report.group_id}>
-                    <TableCell>
-                      <Link
-                        href={`/instructor/assignments/${assignmentId}/reports/${report.group_id}?tab=contribution`}
-                        className="font-medium text-primary hover:underline"
-                      >
-                        {report.group_name ?? `Group ${report.group_number}`}
-                      </Link>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={reportStatusVariant(report.report_status)}
-                      >
-                        {report.report_status ?? "DRAFT"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="hidden text-muted-foreground sm:table-cell">
-                      {formatDate(report.created_at)}
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      {report.notification_sent_at ? (
-                        <span className="text-muted-foreground">
-                          Sent {formatDate(report.notification_sent_at)}
-                        </span>
-                      ) : (
-                        <span className="text-muted-foreground">Not sent</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Link
-                        href={`/instructor/assignments/${assignmentId}/reports/${report.group_id}?tab=contribution`}
-                      >
-                        <Button size="sm" variant="outline">
-                          View Report
-                        </Button>
-                      </Link>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
+        <DataTable
+          columns={columns}
+          data={reports}
+          emptyMessage="No reports yet. Upload an attendance file to create Group 1."
+          exportable
+          exportFilename={`${assignment.title.replace(/\s+/g, "-").toLowerCase()}-reports.csv`}
+          searchColumns={[
+            { id: "group", label: "Group" },
+            { id: "report_status", label: "Status" },
+          ]}
+        />
       </div>
 
       <CreateAssignmentReportWizard

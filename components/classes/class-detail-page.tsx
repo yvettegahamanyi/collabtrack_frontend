@@ -1,24 +1,30 @@
 "use client";
 
-import { ChevronLeftIcon, PlusIcon, TrashIcon } from "lucide-react";
+import { type ColumnDef } from "@tanstack/react-table";
+import {
+  ChevronLeftIcon,
+  MoreVerticalIcon,
+  PlusIcon,
+  TrashIcon,
+} from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { CreateAssignmentDialog } from "@/components/assignments/create-assignment-dialog";
+import { DataTable } from "@/components/data-table";
+import { DataTableStatusBadge } from "@/components/data-table-status-badge";
 import { PageHeader } from "@/components/layout/page-header";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useDeleteAssignment } from "@/service/use-assignments";
 import { useClass, useDeleteClass } from "@/service/use-classes";
 import type { ApiError } from "@/types";
@@ -67,6 +73,115 @@ export function ClassDetailPage({ classId }: ClassDetailPageProps) {
       toast.error(apiError.message ?? "Failed to delete assignment");
     }
   };
+
+  const columns = useMemo<ColumnDef<Assignment>[]>(
+    () => [
+      {
+        accessorKey: "title",
+        header: "Title",
+        meta: {
+          isPrimary: true,
+          exportLabel: "Title",
+        },
+        cell: ({ row }) => (
+          <div className="space-y-1">
+            <Link
+              href={`/instructor/assignments/${row.original.id}`}
+              className="font-semibold text-primary hover:underline"
+            >
+              {row.original.title}
+            </Link>
+            {row.original.description && (
+              <p className="line-clamp-1 text-xs text-muted-foreground md:hidden">
+                {row.original.description}
+              </p>
+            )}
+          </div>
+        ),
+      },
+      {
+        accessorKey: "status",
+        header: "Status",
+        meta: {
+          exportLabel: "Status",
+          exportValue: (row) => (row.status === "ACTIVE" ? "Active" : "Done"),
+        },
+        cell: ({ row }) => (
+          <DataTableStatusBadge
+            label={row.original.status === "ACTIVE" ? "Active" : "Done"}
+            tone={row.original.status === "ACTIVE" ? "success" : "neutral"}
+          />
+        ),
+      },
+      {
+        accessorKey: "report_count",
+        header: "Reports",
+        meta: { align: "right", exportLabel: "Reports" },
+        cell: ({ row }) => (
+          <span className="tabular-nums">{row.original.report_count}</span>
+        ),
+      },
+      {
+        id: "created_at",
+        accessorFn: (row) => formatDate(row.created_at),
+        header: "Created",
+        meta: {
+          exportLabel: "Created",
+          exportValue: (row) => formatDate(row.created_at),
+          headerClassName: "hidden md:table-cell",
+          cellClassName: "hidden md:table-cell",
+        },
+        cell: ({ row }) => (
+          <span className="text-muted-foreground">
+            {formatDate(row.original.created_at)}
+          </span>
+        ),
+      },
+      {
+        id: "actions",
+        header: "Actions",
+        meta: { align: "right", hideOnExport: true },
+        cell: ({ row }) => (
+          <div className="flex justify-end">
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label={`Actions for ${row.original.title}`}
+                  >
+                    <MoreVerticalIcon className="size-4" />
+                  </Button>
+                }
+              />
+              <DropdownMenuContent align="end">
+                <DropdownMenuGroup>
+                  <DropdownMenuItem
+                    render={
+                      <Link
+                        href={`/instructor/assignments/${row.original.id}`}
+                      />
+                    }
+                  >
+                    Open
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onClick={() => handleDeleteAssignment(row.original)}
+                  >
+                    <TrashIcon />
+                    Delete
+                  </DropdownMenuItem>
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        ),
+      },
+    ],
+    []
+  );
 
   if (isLoading) {
     return (
@@ -117,94 +232,25 @@ export function ClassDetailPage({ classId }: ClassDetailPageProps) {
       />
 
       <div className="space-y-3">
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-semibold">Assignments</h2>
-            <p className="text-sm text-muted-foreground">
-              {assignments.length} assignment
-              {assignments.length === 1 ? "" : "s"} in this class
-            </p>
-          </div>
+        <div>
+          <h2 className="text-lg font-semibold">Assignments</h2>
+          <p className="text-sm text-muted-foreground">
+            {assignments.length} assignment
+            {assignments.length === 1 ? "" : "s"} in this class
+          </p>
         </div>
 
-        {assignments.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center text-muted-foreground">
-              No assignments yet. Create one to start generating reports.
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="rounded-lg border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Reports</TableHead>
-                  <TableHead className="hidden md:table-cell">
-                    Created
-                  </TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {assignments.map((assignment) => (
-                  <TableRow key={assignment.id}>
-                    <TableCell>
-                      <div className="space-y-1">
-                        <Link
-                          href={`/instructor/assignments/${assignment.id}`}
-                          className="font-medium text-primary hover:underline"
-                        >
-                          {assignment.title}
-                        </Link>
-                        {assignment.description && (
-                          <p className="line-clamp-1 text-xs text-muted-foreground md:hidden">
-                            {assignment.description}
-                          </p>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={
-                          assignment.status === "ACTIVE"
-                            ? "default"
-                            : "secondary"
-                        }
-                      >
-                        {assignment.status === "ACTIVE" ? "Active" : "Done"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right tabular-nums">
-                      {assignment.report_count}
-                    </TableCell>
-                    <TableCell className="hidden text-muted-foreground md:table-cell">
-                      {formatDate(assignment.created_at)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Link href={`/instructor/assignments/${assignment.id}`}>
-                          <Button size="sm" variant="outline">
-                            Open
-                          </Button>
-                        </Link>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => handleDeleteAssignment(assignment)}
-                          aria-label={`Delete ${assignment.title}`}
-                        >
-                          <TrashIcon className="size-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        )}
+        <DataTable
+          columns={columns}
+          data={assignments}
+          emptyMessage="No assignments yet. Create one to start generating reports."
+          exportable
+          exportFilename={`${courseClass.name.replace(/\s+/g, "-").toLowerCase()}-assignments.csv`}
+          searchColumns={[
+            { id: "title", label: "Title" },
+            { id: "status", label: "Status" },
+          ]}
+        />
       </div>
 
       <CreateAssignmentDialog

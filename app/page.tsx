@@ -79,7 +79,15 @@ export default function Home() {
       </main>
 
       <footer className="border-t px-6 py-6 text-center text-sm text-muted-foreground">
-        © {new Date().getFullYear()} {APP_NAME}
+        <p>© {new Date().getFullYear()} {APP_NAME}</p>
+        <div className="mt-2 flex items-center justify-center gap-4">
+          <Link href={ROUTES.privacy} className="hover:text-foreground">
+            Privacy Policy
+          </Link>
+          <Link href={ROUTES.terms} className="hover:text-foreground">
+            Terms of Service
+          </Link>
+        </div>
       </footer>
     </div>
   );

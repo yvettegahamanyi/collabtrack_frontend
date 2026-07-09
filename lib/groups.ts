@@ -141,6 +141,13 @@ export function splitGroups(groups: Group[]) {
   };
 }
 
+export function sortGroupsByNewest(groups: Group[]) {
+  return [...groups].sort(
+    (a, b) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
+}
+
 export function memberInitials(name: string): string {
   return name
     .split(" ")

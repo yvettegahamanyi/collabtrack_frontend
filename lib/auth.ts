@@ -44,6 +44,25 @@ export interface UpdateProfilePayload {
   role: ApiRole;
 }
 
+export interface RequestPasswordResetPayload {
+  email: string;
+}
+
+export interface ResetPasswordPayload {
+  email: string;
+  otp: string;
+  new_password: string;
+}
+
+export interface ChangePasswordPayload {
+  current_password: string;
+  new_password: string;
+}
+
+export function isValidPassword(password: string) {
+  return password.length >= 8 && /\d/.test(password);
+}
+
 export function toApiRole(role: Role): ApiRole {
   switch (role) {
     case "student":

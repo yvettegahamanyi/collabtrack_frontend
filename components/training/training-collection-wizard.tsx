@@ -1,5 +1,6 @@
 "use client";
 
+import { type ColumnDef } from "@tanstack/react-table";
 import {
   BarChart3Icon,
   DownloadIcon,
@@ -12,23 +13,17 @@ import {
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
+import { DataTable } from "@/components/data-table";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { useIntegrations } from "@/service/use-integrations";
 import { useCreateTrainingCollection } from "@/service/use-training";
 import type { ApiError } from "@/types";
 import type {
+  DatasetRow,
   IdentityMemberPreview,
   MeetingInputMeta,
   TrainingCollectionDetail,
@@ -43,6 +38,73 @@ const STEPS = [
 
 const fieldLabelClass =
   "text-xs font-semibold tracking-wide text-muted-foreground uppercase";
+
+const identityPreviewColumns: ColumnDef<IdentityMemberPreview>[] = [
+  {
+    accessorKey: "name",
+    header: "Name",
+    meta: { isPrimary: true },
+  },
+  {
+    accessorKey: "github_email",
+    header: "GitHub",
+    cell: ({ row }) => row.original.github_email ?? "—",
+  },
+  {
+    accessorKey: "google_docs_email",
+    header: "Docs",
+    cell: ({ row }) => row.original.google_docs_email ?? "—",
+  },
+  {
+    accessorKey: "google_meet_email",
+    header: "Meet",
+    cell: ({ row }) => row.original.google_meet_email ?? "—",
+  },
+];
+
+const datasetRowColumns: ColumnDef<DatasetRow>[] = [
+  {
+    accessorKey: "student_id",
+    header: "Student ID",
+    meta: { isPrimary: true },
+  },
+  {
+    id: "code_commits",
+    accessorFn: (row) => `${(row.code_commits * 100).toFixed(0)}%`,
+    header: "Commits",
+    meta: { align: "right" },
+  },
+  {
+    id: "code_share",
+    accessorFn: (row) => `${(row.code_share * 100).toFixed(0)}%`,
+    header: "Lines",
+    meta: { align: "right" },
+  },
+  {
+    id: "review_participation",
+    accessorFn: (row) => `${(row.review_participation * 100).toFixed(0)}%`,
+    header: "Reviews",
+    meta: { align: "right" },
+  },
+  {
+    id: "attendance_ratio",
+    accessorFn: (row) => `${(row.attendance_ratio * 100).toFixed(0)}%`,
+    header: "Attendance",
+    meta: { align: "right" },
+  },
+  {
+    id: "docs_contribution_share",
+    accessorFn: (row) => `${(row.docs_contribution_share * 100).toFixed(0)}%`,
+    header: "Docs",
+    meta: { align: "right" },
+  },
+  {
+    id: "benchmark_score",
+    accessorFn: (row) => row.benchmark_score.toFixed(3),
+    header: "Benchmark",
+    meta: { align: "right" },
+  },
+];
 
 interface MeetingDraft {
   id: string;
@@ -357,32 +419,14 @@ export function TrainingCollectionWizard() {
               {result.warnings.join(" ")}
             </div>
           )}
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Student ID</TableHead>
-                <TableHead>Commits</TableHead>
-                <TableHead>Lines</TableHead>
-                <TableHead>Reviews</TableHead>
-                <TableHead>Attendance</TableHead>
-                <TableHead>Docs</TableHead>
-                <TableHead>Benchmark</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {result.dataset_rows.map((row) => (
-                <TableRow key={row.id}>
-                  <TableCell>{row.student_id}</TableCell>
-                  <TableCell>{(row.code_commits * 100).toFixed(0)}%</TableCell>
-                  <TableCell>{(row.code_share * 100).toFixed(0)}%</TableCell>
-                  <TableCell>{(row.review_participation * 100).toFixed(0)}%</TableCell>
-                  <TableCell>{(row.attendance_ratio * 100).toFixed(0)}%</TableCell>
-                  <TableCell>{(row.docs_contribution_share * 100).toFixed(0)}%</TableCell>
-                  <TableCell>{row.benchmark_score.toFixed(3)}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <DataTable
+            columns={datasetRowColumns}
+            data={result.dataset_rows}
+            embedded
+            searchable={false}
+            paginated={result.dataset_rows.length > 10}
+            toolbar={false}
+          />
         </CardContent>
       </Card>
     );
@@ -437,26 +481,13 @@ export function TrainingCollectionWizard() {
                 </p>
               </div>
               {identityPreview.length > 0 && (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>GitHub</TableHead>
-                      <TableHead>Docs</TableHead>
-                      <TableHead>Meet</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {identityPreview.map((member) => (
-                      <TableRow key={member.name}>
-                        <TableCell>{member.name}</TableCell>
-                        <TableCell>{member.github_email ?? "—"}</TableCell>
-                        <TableCell>{member.google_docs_email ?? "—"}</TableCell>
-                        <TableCell>{member.google_meet_email ?? "—"}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <DataTable
+                  columns={identityPreviewColumns}
+                  data={identityPreview}
+                  searchable={false}
+                  paginated={false}
+                  toolbar={false}
+                />
               )}
             </div>
           )}

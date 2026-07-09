@@ -1,9 +1,9 @@
 "use client";
 
-import { PlusIcon } from "lucide-react";
+import { ChevronRightIcon, PlusIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { CreateGroupDialog } from "@/components/groups/create-group-dialog";
@@ -12,8 +12,8 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { groupPath } from "@/lib/constants";
-import { splitGroups } from "@/lib/groups";
+import { groupPath, ROUTES } from "@/lib/constants";
+import { sortGroupsByNewest, splitGroups } from "@/lib/groups";
 import {
   useDeleteGroup,
   useGroups,
@@ -37,6 +37,17 @@ export function GroupsPage({ role, canCreate = false }: GroupsPageProps) {
 
   const groups = data?.data ?? [];
   const { active, previous } = splitGroups(groups);
+  const recentPrevious = useMemo(
+    () => sortGroupsByNewest(previous).slice(0, 5),
+    [previous]
+  );
+
+  const formatPreviousDate = (value: string) =>
+    new Date(value).toLocaleDateString(undefined, {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
 
   const handleDelete = async (group: Group) => {
     if (!confirm(`Delete "${group.group_name}"?`)) return;
@@ -103,7 +114,10 @@ export function GroupsPage({ role, canCreate = false }: GroupsPageProps) {
                 <CardContent className="py-10 text-center">
                   <p className="text-muted-foreground">{emptyMessage}</p>
                   {canCreate && (
-                    <Button className="mt-4" onClick={() => setCreateOpen(true)}>
+                    <Button
+                      className="mt-4"
+                      onClick={() => setCreateOpen(true)}
+                    >
                       <PlusIcon />
                       Create New Group
                     </Button>
@@ -126,38 +140,68 @@ export function GroupsPage({ role, canCreate = false }: GroupsPageProps) {
           </div>
 
           <div className="space-y-4">
-            <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
-              Previous Groups
-            </h2>
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-sm font-semibold tracking-wide text-muted-foreground uppercase">
+                Previous Groups
+              </h2>
+              {role === "student" && previous.length > 0 && (
+                <Link href={ROUTES.studentPreviousGroups}>
+                  <Button variant="ghost" size="sm">
+                    View all
+                    <ChevronRightIcon className="size-4" />
+                  </Button>
+                </Link>
+              )}
+            </div>
             <Card>
-              <CardContent className="space-y-3 pt-6">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-base font-medium">
+                  Recent collaborations
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  {previous.length === 0
+                    ? "Completed groups will appear here."
+                    : `Showing ${recentPrevious.length} of ${
+                        previous.length
+                      } completed group${previous.length === 1 ? "" : "s"}.`}
+                </p>
+              </CardHeader>
+              <CardContent className="pt-0">
                 {previous.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    Completed groups will appear here.
+                  <p className="py-4 text-sm text-muted-foreground">
+                    Mark a group as done to move it here.
                   </p>
                 ) : (
-                  previous.map((group) => (
-                    <Link
-                      key={group.id}
-                      href={groupPath(group.id, undefined, role)}
-                      className="block rounded-lg border p-3 transition-colors hover:bg-muted/50"
-                    >
-                      <p className="font-medium text-primary">
-                        {group.group_name}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(group.created_at).toLocaleDateString(undefined, {
-                          month: "long",
-                          year: "numeric",
-                        })}
-                      </p>
-                      {group.description && (
-                        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                          {group.description}
-                        </p>
-                      )}
-                    </Link>
-                  ))
+                  <ul className="divide-y">
+                    {recentPrevious.map((group) => (
+                      <li key={group.id} className="py-5">
+                        <Link
+                          href={groupPath(group.id, undefined, role)}
+                          className="flex items-start justify-between gap-3 py-3 transition-colors first:pt-0 last:pb-0 hover:text-primary"
+                        >
+                          <div className="min-w-0 space-y-1">
+                            <p className="truncate font-semibold text-foreground">
+                              {group.group_name}
+                            </p>
+                            {group.description && (
+                              <p className="line-clamp-1 text-sm text-muted-foreground">
+                                {group.description}
+                              </p>
+                            )}
+                            <p className="text-xs text-muted-foreground">
+                              {formatPreviousDate(group.created_at)}
+                              {group.members?.length
+                                ? ` · ${group.members.length} member${
+                                    group.members.length === 1 ? "" : "s"
+                                  }`
+                                : ""}
+                            </p>
+                          </div>
+                          <ChevronRightIcon className="mt-1 size-4 shrink-0 text-muted-foreground" />
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
                 )}
               </CardContent>
             </Card>
@@ -170,10 +214,7 @@ export function GroupsPage({ role, canCreate = false }: GroupsPageProps) {
                 <p className="text-primary-foreground/90">
                   You belong to {groups.length} group
                   {groups.length === 1 ? "" : "s"} with{" "}
-                  {groups.reduce(
-                    (sum, g) => sum + (g.members?.length ?? 0),
-                    0
-                  )}{" "}
+                  {groups.reduce((sum, g) => sum + (g.members?.length ?? 0), 0)}{" "}
                   total collaborations tracked.
                 </p>
                 <Button

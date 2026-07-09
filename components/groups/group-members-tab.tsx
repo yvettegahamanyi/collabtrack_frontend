@@ -1,12 +1,14 @@
 "use client";
 
-import { UserMinusIcon } from "lucide-react";
-import { useState } from "react";
+import { type ColumnDef } from "@tanstack/react-table";
+import { MoreVerticalIcon, UserMinusIcon } from "lucide-react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
+import { DataTable } from "@/components/data-table";
+import { DataTableStatusBadge } from "@/components/data-table-status-badge";
 import { InviteDialog } from "@/components/groups/invite-dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,21 +19,28 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { memberInitials } from "@/lib/groups";
 import { useRemoveMember } from "@/service/use-groups";
 import { useAuthStore } from "@/stores/auth-store";
 import type { ApiError } from "@/types";
-import type { Group } from "@/types/groups";
+import type { Group, GroupMember } from "@/types/groups";
 
 interface GroupMembersTabProps {
   group: Group;
+}
+
+function formatDate(value: string) {
+  return new Date(value).toLocaleDateString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
 }
 
 export function GroupMembersTab({ group }: GroupMembersTabProps) {
@@ -58,6 +67,109 @@ export function GroupMembersTab({ group }: GroupMembersTabProps) {
     }
   };
 
+  const columns = useMemo<ColumnDef<GroupMember>[]>(() => {
+    const baseColumns: ColumnDef<GroupMember>[] = [
+      {
+        id: "member",
+        accessorFn: (row) => row.name,
+        header: "Member",
+        meta: {
+          isPrimary: true,
+          exportLabel: "Member",
+          exportValue: (row) => row.name,
+        },
+        cell: ({ row }) => (
+          <div className="flex items-center gap-3">
+            <Avatar size="sm">
+              <AvatarFallback>
+                {memberInitials(row.original.name)}
+              </AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="font-semibold">{row.original.name}</p>
+              <p className="text-xs text-muted-foreground">
+                {row.original.email}
+              </p>
+            </div>
+          </div>
+        ),
+      },
+      {
+        accessorKey: "role",
+        header: "Role",
+        meta: { exportLabel: "Role" },
+        cell: ({ row }) => (
+          <div className="flex items-center gap-2">
+            <DataTableStatusBadge label={row.original.role} tone="neutral" />
+            {row.original.is_owner && (
+              <DataTableStatusBadge label="Owner" tone="info" />
+            )}
+          </div>
+        ),
+      },
+      {
+        id: "joined_at",
+        accessorFn: (row) => formatDate(row.joined_at),
+        header: "Joined",
+        meta: {
+          exportLabel: "Joined",
+          exportValue: (row) => formatDate(row.joined_at),
+        },
+        cell: ({ row }) => (
+          <span className="text-muted-foreground">
+            {formatDate(row.original.joined_at)}
+          </span>
+        ),
+      },
+    ];
+
+    if (isOwner) {
+      baseColumns.push({
+        id: "actions",
+        header: "Actions",
+        meta: { align: "right", hideOnExport: true },
+        cell: ({ row }) => (
+          <div className="flex justify-end">
+            {!row.original.is_owner ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  render={
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      aria-label={`Actions for ${row.original.name}`}
+                      disabled={removeMember.isPending}
+                    >
+                      <MoreVerticalIcon className="size-4" />
+                    </Button>
+                  }
+                />
+                <DropdownMenuContent align="end">
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onClick={() =>
+                        setRemoveTarget({
+                          userId: row.original.user_id,
+                          name: row.original.name,
+                        })
+                      }
+                    >
+                      <UserMinusIcon />
+                      Remove
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : null}
+          </div>
+        ),
+      });
+    }
+
+    return baseColumns;
+  }, [isOwner, removeMember.isPending]);
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -73,70 +185,17 @@ export function GroupMembersTab({ group }: GroupMembersTabProps) {
         )}
       </div>
 
-      <div className="rounded-lg border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Member</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Joined</TableHead>
-              {isOwner && <TableHead className="text-right">Actions</TableHead>}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {members.map((member) => (
-              <TableRow key={member.user_id}>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <Avatar size="sm">
-                      <AvatarFallback>
-                        {memberInitials(member.name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="font-medium">{member.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {member.email}
-                      </p>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline">{member.role}</Badge>
-                    {member.is_owner && (
-                      <Badge variant="secondary">Owner</Badge>
-                    )}
-                  </div>
-                </TableCell>
-                <TableCell className="text-muted-foreground">
-                  {new Date(member.joined_at).toLocaleDateString()}
-                </TableCell>
-                {isOwner && (
-                  <TableCell className="text-right">
-                    {!member.is_owner && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-destructive"
-                        disabled={removeMember.isPending}
-                        onClick={() =>
-                          setRemoveTarget({
-                            userId: member.user_id,
-                            name: member.name,
-                          })
-                        }
-                      >
-                        Remove
-                      </Button>
-                    )}
-                  </TableCell>
-                )}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      <DataTable
+        columns={columns}
+        data={members}
+        emptyMessage="No members in this group yet."
+        exportable={isOwner}
+        exportFilename={`${group.group_name?.replace(/\s+/g, "-").toLowerCase() ?? "group"}-members.csv`}
+        searchColumns={[
+          { id: "member", label: "Member" },
+          { id: "role", label: "Role" },
+        ]}
+      />
 
       <InviteDialog
         groupId={group.id}
