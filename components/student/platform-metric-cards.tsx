@@ -7,12 +7,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-import {
-  Card,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { contributorTierLabel } from "@/lib/groups";
 import {
   meetingActivityLabel,
   type PlatformPercentages,
@@ -90,14 +86,14 @@ export function PlatformMetricCards({
           <p className="mt-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
             My Contribution Score
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">
+          {/* <p className="mt-1 text-xs text-muted-foreground">
             Benchmark score for this group
-          </p>
-          {contributorTier && (
+          </p> */}
+          {/* {contributorTier && (
             <p className="mt-2 text-sm font-medium text-muted-foreground">
               {contributorTierLabel(contributorTier)}
             </p>
-          )}
+          )} */}
         </CardContent>
       </Card>
 

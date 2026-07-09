@@ -1,6 +1,5 @@
 "use client";
 
-import { BellIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -8,7 +7,6 @@ import { useEffect } from "react";
 
 import { UserMenu } from "@/components/layout/user-menu";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Button } from "@/components/ui/button";
 import { APP_NAME, ROUTES } from "@/lib/constants";
 import { NAVIGATION } from "@/lib/navigation";
 import { useAuthHydrated } from "@/lib/use-auth-hydrated";
@@ -111,15 +109,7 @@ export function DashboardShell({ role, children }: DashboardShellProps) {
           </span>
           <div className="ml-auto flex items-center gap-1.5">
             <ThemeToggle />
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Notifications"
-              className="relative"
-            >
-              <BellIcon />
-              <span className="absolute top-2 right-2 size-1.5 rounded-full bg-destructive" />
-            </Button>
+
             <UserMenu />
           </div>
         </header>
