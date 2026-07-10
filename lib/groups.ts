@@ -157,6 +157,73 @@ export function memberInitials(name: string): string {
     .toUpperCase();
 }
 
+const PARTICIPATION_FEATURE_LABELS: Record<string, string> = {
+  code_commits: "Code commits",
+  code_share: "Code lines changed",
+  review_participation: "Pull request reviews",
+  attendance_ratio: "Meeting attendance",
+  speaking_participation_ratio: "Speaking in meetings",
+  chat_participation_ratio: "Meeting chat",
+  docs_contribution_share: "Google Docs edits",
+  comment_activity: "Google Docs comments",
+};
+
+export function participationFeatureLabel(key: string): string {
+  return PARTICIPATION_FEATURE_LABELS[key] ?? key.replaceAll("_", " ");
+}
+
+export function scoreConfidenceTextClass(confidence: number): string {
+  if (confidence >= 0.8) {
+    return "text-green-600 dark:text-green-400";
+  }
+  if (confidence >= 0.65) {
+    return "text-amber-600 dark:text-amber-400";
+  }
+  return "text-red-600 dark:text-red-400";
+}
+
+export function scoreConfidenceLabel(confidence: number): string {
+  if (confidence >= 0.8) {
+    return "High scoring confidence";
+  }
+  if (confidence >= 0.65) {
+    return "Moderate scoring confidence";
+  }
+  return "Low scoring confidence";
+}
+
+export function llmFlagLabel(flag: string): string {
+  switch (flag) {
+    case "possible_data_issue":
+      return "Possible data issue";
+    case "low_measured_activity":
+      return "Low measured activity";
+    case "high_relative_contribution":
+      return "High relative contribution";
+    case "uneven_contribution":
+      return "Uneven contribution";
+    case "single_member_group":
+      return "Single-member group";
+    case "needs_instructor_review":
+      return "Needs instructor review";
+    default:
+      return flag.replaceAll("_", " ");
+  }
+}
+
+/** Strip anonymized LLM refs (e.g. "Member C's") when showing reasoning to the member. */
+export function sanitizeLlmReasoning(reasoning: string): string {
+  const cleaned = reasoning
+    .replace(/\bMember [A-Z]+'s\s+/gi, "")
+    .replace(/\bMember [A-Z]+'s\b/gi, "")
+    .replace(/\bMember [A-Z]+\s+/gi, "")
+    .trim();
+  if (!cleaned) {
+    return reasoning;
+  }
+  return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+}
+
 export function mergeGroupWithMembers(detail: Group, listItem?: Group): Group {
   return {
     ...detail,

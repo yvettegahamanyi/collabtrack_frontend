@@ -13,13 +13,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ROUTES } from "@/lib/constants";
 import {
   buildContributionComparison,
-  buildParticipationInsights,
-  classifyBenchmarkTier,
-  computeBenchmarkScoreForUser,
-  computeGroupPlatformAverages,
-  formatBenchmarkScorePercent,
-  getActivePlatforms,
   getMemberRawCounts,
+  mlParticipationScorePercent,
+  platformPercentagesFromScoreFeatures,
 } from "@/lib/student-dashboard";
 import {
   useGroupContributions,
@@ -77,71 +73,33 @@ export function StudentDashboardPage() {
     [members, currentUserId]
   );
 
-  const groupAverages = useMemo(
-    () => computeGroupPlatformAverages(comparisonRows),
-    [comparisonRows]
-  );
-
-  const activePlatforms = useMemo(
-    () => getActivePlatforms(members),
-    [members]
-  );
-
   const currentMember = members.find((member) => member.user_id === currentUserId);
   const currentRow = comparisonRows.find((row) => row.isCurrentUser);
   const ownScore = scoresData?.data.scores.find(
     (score) => score.user_id === currentUserId
   );
 
-  const currentPlatforms = currentRow
-    ? {
-        github: currentRow.github,
-        docs: currentRow.docs,
-        meeting: currentRow.meeting,
-      }
-    : { github: 0, docs: 0, meeting: 0 };
+  const currentPlatforms = ownScore?.features
+    ? platformPercentagesFromScoreFeatures(ownScore.features)
+    : currentRow
+      ? {
+          github: currentRow.github,
+          docs: currentRow.docs,
+          meeting: currentRow.meeting,
+        }
+      : { github: 0, docs: 0, meeting: 0 };
 
   const rawCounts = currentMember
     ? getMemberRawCounts(currentMember)
     : { githubCommits: 0, docEdits: 0 };
 
-  const benchmarkScore = useMemo(
-    () => computeBenchmarkScoreForUser(members, currentUserId),
-    [members, currentUserId]
-  );
+  const contributionScore = ownScore
+    ? mlParticipationScorePercent(ownScore.predicted_score)
+    : null;
 
-  const contributionScore = formatBenchmarkScorePercent(benchmarkScore);
-
-  const contributorTier =
-    ownScore?.contributor_tier ??
-    (benchmarkScore !== null ? classifyBenchmarkTier(benchmarkScore) : null);
-
-  const insights = useMemo(() => {
-    if (!currentMember) return null;
-
-    return buildParticipationInsights(
-      {
-        github: currentPlatforms.github,
-        docs: currentPlatforms.docs,
-        meeting: currentPlatforms.meeting,
-        contributorTier,
-        outlierType: ownScore?.outlier?.outlier_type ?? null,
-        teamArchetype: scoresData?.data.team_archetype?.archetype ?? null,
-      },
-      groupAverages,
-      activePlatforms,
-      members.length
-    );
-  }, [
-    activePlatforms,
-    contributorTier,
-    currentMember,
-    currentPlatforms,
-    groupAverages,
-    members.length,
-    ownScore,
-    scoresData?.data.team_archetype?.archetype,
-  ]);
+  const contributorTier = ownScore?.contributor_tier ?? null;
+  const scoreConfidence = ownScore?.llm_rationale?.confidence ?? null;
+  const topContributionArea = ownScore?.llm_rationale?.top_area ?? null;
 
   const isLoading =
     groupsLoading || (selectedGroupId && contributionsLoading);
@@ -212,9 +170,12 @@ export function StudentDashboardPage() {
           <PlatformMetricCards
             contributionScore={contributionScore}
             contributorTier={contributorTier}
+            scoreConfidence={scoreConfidence}
+            topContributionArea={topContributionArea}
             platforms={currentPlatforms}
             githubCommits={rawCounts.githubCommits}
             docEdits={rawCounts.docEdits}
+            scoresGenerated={Boolean(ownScore)}
           />
 
           <div className="grid gap-6 lg:grid-cols-3">
@@ -232,7 +193,7 @@ export function StudentDashboardPage() {
               contributorTier={contributorTier}
               contributionScore={contributionScore}
               teamArchetype={scoresData?.data.team_archetype}
-              insights={insights}
+              llmRationale={ownScore?.llm_rationale}
               groupId={selectedGroupId}
               scoresGeneratedAt={scoresData?.data.generated_at ?? null}
               hasSyncedData={Boolean(contributions?.last_synced_at)}

@@ -12,12 +12,21 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   contributorTierBadgeVariant,
   contributorTierLabel,
+  llmFlagLabel,
+  participationFeatureLabel,
+  sanitizeLlmReasoning,
+  scoreConfidenceLabel,
+  scoreConfidenceTextClass,
 } from "@/lib/groups";
 import {
   useMemberParticipation,
   useMemberParticipationScore,
 } from "@/service/use-participation";
-import type { GoogleDocSyncEvent, MemberParticipation } from "@/types/participation";
+import type {
+  GithubSyncEvent,
+  GoogleDocSyncEvent,
+  MemberParticipation,
+} from "@/types/participation";
 
 interface ParticipationScoreModalProps {
   groupId: string;
@@ -40,6 +49,10 @@ const FEATURE_LABELS: Record<string, string> = {
   comment_activity: "Comment activity",
 };
 
+function featureLabel(key: string): string {
+  return FEATURE_LABELS[key] ?? participationFeatureLabel(key);
+}
+
 export function ParticipationScoreModal({
   groupId,
   userId,
@@ -60,6 +73,8 @@ export function ParticipationScoreModal({
 
   const participation = data?.data ?? fallback;
   const score = scoreData?.data;
+  const rationale = score?.llm_rationale;
+  const scoreConfidence = rationale?.confidence;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -85,9 +100,22 @@ export function ParticipationScoreModal({
                   <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                     ML participation score
                   </p>
-                  <p className="text-3xl font-bold tabular-nums text-primary">
+                  <p
+                    className={`text-3xl font-bold tabular-nums ${
+                      scoreConfidence != null
+                        ? scoreConfidenceTextClass(scoreConfidence)
+                        : "text-primary"
+                    }`}
+                  >
                     {Math.round(score.predicted_score * 100)}%
                   </p>
+                  {scoreConfidence != null && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {scoreConfidenceLabel(scoreConfidence)} (
+                      {Math.round(scoreConfidence * 100)}%) — how certain the
+                      model is that this score fits the data
+                    </p>
+                  )}
                 </div>
                 <Badge variant={contributorTierBadgeVariant(score.contributor_tier)}>
                   {contributorTierLabel(score.contributor_tier)}
@@ -101,7 +129,7 @@ export function ParticipationScoreModal({
                       className="flex items-center justify-between rounded-lg bg-background px-3 py-2 text-sm"
                     >
                       <dt className="text-muted-foreground">
-                        {FEATURE_LABELS[key] ?? key}
+                        {featureLabel(key)}
                       </dt>
                       <dd className="font-semibold tabular-nums">
                         {Math.round(value * 100)}%
@@ -109,6 +137,34 @@ export function ParticipationScoreModal({
                     </div>
                   ))}
                 </dl>
+              )}
+            </div>
+          )}
+
+          {rationale && (
+            <div className="rounded-xl border bg-muted/20 p-4">
+              <h3 className="mb-3 text-sm font-semibold">Score analysis</h3>
+              {rationale.top_area && (
+                <p className="mb-2 text-sm">
+                  <span className="text-muted-foreground">Strongest area: </span>
+                  <span className="font-medium">
+                    {featureLabel(rationale.top_area)}
+                  </span>
+                </p>
+              )}
+              {rationale.reasoning && (
+                <p className="text-sm leading-relaxed text-muted-foreground">
+                  {sanitizeLlmReasoning(rationale.reasoning)}
+                </p>
+              )}
+              {rationale.flags && rationale.flags.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {rationale.flags.map((flag) => (
+                    <Badge key={flag} variant="outline" className="text-[10px]">
+                      {llmFlagLabel(flag)}
+                    </Badge>
+                  ))}
+                </div>
               )}
             </div>
           )}
@@ -211,6 +267,11 @@ export function ParticipationScoreModal({
                 />
               )}
 
+              {participation.github_events &&
+                participation.github_events.length > 0 && (
+                  <GithubEventsSection events={participation.github_events} />
+                )}
+
               {participation.google_docs_events &&
                 participation.google_docs_events.length > 0 && (
                   <GoogleDocsEventsSection
@@ -228,6 +289,50 @@ export function ParticipationScoreModal({
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function GithubEventsSection({ events }: { events: GithubSyncEvent[] }) {
+  return (
+    <div className="rounded-xl border bg-muted/20 p-4">
+      <h3 className="mb-3 text-sm font-semibold">GitHub — sync breakdown</h3>
+      <p className="mb-3 text-xs text-muted-foreground">
+        Raw events from the GitHub API that contributed to this member&apos;s score.
+      </p>
+      <ul className="max-h-56 space-y-2 overflow-y-auto text-xs">
+        {events.map((event, index) => (
+          <li
+            key={`${event.type}-${event.source_id ?? index}`}
+            className="rounded-lg bg-background px-3 py-2 font-mono"
+          >
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="outline" className="text-[10px] uppercase">
+                {event.type}
+              </Badge>
+              {event.timestamp && (
+                <span className="text-muted-foreground">
+                  {new Date(event.timestamp).toLocaleString()}
+                </span>
+              )}
+            </div>
+            <p className="mt-1 text-muted-foreground">
+              author: {event.author_login ?? "Unknown"}
+              {event.author_email ? ` (${event.author_email})` : ""}
+              {event.match_method ? ` · matched via ${event.match_method}` : ""}
+            </p>
+            {event.type === "commit" && (
+              <p className="text-muted-foreground">
+                +{event.additions ?? 0} / -{event.deletions ?? 0} lines
+                {event.message ? ` · ${event.message.split("\n")[0]}` : ""}
+              </p>
+            )}
+            <p className="text-muted-foreground">
+              source: {event.source_id ?? "—"} · repo: {event.owner}/{event.repo}
+            </p>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 

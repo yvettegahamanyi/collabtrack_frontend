@@ -1,30 +1,26 @@
 "use client";
 
-import { SparklesIcon } from "lucide-react";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { groupPath } from "@/lib/constants";
 import {
   contributorTierBadgeVariant,
   contributorTierLabel,
+  participationFeatureLabel,
+  sanitizeLlmReasoning,
   teamArchetypeBadgeVariant,
   teamArchetypeDescription,
 } from "@/lib/groups";
-import type { ParticipationInsightResult } from "@/lib/student-dashboard";
-import type { TeamArchetype } from "@/types/participation";
+import type { LLMRationale, TeamArchetype } from "@/types/participation";
+import { SparklesIcon } from "lucide-react";
 
 interface ParticipationInsightsCardProps {
   contributorTier: string | null;
   contributionScore: number | null;
   teamArchetype: TeamArchetype | null | undefined;
-  insights: ParticipationInsightResult | null;
+  llmRationale: LLMRationale | null | undefined;
   groupId: string;
   scoresGeneratedAt: string | null;
   hasSyncedData: boolean;
@@ -34,7 +30,7 @@ export function ParticipationInsightsCard({
   contributorTier,
   contributionScore,
   teamArchetype,
-  insights,
+  llmRationale,
   groupId,
   scoresGeneratedAt,
   hasSyncedData,
@@ -84,31 +80,40 @@ export function ParticipationInsightsCard({
         <div className="rounded-lg border bg-muted/40 p-4">
           <p className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-primary">
             <SparklesIcon className="size-4 text-tertiary" />
-            Suggestions
+            Score analysis
           </p>
+
           {!hasSyncedData ? (
             <p className="text-sm text-muted-foreground">
               No participation data synced for this group yet.
             </p>
-          ) : insights && insights.messages.length > 0 ? (
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              {insights.messages.map((message, index) => (
-                <li key={index} className="leading-relaxed">
-                  {message}
-                </li>
-              ))}
-            </ul>
+          ) : llmRationale?.reasoning ? (
+            <div className="space-y-2">
+              {llmRationale.top_area && (
+                <p className="text-sm">
+                  <span className="text-muted-foreground">
+                    Strongest area:{" "}
+                  </span>
+                  <span className="font-medium">
+                    {participationFeatureLabel(llmRationale.top_area)}
+                  </span>
+                </p>
+              )}
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                {sanitizeLlmReasoning(llmRationale.reasoning)}
+              </p>
+            </div>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Sync participation data to receive personalized suggestions.
+              Score analysis will appear once participation scores are generated
+              for this group.
             </p>
           )}
         </div>
 
         {scoresGeneratedAt && (
           <p className="text-xs text-muted-foreground">
-            Scores last generated{" "}
-            {new Date(scoresGeneratedAt).toLocaleString()}.
+            Scores generated {new Date(scoresGeneratedAt).toLocaleString()}.
           </p>
         )}
 

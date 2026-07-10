@@ -341,6 +341,51 @@ export function getMemberRawCounts(member: MemberParticipation): {
   };
 }
 
+/** Platform share cards from persisted ML feature rows (matches backend scoring). */
+export function platformPercentagesFromScoreFeatures(
+  features: Record<string, number>
+): PlatformPercentages {
+  const githubValues: number[] = [];
+  if ((features.code_commits ?? 0) > 0) {
+    githubValues.push(features.code_commits);
+  }
+  if ((features.code_share ?? 0) > 0) {
+    githubValues.push(features.code_share);
+  }
+  if ((features.review_participation ?? 0) > 0) {
+    githubValues.push(features.review_participation);
+  }
+
+  const docsValues: number[] = [];
+  if ((features.docs_contribution_share ?? 0) > 0) {
+    docsValues.push(features.docs_contribution_share);
+  }
+  if ((features.comment_activity ?? 0) > 0) {
+    docsValues.push(features.comment_activity);
+  }
+
+  const meetingValues: number[] = [];
+  if ((features.attendance_ratio ?? 0) > 0) {
+    meetingValues.push(features.attendance_ratio);
+  }
+  if ((features.speaking_participation_ratio ?? 0) > 0) {
+    meetingValues.push(features.speaking_participation_ratio);
+  }
+  if ((features.chat_participation_ratio ?? 0) > 0) {
+    meetingValues.push(features.chat_participation_ratio);
+  }
+
+  return {
+    github: roundPercent(mean(githubValues.length > 0 ? githubValues : [0])),
+    docs: roundPercent(mean(docsValues.length > 0 ? docsValues : [0])),
+    meeting: roundPercent(mean(meetingValues.length > 0 ? meetingValues : [0])),
+  };
+}
+
+export function mlParticipationScorePercent(predictedScore: number): number {
+  return Math.round(predictedScore * 100);
+}
+
 export function meetingActivityLabel(meetingPct: number): string {
   if (meetingPct >= 70) return "Highly Active";
   if (meetingPct >= 40) return "Active";

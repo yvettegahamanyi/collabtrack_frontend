@@ -25,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { statusLabel, canManageGroupResources } from "@/lib/groups";
+import { canManageGroupResources, statusLabel } from "@/lib/groups";
 import { useDeleteGroup, useUpdateGroup } from "@/service/use-groups";
 import { useAuthStore } from "@/stores/auth-store";
 import type { ApiError } from "@/types";
@@ -173,7 +173,7 @@ export function GroupOverviewTab({ group, onDeleted }: GroupOverviewTabProps) {
           </CardContent>
         </Card>
 
-        <Card>
+        {/* <Card>
           <CardHeader>
             <CardTitle>Contribution Weights</CardTitle>
           </CardHeader>
@@ -186,13 +186,10 @@ export function GroupOverviewTab({ group, onDeleted }: GroupOverviewTabProps) {
               contribution reports.
             </p>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
 
-      <LinkResourcesSection
-        groupId={group.id}
-        canManage={canManageResources}
-      />
+      <LinkResourcesSection groupId={group.id} canManage={canManageResources} />
 
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent

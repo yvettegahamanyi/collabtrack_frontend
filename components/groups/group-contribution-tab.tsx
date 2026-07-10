@@ -31,6 +31,9 @@ import {
   contributorTierLabel,
   memberInitials,
   outlierTypeLabel,
+  participationFeatureLabel,
+  scoreConfidenceLabel,
+  scoreConfidenceTextClass,
 } from "@/lib/groups";
 import {
   useGenerateParticipationScores,
@@ -443,9 +446,32 @@ export function GroupContributionTab({
                             <TableCell className="text-right">
                               {score ? (
                                 <div className="flex flex-col items-end gap-1">
-                                  <span className="font-semibold tabular-nums">
+                                  <span
+                                    className={`font-semibold tabular-nums ${
+                                      score.llm_rationale?.confidence != null
+                                        ? scoreConfidenceTextClass(
+                                            score.llm_rationale.confidence
+                                          )
+                                        : ""
+                                    }`}
+                                  >
                                     {formatRatio(score.predicted_score)}
                                   </span>
+                                  {score.llm_rationale?.confidence != null && (
+                                    <span className="text-[10px] text-muted-foreground">
+                                      {scoreConfidenceLabel(
+                                        score.llm_rationale.confidence
+                                      )}
+                                    </span>
+                                  )}
+                                  {score.llm_rationale?.top_area && (
+                                    <span className="max-w-28 truncate text-[10px] text-muted-foreground">
+                                      Top:{" "}
+                                      {participationFeatureLabel(
+                                        score.llm_rationale.top_area
+                                      )}
+                                    </span>
+                                  )}
                                   <Badge
                                     variant={contributorTierBadgeVariant(
                                       score.contributor_tier

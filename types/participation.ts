@@ -24,6 +24,23 @@ export interface GoogleDocSyncEvent {
   timestamp?: string | null;
 }
 
+export interface GithubSyncEvent {
+  type: "commit" | "pr_created" | "pr_reviewed" | "comment";
+  owner: string;
+  repo: string;
+  source_id?: string | null;
+  author_login?: string | null;
+  author_email?: string | null;
+  matched_login?: string | null;
+  matched_email?: string | null;
+  match_method?: string | null;
+  timestamp?: string | null;
+  message?: string | null;
+  additions?: number | null;
+  deletions?: number | null;
+  lines_changed?: number | null;
+}
+
 export interface MeetingEngagementMetrics {
   attendance_ratio: number;
   speaking_ratio: number;
@@ -40,6 +57,7 @@ export interface MemberParticipation {
   github_login?: string | null;
   google_email_matched?: boolean | null;
   github: GitHubMetrics | null;
+  github_events?: GithubSyncEvent[];
   google_docs: GoogleDocsMetrics | null;
   google_docs_events?: GoogleDocSyncEvent[];
   meeting_engagement?: MeetingEngagementMetrics | null;
@@ -96,6 +114,15 @@ export interface TeamArchetype {
   archetype_label: string;
 }
 
+export interface LLMRationale {
+  reasoning: string;
+  top_area: string | null;
+  flags: string[];
+  confidence: number;
+  group_observations?: string;
+  model_version?: string;
+}
+
 export interface ParticipationScore {
   user_id: string;
   name: string | null;
@@ -104,6 +131,7 @@ export interface ParticipationScore {
   features: Record<string, number>;
   generated_at: string;
   outlier?: OutlierDetection | null;
+  llm_rationale?: LLMRationale | null;
 }
 
 export interface ParticipationScoresSummary {
