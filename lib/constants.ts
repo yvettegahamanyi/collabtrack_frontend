@@ -23,6 +23,7 @@ export const ROUTES = {
   privacy: "/privacy",
   terms: "/terms",
   onboarding: "/onboarding",
+  ltiCallback: "/auth/lti-callback",
   admin: "/admin",
   instructor: "/instructor",
   student: "/student",
@@ -33,10 +34,16 @@ export const ROUTES = {
 } as const;
 
 export function groupsListPath(role: Role) {
-  return role === "instructor" ? ROUTES.instructorClasses : ROUTES.studentGroups;
+  return role === "instructor"
+    ? ROUTES.instructorClasses
+    : ROUTES.studentGroups;
 }
 
-export function groupPath(groupId: string, tab?: string, role: Role = "student") {
+export function groupPath(
+  groupId: string,
+  tab?: string,
+  role: Role = "student"
+) {
   const base =
     role === "instructor"
       ? `/instructor/group/${groupId}`
