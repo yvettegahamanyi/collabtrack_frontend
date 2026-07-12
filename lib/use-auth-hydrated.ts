@@ -9,19 +9,36 @@ export function useAuthHydrated() {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    let active = true;
     const persist = useAuthStore.persist;
+
+    const finish = () => {
+      if (active) setHydrated(true);
+    };
+
+    const timeout = window.setTimeout(finish, 1000);
+
     if (!persist) {
-      setHydrated(true);
+      finish();
+      window.clearTimeout(timeout);
       return;
     }
 
-    const unsub = persist.onFinishHydration(() => {
-      setHydrated(true);
+    if (persist.hasHydrated()) {
+      finish();
+      window.clearTimeout(timeout);
+      return;
+    }
+
+    void Promise.resolve(persist.rehydrate()).finally(() => {
+      window.clearTimeout(timeout);
+      finish();
     });
 
-    setHydrated(persist.hasHydrated());
-
-    return unsub;
+    return () => {
+      active = false;
+      window.clearTimeout(timeout);
+    };
   }, []);
 
   return hydrated;

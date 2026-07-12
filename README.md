@@ -1,6 +1,37 @@
+# CollabTrack
+
+**CollabTrack** is a collaboration analytics platform developed at the **African Leadership University (ALU), Kigali campus**. It helps instructors and students see how each member contributes during group assignments by pulling activity from the tools teams already use — **GitHub**, **Google Docs**, and **meeting transcripts/chat** — then turning that activity into per-member contribution scores and explainable reports.
+
+### What CollabTrack does
+
+- **Connects collaboration platforms** — students link GitHub and Google accounts; groups attach repositories and documents to a project.
+- **Captures meeting participation** — a Chrome extension exports Google Meet live captions and chat in CollabTrack’s upload format; attendance and speaking/chat counts are parsed from uploaded files.
+- **Aggregates multi-platform data** — commits, doc edits, reviews, comments, attendance, speaking turns, and chat messages are synced into one group view.
+- **Estimates individual contribution** — a backend ML pipeline (benchmark regression, outlier detection, team clustering, and LLM-generated rationale) produces 0–1 scores and contributor tiers per student.
+- **Surfaces results in dashboards** — instructors manage classes, assignments, and contribution reports; students view their group, integrations, and own participation breakdown.
+
+---
+
+## Positioning and Proposal Alignment
+
+**What the platform demonstrates**
+
+- **Literature-informed indicators** — contribution features align with collaborative learning analytics practice: code activity, document edits, review/comment participation, meeting attendance, speaking turns, and chat engagement.
+- **Unified multi-platform ingestion** — OAuth-linked **GitHub** and **Google Workspace** APIs plus user-uploaded **meeting transcript/chat** files feed a single backend participation model.
+- **End-to-end dashboard workflows** — instructor class/assignment/report flows and student group/integration views on one deployed web app (frontend + backend + PostgreSQL on Railway).
+- **ML-based scoring pipeline** — engineered features → benchmark score prediction → contributor tier classification, with optional outlier flags, team archetype labels, and Gemini-generated reasoning for instructors.
+- **Measurable evaluation evidence** — automated tests (pytest edge cases, Playwright E2E across Chromium/Firefox/WebKit, Locust load tests on production) and report-completeness checks (required platforms, parsed meeting files, generated scores).
+
+**What it does not yet fully demonstrate**
+
+- **Fully automatic** Google Meet capture — the extension assists export, but students still upload files manually in the report wizard.
+- **Campus-wide Moodle/LTI rollout** — Moodle sync exists as integration groundwork but is not the primary evaluated deployment path in scope.
+
+---
+
 # CollabTrack Frontend
 
-Next.js frontend for **CollabTrack** — CollabTrack is a collaboration analytics system that helps make individual contributions in online student group work more visible, trackable, and fairly evaluated.
+This repository is the **Next.js frontend** for that system. The [backend API](https://github.com/yvettegahamanyi/collabtrack_backend), [Chrome extension](https://github.com/yvettegahamanyi/collabtrack_extension), and [Colab team classification notebook](https://colab.research.google.com/drive/1x8Tya-B6-TqggDVnVJf2u85wK_biDo7Z?usp=sharing) complete the full CollabTrack stack.
 
 **Colab notebook:** [Scoring Modal Notebook](https://colab.research.google.com/drive/1x8Tya-B6-TqggDVnVJf2u85wK_biDo7Z?usp=sharing)
 
@@ -8,7 +39,7 @@ Next.js frontend for **CollabTrack** — CollabTrack is a collaboration analytic
 
 **Designs:** [CollabTrack on Figma](https://www.figma.com/design/8ABtyvdgwjShvJcZnGHaVw/CollabTrack?node-id=0-1&t=FrTbk1dqAEqgkY1S-1)
 
-**Demo video:** [Google Drive Video](https://drive.google.com/file/d/1WiNtncC6x5H_uxOI730WvOxP07xOC8eM/view?usp=sharing)
+**Demo video:** [Google Drive Video](https://drive.google.com/file/d/1nwUcfmIy3uYQi1J63FmgSh3CYJzZ6ecP/view?usp=sharing)
 
 ---
 
@@ -136,16 +167,33 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ### Scripts
 
-| Command      | Description              |
-| ------------ | ------------------------ |
-| `pnpm dev`   | Start development server |
-| `pnpm build` | Production build         |
-| `pnpm start` | Start production server  |
-| `pnpm lint`  | Run ESLint               |
+| Command                  | Description                             |
+| ------------------------ | --------------------------------------- |
+| `pnpm dev`               | Start development server                |
+| `pnpm build`             | Production build                        |
+| `pnpm start`             | Start production server                 |
+| `pnpm lint`              | Run ESLint                              |
+| `pnpm test:e2e`          | Run Playwright E2E tests (all browsers) |
+| `pnpm test:e2e:chromium` | Run E2E tests in Chromium only          |
 
 ---
 
-## Related documentation
+## Testing
 
-- [Backend repository](https://github.com/yvettegahamanyi/collabtrack_backend/tree/main)
-- [Figma designs](https://www.figma.com/design/8ABtyvdgwjShvJcZnGHaVw/CollabTrack?node-id=0-1&t=FrTbk1dqAEqgkY1S-1)
+CollabTrack is tested with **Playwright** (E2E, cross-browser), **pytest** (backend unit & edge cases), and **Locust** (load/performance on production). This covers different inputs, edge cases, and performance across software environments.
+
+### Load testing (Locust — production Railway API)
+
+![Locust load test — 100 concurrent users, 0% failures](./docs/testing/Screenshot1.png)
+
+### E2E testing (Playwright — Chromium, Firefox, WebKit)
+
+![Playwright — instructor flows across browsers](./docs/testing/Screenshot2.png)
+
+![Playwright — login edge cases, navigation, and student group creation](./docs/testing/Screenshot3.png)
+
+### Backend testing (pytest — macOS, Python 3.12.7)
+
+![Backend pytest coverage report](./docs/testing/Screenshot4.png)
+
+---
