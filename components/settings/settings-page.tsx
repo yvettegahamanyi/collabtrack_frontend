@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { PageHeader } from "@/components/layout/page-header";
 import { ChangePasswordDialog } from "@/components/settings/change-password-dialog";
 import { IntegrationsCard } from "@/components/settings/integrations-card";
+import { MoodleIntegrationCard } from "@/components/settings/moodle-integration-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,6 +52,9 @@ export function SettingsPage({
   const resolvedShowIntegrations =
     showIntegrations ??
     (user?.role === "student" || user?.role === "instructor");
+
+  const showMoodleIntegration =
+    (role ?? user?.role) === "instructor";
 
   const [name, setName] = useState(user?.name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
@@ -122,6 +126,8 @@ export function SettingsPage({
 
         {resolvedShowIntegrations && <IntegrationsCard />}
       </div>
+
+      {showMoodleIntegration && <MoodleIntegrationCard />}
 
       <SecurityBanner />
 
