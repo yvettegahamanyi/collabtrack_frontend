@@ -5,6 +5,7 @@ import { ChevronLeftIcon, MoreVerticalIcon, PlusIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 
 import { DataTable } from "@/components/data-table";
 import { DataTableStatusBadge } from "@/components/data-table-status-badge";
@@ -21,7 +22,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
+import * as reportsService from "@/service/reports.service";
 import { useAssignment } from "@/service/use-assignments";
+import type { ApiError } from "@/types";
 import type { AssignmentReport } from "@/types/reports";
 
 interface AssignmentDetailPageProps {
@@ -78,6 +81,28 @@ export function AssignmentDetailPage({
     router.push(
       `/instructor/assignments/${assignmentId}/reports/${groupId}?tab=contribution`
     );
+  };
+
+  const handleSyncMoodleGrades = async (report: AssignmentReport) => {
+    try {
+      const response = await reportsService.syncMoodleGrades(
+        assignmentId,
+        report.group_id
+      );
+      const result = response.data;
+      if (result.failed_count > 0 || result.skipped_count > 0) {
+        toast.warning(
+          `${report.group_name ?? "Group"}: synced ${result.synced_count} grade(s) (${result.failed_count} failed, ${result.skipped_count} skipped).`
+        );
+      } else {
+        toast.success(
+          `${report.group_name ?? "Group"}: synced ${result.synced_count} grade(s) to Moodle.`
+        );
+      }
+    } catch (error) {
+      const apiError = error as ApiError;
+      toast.error(apiError.message ?? "Failed to sync grades to Moodle");
+    }
   };
 
   const columns = useMemo<ColumnDef<AssignmentReport>[]>(
@@ -185,6 +210,13 @@ export function AssignmentDetailPage({
                       ? "Add collaboration data"
                       : "Setup collaboration"}
                   </DropdownMenuItem>
+                  {row.original.moodle_grade_sync_available && (
+                    <DropdownMenuItem
+                      onClick={() => handleSyncMoodleGrades(row.original)}
+                    >
+                      Push grades to Moodle
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem
                     render={
                       <Link

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeftIcon, MailIcon } from "lucide-react";
+import { ChevronLeftIcon, GraduationCapIcon, MailIcon } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -12,7 +12,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGroupParticipationScores } from "@/service/use-participation";
-import { useNotifySupervisor, useReport } from "@/service/use-reports";
+import {
+  useNotifySupervisor,
+  useReport,
+  useSyncMoodleGrades,
+} from "@/service/use-reports";
 import type { ApiError } from "@/types";
 import type { Group } from "@/types/groups";
 
@@ -27,11 +31,15 @@ export function AssignmentReportDetailPage({
 }: AssignmentReportDetailPageProps) {
   const { data, isLoading, isError } = useReport(assignmentId, groupId);
   const notifySupervisor = useNotifySupervisor(assignmentId, groupId);
+  const syncMoodleGrades = useSyncMoodleGrades(assignmentId, groupId);
   const { data: scoresData } = useGroupParticipationScores(groupId);
 
   const report = data?.data;
   const teamArchetype = scoresData?.data.team_archetype;
   const analyzedMemberCount = scoresData?.data.scores.length;
+  const hasParticipationScores = (scoresData?.data.scores.length ?? 0) > 0;
+  const canSyncMoodleGrades =
+    Boolean(report?.moodle_grade_sync_available) && hasParticipationScores;
 
   const handleNotify = async () => {
     try {
@@ -40,6 +48,25 @@ export function AssignmentReportDetailPage({
     } catch (error) {
       const apiError = error as ApiError;
       toast.error(apiError.message ?? "Failed to send notification");
+    }
+  };
+
+  const handleSyncMoodleGrades = async () => {
+    try {
+      const response = await syncMoodleGrades.mutateAsync();
+      const result = response.data;
+      if (result.failed_count > 0 || result.skipped_count > 0) {
+        toast.warning(
+          `Synced ${result.synced_count} grade(s) to Moodle (${result.failed_count} failed, ${result.skipped_count} skipped).`
+        );
+      } else {
+        toast.success(
+          `Synced ${result.synced_count} grade(s) to the Moodle gradebook.`
+        );
+      }
+    } catch (error) {
+      const apiError = error as ApiError;
+      toast.error(apiError.message ?? "Failed to sync grades to Moodle");
     }
   };
 
@@ -89,16 +116,30 @@ export function AssignmentReportDetailPage({
         title={report.group_name ?? `Group ${report.group_number}`}
         description="Contribution report for this assignment group."
         action={
-          report.report_status === "READY" ? (
-            <Button
-              variant="outline"
-              onClick={handleNotify}
-              disabled={notifySupervisor.isPending}
-            >
-              <MailIcon />
-              {report.notification_sent_at ? "Resend Email" : "Email Instructor"}
-            </Button>
-          ) : undefined
+          <div className="flex flex-wrap gap-2">
+            {canSyncMoodleGrades && (
+              <Button
+                variant="outline"
+                onClick={handleSyncMoodleGrades}
+                disabled={syncMoodleGrades.isPending}
+              >
+                <GraduationCapIcon />
+                {syncMoodleGrades.isPending
+                  ? "Syncing…"
+                  : "Push to Moodle"}
+              </Button>
+            )}
+            {report.report_status === "READY" ? (
+              <Button
+                variant="outline"
+                onClick={handleNotify}
+                disabled={notifySupervisor.isPending}
+              >
+                <MailIcon />
+                {report.notification_sent_at ? "Resend Email" : "Email Instructor"}
+              </Button>
+            ) : null}
+          </div>
         }
       />
 

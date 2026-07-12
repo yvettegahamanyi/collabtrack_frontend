@@ -77,6 +77,21 @@ export function useSetupReport(assignmentId: string, groupId: string) {
   });
 }
 
+export function useSyncMoodleGrades(assignmentId: string, groupId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => reportsService.syncMoodleGrades(assignmentId, groupId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.reports.list(assignmentId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.reports.detail(assignmentId, groupId),
+      });
+    },
+  });
+}
+
 export function useNotifySupervisor(assignmentId: string, groupId: string) {
   const queryClient = useQueryClient();
   return useMutation({

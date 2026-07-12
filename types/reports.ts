@@ -21,6 +21,27 @@ export interface AssignmentReport {
   contribution_report_status: ContributionReportStatus | null;
   notification_sent_at: string | null;
   has_collaboration_resources?: boolean;
+  moodle_grade_sync_available?: boolean;
+}
+
+export interface MoodleGradeSyncStudentResult {
+  user_id: string;
+  student_name: string;
+  moodle_user_id: string | null;
+  score_given: number | null;
+  status: "synced" | "skipped" | "failed";
+  message: string | null;
+}
+
+export interface MoodleGradeSyncResult {
+  group_id: string;
+  assignment_id: string;
+  score_maximum: number;
+  synced_count: number;
+  failed_count: number;
+  skipped_count: number;
+  results: MoodleGradeSyncStudentResult[];
+  synced_at: string;
 }
 
 export interface AssignmentReportDetail extends AssignmentReport {
@@ -71,3 +92,4 @@ export type ReportsResponse = ApiResponse<AssignmentReport[]>;
 export type ReportDetailResponse = ApiResponse<AssignmentReportDetail>;
 export type CreateReportResponse = ApiResponse<CreateReportResult>;
 export type SetupReportResponse = ApiResponse<SetupReportResult>;
+export type MoodleGradeSyncResponse = ApiResponse<MoodleGradeSyncResult>;

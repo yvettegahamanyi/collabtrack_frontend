@@ -7,6 +7,7 @@ import type {
   ReportsResponse,
   SetupReportPayload,
   SetupReportResponse,
+  MoodleGradeSyncResponse,
 } from "@/types/reports";
 
 export function previewMembers(assignmentId: string, membersFile: File) {
@@ -56,6 +57,12 @@ export function setupReport(
   return api.postForm<SetupReportResponse>(
     `/assignments/${assignmentId}/reports/${groupId}/setup`,
     form
+  );
+}
+
+export function syncMoodleGrades(assignmentId: string, groupId: string) {
+  return api.post<MoodleGradeSyncResponse>(
+    `/assignments/${assignmentId}/reports/${groupId}/sync-moodle-grades`
   );
 }
 
