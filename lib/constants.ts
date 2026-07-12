@@ -15,6 +15,15 @@ export const ROLE_HOME: Record<Role, string> = {
   student: "/student",
 };
 
+export const MOODLE_LTI_CONFIG = {
+  loginUrl:
+    "https://collabtrackbackend-production.up.railway.app/lti/login",
+  launchUrl:
+    "https://collabtrackbackend-production.up.railway.app/lti/launch",
+  jwksUrl: "https://collabtrackbackend-production.up.railway.app/lti/jwks",
+  clientId: "109uiWnZTEO1GIO",
+} as const;
+
 export const ROUTES = {
   home: "/",
   login: "/login",
