@@ -10,6 +10,7 @@ import { DataTable } from "@/components/data-table";
 import { DataTableStatusBadge } from "@/components/data-table-status-badge";
 import { PageHeader } from "@/components/layout/page-header";
 import { CreateAssignmentReportWizard } from "@/components/reports/create-assignment-report-wizard";
+import { SetupGroupCollaborationWizard } from "@/components/reports/setup-group-collaboration-wizard";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -56,11 +57,24 @@ export function AssignmentDetailPage({
   const router = useRouter();
   const { data, isLoading, isError } = useAssignment(assignmentId);
   const [wizardOpen, setWizardOpen] = useState(false);
+  const [setupReport, setSetupReport] = useState<AssignmentReport | null>(null);
+  const [setupOpen, setSetupOpen] = useState(false);
 
   const assignment = data?.data;
   const reports = assignment?.reports ?? [];
 
   const handleReportCreated = (groupId: string) => {
+    router.push(
+      `/instructor/assignments/${assignmentId}/reports/${groupId}?tab=contribution`
+    );
+  };
+
+  const handleOpenSetup = (report: AssignmentReport) => {
+    setSetupReport(report);
+    setSetupOpen(true);
+  };
+
+  const handleSetupComplete = (groupId: string) => {
     router.push(
       `/instructor/assignments/${assignmentId}/reports/${groupId}?tab=contribution`
     );
@@ -164,6 +178,13 @@ export function AssignmentDetailPage({
               />
               <DropdownMenuContent align="end">
                 <DropdownMenuGroup>
+                  <DropdownMenuItem
+                    onClick={() => handleOpenSetup(row.original)}
+                  >
+                    {row.original.has_collaboration_resources
+                      ? "Add collaboration data"
+                      : "Setup collaboration"}
+                  </DropdownMenuItem>
                   <DropdownMenuItem
                     render={
                       <Link
@@ -275,6 +296,14 @@ export function AssignmentDetailPage({
         open={wizardOpen}
         onOpenChange={setWizardOpen}
         onCreated={handleReportCreated}
+      />
+
+      <SetupGroupCollaborationWizard
+        assignmentId={assignmentId}
+        report={setupReport}
+        open={setupOpen}
+        onOpenChange={setSetupOpen}
+        onComplete={handleSetupComplete}
       />
     </div>
   );

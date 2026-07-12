@@ -5,6 +5,8 @@ import type {
   MembersPreviewResponse,
   ReportDetailResponse,
   ReportsResponse,
+  SetupReportPayload,
+  SetupReportResponse,
 } from "@/types/reports";
 
 export function previewMembers(assignmentId: string, membersFile: File) {
@@ -31,6 +33,28 @@ export function createReport(assignmentId: string, payload: CreateReportPayload)
 
   return api.postForm<CreateReportResponse>(
     `/assignments/${assignmentId}/reports`,
+    form
+  );
+}
+
+export function setupReport(
+  assignmentId: string,
+  groupId: string,
+  payload: SetupReportPayload
+) {
+  const form = new FormData();
+  form.append("github_urls", JSON.stringify(payload.github_urls));
+  form.append("google_doc_urls", JSON.stringify(payload.google_doc_urls));
+
+  payload.meeting_files.forEach((files, index) => {
+    form.append(`meeting_${index}_transcript`, files.transcript);
+    if (files.chat) {
+      form.append(`meeting_${index}_chat`, files.chat);
+    }
+  });
+
+  return api.postForm<SetupReportResponse>(
+    `/assignments/${assignmentId}/reports/${groupId}/setup`,
     form
   );
 }

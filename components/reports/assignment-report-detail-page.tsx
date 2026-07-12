@@ -112,7 +112,7 @@ export function AssignmentReportDetailPage({
                 : "secondary"
           }
         >
-          {report.report_status ?? "PROCESSING"}
+          {report.report_status ?? "DRAFT"}
         </Badge>
         {report.notification_sent_at && (
           <Badge variant="outline">Email sent</Badge>
@@ -136,7 +136,8 @@ export function AssignmentReportDetailPage({
         </Card>
       )}
 
-      {(report.report_status === "READY" || report.report_status === "PROCESSING") && (
+      {(report.report_status === "READY" ||
+        report.report_status === "PROCESSING") && (
         <>
           {teamArchetype && (
             <TeamArchetypeCard

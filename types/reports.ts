@@ -20,6 +20,7 @@ export interface AssignmentReport {
   contribution_report_id: string | null;
   contribution_report_status: ContributionReportStatus | null;
   notification_sent_at: string | null;
+  has_collaboration_resources?: boolean;
 }
 
 export interface AssignmentReportDetail extends AssignmentReport {
@@ -28,6 +29,15 @@ export interface AssignmentReportDetail extends AssignmentReport {
 
 export interface CreateReportPayload {
   members: MemberInput[];
+  github_urls: string[];
+  google_doc_urls: string[];
+  meeting_files: Array<{
+    transcript: File;
+    chat: File | null;
+  }>;
+}
+
+export interface SetupReportPayload {
   github_urls: string[];
   google_doc_urls: string[];
   meeting_files: Array<{
@@ -46,9 +56,18 @@ export interface CreateReportResult {
   meetings_created: number;
 }
 
+export interface SetupReportResult {
+  group_id: string;
+  group_name: string | null;
+  report_status: ReportStatus;
+  resources_linked: number;
+  meetings_queued: number;
+}
+
 export type MembersPreviewResponse = ApiResponse<{
   members: MemberInput[];
 }>;
 export type ReportsResponse = ApiResponse<AssignmentReport[]>;
 export type ReportDetailResponse = ApiResponse<AssignmentReportDetail>;
 export type CreateReportResponse = ApiResponse<CreateReportResult>;
+export type SetupReportResponse = ApiResponse<SetupReportResult>;

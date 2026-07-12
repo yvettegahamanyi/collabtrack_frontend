@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { queryKeys } from "@/lib/query-keys";
 import * as reportsService from "@/service/reports.service";
-import type { CreateReportPayload } from "@/types/reports";
+import type { CreateReportPayload, SetupReportPayload } from "@/types/reports";
 
 export function useReports(assignmentId: string) {
   return useQuery({
@@ -45,6 +45,32 @@ export function useCreateReport(assignmentId: string) {
       });
       queryClient.invalidateQueries({
         queryKey: queryKeys.assignments.detail(assignmentId),
+      });
+      queryClient.invalidateQueries({ queryKey: queryKeys.instructor.all });
+    },
+  });
+}
+
+export function useSetupReport(assignmentId: string, groupId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (payload: SetupReportPayload) =>
+      reportsService.setupReport(assignmentId, groupId, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.reports.list(assignmentId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.reports.detail(assignmentId, groupId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.assignments.detail(assignmentId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.participation.repos(groupId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.participation.documents(groupId),
       });
       queryClient.invalidateQueries({ queryKey: queryKeys.instructor.all });
     },
