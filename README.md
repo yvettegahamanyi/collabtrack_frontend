@@ -31,11 +31,15 @@
 
 # CollabTrack Frontend
 
-This repository is the **Next.js frontend** for that system. The [backend API](https://github.com/yvettegahamanyi/collabtrack_backend), [Chrome extension](https://github.com/yvettegahamanyi/collabtrack_extension), and [Colab team classification notebook](https://colab.research.google.com/drive/1x8Tya-B6-TqggDVnVJf2u85wK_biDo7Z?usp=sharing) complete the full CollabTrack stack.
+This repository is the **Next.js frontend** for that system. The [backend API](https://github.com/yvettegahamanyi/collabtrack_backend), and [Chrome extension](https://github.com/yvettegahamanyi/collabtrack_extension) complete the full CollabTrack stack.
 
-**Colab notebook:** [Scoring Modal Notebook](https://colab.research.google.com/drive/1x8Tya-B6-TqggDVnVJf2u85wK_biDo7Z?usp=sharing)
+<!-- , and [Colab team classification notebook](https://colab.research.google.com/drive/1x8Tya-B6-TqggDVnVJf2u85wK_biDo7Z?usp=sharing)  -->
+
+<!-- **Colab notebook:** [Scoring Modal Notebook](https://colab.research.google.com/drive/1x8Tya-B6-TqggDVnVJf2u85wK_biDo7Z?usp=sharing) -->
 
 **Backend repository:** [collabtrack_backend](https://github.com/yvettegahamanyi/collabtrack_backend)
+
+**Extension repository:** [extension](https://github.com/yvettegahamanyi/collabtrack_extension)
 
 **Designs:** [CollabTrack on Figma](https://www.figma.com/design/8ABtyvdgwjShvJcZnGHaVw/CollabTrack?node-id=0-1&t=FrTbk1dqAEqgkY1S-1)
 
