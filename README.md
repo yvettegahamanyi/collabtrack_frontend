@@ -39,7 +39,7 @@ This repository is the **Next.js frontend** for that system. The [backend API](h
 
 **Designs:** [CollabTrack on Figma](https://www.figma.com/design/8ABtyvdgwjShvJcZnGHaVw/CollabTrack?node-id=0-1&t=FrTbk1dqAEqgkY1S-1)
 
-**Demo video:** [Google Drive Video](https://drive.google.com/file/d/1WiNtncC6x5H_uxOI730WvOxP07xOC8eM/view?usp=sharing)
+**Demo video:** [Google Drive Video](https://drive.google.com/file/d/1nwUcfmIy3uYQi1J63FmgSh3CYJzZ6ecP/view?usp=sharing)
 
 ---
 
