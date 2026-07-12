@@ -1,12 +1,12 @@
 "use client";
 
-import { Trash2Icon } from "lucide-react";
+import { DownloadIcon, PuzzleIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { LinkResourcesSection } from "@/components/groups/link-resources-section";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
@@ -26,6 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { canManageGroupResources, statusLabel } from "@/lib/groups";
+import { cn } from "@/lib/utils";
 import { useDeleteGroup, useUpdateGroup } from "@/service/use-groups";
 import { useAuthStore } from "@/stores/auth-store";
 import type { ApiError } from "@/types";
@@ -173,20 +174,58 @@ export function GroupOverviewTab({ group, onDeleted }: GroupOverviewTabProps) {
           </CardContent>
         </Card>
 
-        {/* <Card>
+        <Card>
           <CardHeader>
-            <CardTitle>Contribution Weights</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <PuzzleIcon className="size-4 text-primary" />
+              Google Meet Extension
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            <WeightRow label="GitHub" value={group.git_weight} />
-            <WeightRow label="Documents" value={group.doc_weight} />
-            <WeightRow label="Transcripts" value={group.transcript_weight} />
+          <CardContent className="space-y-4 text-sm">
+            <p className="text-muted-foreground">
+              Install the CollabTrack Chrome extension to capture meeting
+              transcripts and chat from Google Meet, then upload the exported
+              files when generating contribution reports.
+            </p>
+
+            <a
+              href="/collabtrack-extension.zip"
+              download
+              className={cn(buttonVariants(), "w-full")}
+            >
+              <DownloadIcon className="size-4" />
+              Download Extension
+            </a>
+
+            <div className="space-y-2">
+              <p className="text-xs font-semibold uppercase text-muted-foreground">
+                Installation steps
+              </p>
+              <ol className="list-decimal space-y-1.5 pl-4 text-xs text-muted-foreground">
+                <li>Download and unzip the extension file above</li>
+                <li>Open Chrome and go to <code>chrome://extensions</code></li>
+                <li>Enable Developer Mode (toggle in the top right)</li>
+                <li>
+                  Click Load unpacked and select the unzipped folder that
+                  contains <code>manifest.json</code>
+                </li>
+                <li>
+                  Join your Google Meet, enable captions (Ctrl+Shift+C), and open
+                  chat during the meeting
+                </li>
+                <li>
+                  Click the CollabTrack extension icon after the meeting to
+                  export <code>transcript.txt</code> and <code>chat.txt</code>
+                </li>
+              </ol>
+            </div>
+
             <p className="text-xs text-muted-foreground">
-              Weights are configured by your instructor and used when generating
-              contribution reports.
+              After exporting, upload both files in the contribution report
+              wizard for this group.
             </p>
           </CardContent>
-        </Card> */}
+        </Card>
       </div>
 
       <LinkResourcesSection groupId={group.id} canManage={canManageResources} />
@@ -258,17 +297,6 @@ export function GroupOverviewTab({ group, onDeleted }: GroupOverviewTabProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
-  );
-}
-
-function WeightRow({ label, value }: { label: string; value: number | null }) {
-  return (
-    <div className="flex items-center justify-between">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="font-medium">
-        {value != null ? `${value}%` : "Not set"}
-      </span>
     </div>
   );
 }
