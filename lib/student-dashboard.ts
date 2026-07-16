@@ -25,7 +25,6 @@ export interface ActivePlatforms {
 export interface StudentPlatformProfile extends PlatformPercentages {
   contributorTier: string | null;
   outlierType: string | null;
-  teamArchetype: string | null;
 }
 
 export type PlatformLevel = "low" | "average" | "high";

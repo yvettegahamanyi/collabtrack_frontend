@@ -108,10 +108,12 @@ export interface OutlierDetection {
   outlier_type: "typical" | "free_rider" | "over_contributor" | "unusual_profile" | string;
 }
 
-export interface TeamArchetype {
+export interface StudentCluster {
   cluster_id: number;
-  archetype: string;
-  archetype_label: string;
+  cluster_key: string;
+  cluster_label: string;
+  composite_score?: number;
+  active_platforms?: string[];
 }
 
 export interface LLMRationale {
@@ -131,6 +133,7 @@ export interface ParticipationScore {
   features: Record<string, number>;
   generated_at: string;
   outlier?: OutlierDetection | null;
+  student_cluster?: StudentCluster | null;
   llm_rationale?: LLMRationale | null;
 }
 
@@ -139,7 +142,6 @@ export interface ParticipationScoresSummary {
   generated_at: string;
   scores: ParticipationScore[];
   warnings?: string[];
-  team_archetype?: TeamArchetype | null;
 }
 
 export type ParticipationScoresResponse = ApiResponse<ParticipationScoresSummary>;

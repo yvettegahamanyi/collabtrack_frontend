@@ -75,33 +75,46 @@ export function outlierBadgeVariant(
   }
 }
 
-export function teamArchetypeDescription(archetype: string): string {
-  switch (archetype) {
-    case "balanced_team":
-      return "Members contribute evenly across code, docs, and meetings.";
-    case "one_dominant_contributor":
-      return "One member carries most of the workload — high variance across the team.";
-    case "uniformly_disengaged":
-      return "Some members are not participating in the group.";
-    case "high_performing_cohesive":
-      return "Members are actively participating in the group.";
+export function studentClusterDescription(clusterKey: string): string {
+  switch (clusterKey) {
+    case "free_rider":
+      return "Contribution is well below the group average across measured channels.";
+    case "normal_contributor":
+      return "Contribution is around the group average across measured channels.";
+    case "over_contributor":
+      return "Contribution is clearly above the group average across measured channels.";
+    case "insufficient_data":
+      return "Not enough measured activity on any platform to classify this student.";
     default:
-      return "Team collaboration pattern identified from aggregated member features.";
+      return "Contribution style identified from collaboration feature patterns.";
   }
 }
 
-export function teamArchetypeBadgeVariant(
-  archetype: string
+export function studentClusterPlatformLabel(platform: string): string {
+  switch (platform) {
+    case "code":
+      return "GitHub";
+    case "meetings":
+      return "Meetings";
+    case "communication":
+      return "Docs & chat";
+    default:
+      return platform.replace(/_/g, " ");
+  }
+}
+
+export function studentClusterBadgeVariant(
+  clusterKey: string
 ): "default" | "secondary" | "outline" | "destructive" {
-  switch (archetype) {
-    case "high_performing_cohesive":
-      return "default";
-    case "balanced_team":
-      return "secondary";
-    case "one_dominant_contributor":
-      return "outline";
-    case "uniformly_disengaged":
+  switch (clusterKey) {
+    case "free_rider":
       return "destructive";
+    case "normal_contributor":
+      return "secondary";
+    case "over_contributor":
+      return "default";
+    case "insufficient_data":
+      return "outline";
     default:
       return "secondary";
   }

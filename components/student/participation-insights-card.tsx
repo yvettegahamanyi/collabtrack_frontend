@@ -10,16 +10,13 @@ import {
   contributorTierLabel,
   participationFeatureLabel,
   sanitizeLlmReasoning,
-  teamArchetypeBadgeVariant,
-  teamArchetypeDescription,
 } from "@/lib/groups";
-import type { LLMRationale, TeamArchetype } from "@/types/participation";
+import type { LLMRationale } from "@/types/participation";
 import { SparklesIcon } from "lucide-react";
 
 interface ParticipationInsightsCardProps {
   contributorTier: string | null;
   contributionScore: number | null;
-  teamArchetype: TeamArchetype | null | undefined;
   llmRationale: LLMRationale | null | undefined;
   groupId: string;
   scoresGeneratedAt: string | null;
@@ -29,7 +26,6 @@ interface ParticipationInsightsCardProps {
 export function ParticipationInsightsCard({
   contributorTier,
   contributionScore,
-  teamArchetype,
   llmRationale,
   groupId,
   scoresGeneratedAt,
@@ -62,20 +58,6 @@ export function ParticipationInsightsCard({
             </p>
           )}
         </div>
-
-        {teamArchetype && (
-          <div className="space-y-2">
-            <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
-              Group pattern
-            </p>
-            <Badge variant={teamArchetypeBadgeVariant(teamArchetype.archetype)}>
-              {teamArchetype.archetype_label}
-            </Badge>
-            <p className="text-sm text-muted-foreground">
-              {teamArchetypeDescription(teamArchetype.archetype)}
-            </p>
-          </div>
-        )}
 
         <div className="rounded-lg border bg-muted/40 p-4">
           <p className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-primary">

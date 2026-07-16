@@ -27,13 +27,11 @@ import {
 import { ROUTES } from "@/lib/constants";
 import {
   canGenerateParticipationScores,
-  contributorTierBadgeVariant,
   contributorTierLabel,
   memberInitials,
   outlierTypeLabel,
-  participationFeatureLabel,
-  scoreConfidenceLabel,
   scoreConfidenceTextClass,
+  studentClusterBadgeVariant,
 } from "@/lib/groups";
 import {
   useGenerateParticipationScores,
@@ -76,6 +74,9 @@ export function GroupContributionTab({
   );
   const hasScores = scores.length > 0;
   const hasOutlierInsights = scores.some((score) => score.outlier != null);
+  const hasStudentClusterInsights = scores.some(
+    (score) => score.student_cluster != null
+  );
   const hasMeetingFromScores = scores.some(
     (score) => (score.features.attendance_ratio ?? 0) > 0
   );
@@ -156,6 +157,7 @@ export function GroupContributionTab({
       "Doc Edits",
       "Doc Comments",
       ...(hasScores ? ["Participation Score", "Contributor Tier"] : []),
+      ...(hasStudentClusterInsights ? ["Contribution Style"] : []),
       ...(hasOutlierInsights
         ? ["Outlier Flag", "Outlier Type", "Anomaly Score"]
         : []),
@@ -180,6 +182,9 @@ export function GroupContributionTab({
               score ? `${Math.round(score.predicted_score * 100)}%` : "",
               score ? contributorTierLabel(score.contributor_tier) : "",
             ]
+          : []),
+        ...(hasStudentClusterInsights
+          ? [score?.student_cluster?.cluster_label ?? ""]
           : []),
         ...(hasOutlierInsights
           ? [
@@ -356,41 +361,41 @@ export function GroupContributionTab({
               <p className="mb-3 text-xs text-muted-foreground lg:hidden">
                 Swipe horizontally to see all metrics.
               </p>
-              <div className="-mx-4 overflow-x-auto px-4 sm:-mx-6 sm:px-6">
+              <div className="-mx-4 px-4 sm:-mx-6 sm:px-6">
                 <Table className="min-w-4xl">
                   <TableHeader>
-                    <TableRow>
-                      <TableHead className="sticky left-0 z-10 min-w-36 bg-card shadow-[4px_0_8px_-4px_rgba(0,0,0,0.08)]">
+                    <TableRow className="border-b-0 hover:bg-transparent">
+                      <TableHead className="sticky left-0 z-10 min-w-44 bg-muted/50 px-4 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.06)]">
                         Member
                       </TableHead>
                       {hasScores && (
-                        <TableHead className="text-right">Score</TableHead>
+                        <TableHead className="px-4 text-right">Score</TableHead>
                       )}
-                      {/* {hasOutlierInsights && (
-                        <TableHead>Outlier</TableHead>
-                      )} */}
-                      <TableHead className="text-right">Commits</TableHead>
-                      <TableHead className="hidden text-right md:table-cell">
+                      {hasStudentClusterInsights && (
+                        <TableHead className="px-4">Style</TableHead>
+                      )}
+                      <TableHead className="px-4 text-right">Commits</TableHead>
+                      <TableHead className="hidden px-4 text-right md:table-cell">
                         Lines
                       </TableHead>
-                      <TableHead className="hidden text-right lg:table-cell">
+                      <TableHead className="hidden px-4 text-right lg:table-cell">
                         PRs
                       </TableHead>
-                      <TableHead className="hidden text-right lg:table-cell">
+                      <TableHead className="hidden px-4 text-right lg:table-cell">
                         Doc Edits
                       </TableHead>
-                      <TableHead className="hidden text-right xl:table-cell">
+                      <TableHead className="hidden px-4 text-right xl:table-cell">
                         Comments
                       </TableHead>
                       {hasMeetingEngagement && (
                         <>
-                          <TableHead className="text-right">
+                          <TableHead className="px-4 text-right">
                             Attendance
                           </TableHead>
-                          <TableHead className="hidden text-right md:table-cell">
+                          <TableHead className="hidden px-4 text-right md:table-cell">
                             Speaking
                           </TableHead>
-                          <TableHead className="hidden text-right lg:table-cell">
+                          <TableHead className="hidden px-4 text-right lg:table-cell">
                             Chat
                           </TableHead>
                         </>
@@ -422,11 +427,11 @@ export function GroupContributionTab({
                       return (
                         <TableRow
                           key={member.user_id}
-                          className="cursor-pointer hover:bg-muted/50"
+                          className="group cursor-pointer transition-colors hover:bg-muted/40"
                           onClick={() => setSelectedMember(member)}
                         >
-                          <TableCell className="sticky left-0 z-10 min-w-36 bg-card whitespace-normal shadow-[4px_0_8px_-4px_rgba(0,0,0,0.08)]">
-                            <div className="flex items-center gap-2 sm:gap-3">
+                          <TableCell className="sticky left-0 z-10 min-w-44 bg-card px-4 py-3 whitespace-normal shadow-[4px_0_8px_-4px_rgba(0,0,0,0.06)] group-hover:bg-muted/40">
+                            <div className="flex items-center gap-3">
                               <Avatar size="sm" className="shrink-0">
                                 <AvatarFallback>
                                   {memberInitials(member.name)}
@@ -443,48 +448,37 @@ export function GroupContributionTab({
                             </div>
                           </TableCell>
                           {hasScores && (
-                            <TableCell className="text-right">
+                            <TableCell className="px-4 py-3 text-right">
                               {score ? (
-                                <div className="flex flex-col items-end gap-1">
-                                  <span
-                                    className={`font-semibold tabular-nums ${
-                                      score.llm_rationale?.confidence != null
-                                        ? scoreConfidenceTextClass(
-                                            score.llm_rationale.confidence
-                                          )
-                                        : ""
-                                    }`}
-                                  >
-                                    {formatRatio(score.predicted_score)}
-                                  </span>
-                                  {score.llm_rationale?.confidence != null && (
-                                    <span className="text-[10px] text-muted-foreground">
-                                      {scoreConfidenceLabel(
-                                        score.llm_rationale.confidence
-                                      )}
-                                    </span>
-                                  )}
-                                  {score.llm_rationale?.top_area && (
-                                    <span className="max-w-28 truncate text-[10px] text-muted-foreground">
-                                      Top:{" "}
-                                      {participationFeatureLabel(
-                                        score.llm_rationale.top_area
-                                      )}
-                                    </span>
-                                  )}
-                                  <Badge
-                                    variant={contributorTierBadgeVariant(
-                                      score.contributor_tier
-                                    )}
-                                    className="text-[10px]"
-                                  >
-                                    {contributorTierLabel(
-                                      score.contributor_tier
-                                    )}
-                                  </Badge>
-                                </div>
+                                <span
+                                  className={`text-base font-semibold tabular-nums ${
+                                    score.llm_rationale?.confidence != null
+                                      ? scoreConfidenceTextClass(
+                                          score.llm_rationale.confidence
+                                        )
+                                      : "text-foreground"
+                                  }`}
+                                >
+                                  {formatRatio(score.predicted_score)}
+                                </span>
                               ) : (
-                                "—"
+                                <span className="text-muted-foreground">—</span>
+                              )}
+                            </TableCell>
+                          )}
+                          {hasStudentClusterInsights && (
+                            <TableCell className="px-4 py-3">
+                              {score?.student_cluster ? (
+                                <Badge
+                                  variant={studentClusterBadgeVariant(
+                                    score.student_cluster.cluster_key
+                                  )}
+                                  className="whitespace-nowrap"
+                                >
+                                  {score.student_cluster.cluster_label}
+                                </Badge>
+                              ) : (
+                                <span className="text-muted-foreground">—</span>
                               )}
                             </TableCell>
                           )}
@@ -512,37 +506,71 @@ export function GroupContributionTab({
                               )}
                             </TableCell>
                           )} */}
-                          <TableCell className="text-right tabular-nums">
-                            {gh?.total_commits ?? "—"}
+                          <TableCell className="px-4 py-3 text-right font-medium tabular-nums">
+                            {gh?.total_commits ?? (
+                              <span className="font-normal text-muted-foreground">
+                                —
+                              </span>
+                            )}
                           </TableCell>
-                          <TableCell className="hidden text-right tabular-nums md:table-cell">
-                            {gh?.lines_changed ?? "—"}
+                          <TableCell className="hidden px-4 py-3 text-right font-medium tabular-nums md:table-cell">
+                            {gh?.lines_changed ?? (
+                              <span className="font-normal text-muted-foreground">
+                                —
+                              </span>
+                            )}
                           </TableCell>
-                          <TableCell className="hidden text-right tabular-nums lg:table-cell">
-                            {gh ? `${gh.prs_created}/${gh.prs_reviewed}` : "—"}
+                          <TableCell className="hidden px-4 py-3 text-right font-medium tabular-nums lg:table-cell">
+                            {gh ? (
+                              `${gh.prs_created}/${gh.prs_reviewed}`
+                            ) : (
+                              <span className="font-normal text-muted-foreground">
+                                —
+                              </span>
+                            )}
                           </TableCell>
-                          <TableCell className="hidden text-right tabular-nums lg:table-cell">
-                            {docs?.edits ?? "—"}
+                          <TableCell className="hidden px-4 py-3 text-right font-medium tabular-nums lg:table-cell">
+                            {docs?.edits ?? (
+                              <span className="font-normal text-muted-foreground">
+                                —
+                              </span>
+                            )}
                           </TableCell>
-                          <TableCell className="hidden text-right tabular-nums xl:table-cell">
-                            {totalComments || "—"}
+                          <TableCell className="hidden px-4 py-3 text-right font-medium tabular-nums xl:table-cell">
+                            {totalComments || (
+                              <span className="font-normal text-muted-foreground">
+                                —
+                              </span>
+                            )}
                           </TableCell>
                           {hasMeetingEngagement && (
                             <>
-                              <TableCell className="text-right tabular-nums">
-                                {meeting
-                                  ? formatRatio(meeting.attendance_ratio)
-                                  : "—"}
+                              <TableCell className="px-4 py-3 text-right font-medium tabular-nums">
+                                {meeting ? (
+                                  formatRatio(meeting.attendance_ratio)
+                                ) : (
+                                  <span className="font-normal text-muted-foreground">
+                                    —
+                                  </span>
+                                )}
                               </TableCell>
-                              <TableCell className="hidden text-right tabular-nums md:table-cell">
-                                {meeting
-                                  ? formatRatio(meeting.speaking_ratio)
-                                  : "—"}
+                              <TableCell className="hidden px-4 py-3 text-right font-medium tabular-nums md:table-cell">
+                                {meeting ? (
+                                  formatRatio(meeting.speaking_ratio)
+                                ) : (
+                                  <span className="font-normal text-muted-foreground">
+                                    —
+                                  </span>
+                                )}
                               </TableCell>
-                              <TableCell className="hidden text-right tabular-nums lg:table-cell">
-                                {meeting
-                                  ? formatRatio(meeting.chat_participation)
-                                  : "—"}
+                              <TableCell className="hidden px-4 py-3 text-right font-medium tabular-nums lg:table-cell">
+                                {meeting ? (
+                                  formatRatio(meeting.chat_participation)
+                                ) : (
+                                  <span className="font-normal text-muted-foreground">
+                                    —
+                                  </span>
+                                )}
                               </TableCell>
                             </>
                           )}

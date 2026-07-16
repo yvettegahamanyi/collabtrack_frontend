@@ -192,7 +192,6 @@ export function StudentDashboardPage() {
             <ParticipationInsightsCard
               contributorTier={contributorTier}
               contributionScore={contributionScore}
-              teamArchetype={scoresData?.data.team_archetype}
               llmRationale={ownScore?.llm_rationale}
               groupId={selectedGroupId}
               scoresGeneratedAt={scoresData?.data.generated_at ?? null}

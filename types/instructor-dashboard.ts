@@ -32,21 +32,12 @@ export interface DashboardAssignmentAction {
   status: AssignmentStatus;
 }
 
-export interface TeamClassificationCount {
-  archetype: string;
-  label: string;
-  count: number;
-}
-
 export interface InstructorDashboard {
   summary: DashboardSummary;
   recent_reports: DashboardReportRow[];
   all_reports: DashboardReportRow[];
   failed_reports: DashboardReportRow[];
   assignments_without_reports: DashboardAssignmentAction[];
-  team_classifications: TeamClassificationCount[];
-  classified_group_count: number;
-  unclassified_group_count: number;
 }
 
 export type InstructorDashboardResponse = ApiResponse<InstructorDashboard>;

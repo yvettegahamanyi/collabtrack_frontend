@@ -5,7 +5,6 @@ import Link from "next/link";
 import { toast } from "sonner";
 
 import { GroupContributionTab } from "@/components/groups/group-contribution-tab";
-import { TeamArchetypeCard } from "@/components/groups/team-archetype-card";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -35,8 +34,6 @@ export function AssignmentReportDetailPage({
   const { data: scoresData } = useGroupParticipationScores(groupId);
 
   const report = data?.data;
-  const teamArchetype = scoresData?.data.team_archetype;
-  const analyzedMemberCount = scoresData?.data.scores.length;
   const hasParticipationScores = (scoresData?.data.scores.length ?? 0) > 0;
   const canSyncMoodleGrades =
     Boolean(report?.moodle_grade_sync_available) && hasParticipationScores;
@@ -124,9 +121,7 @@ export function AssignmentReportDetailPage({
                 disabled={syncMoodleGrades.isPending}
               >
                 <GraduationCapIcon />
-                {syncMoodleGrades.isPending
-                  ? "Syncing…"
-                  : "Push to Moodle"}
+                {syncMoodleGrades.isPending ? "Syncing…" : "Push to Moodle"}
               </Button>
             )}
             {report.report_status === "READY" ? (
@@ -136,7 +131,9 @@ export function AssignmentReportDetailPage({
                 disabled={notifySupervisor.isPending}
               >
                 <MailIcon />
-                {report.notification_sent_at ? "Resend Email" : "Email Instructor"}
+                {report.notification_sent_at
+                  ? "Resend Email"
+                  : "Email Instructor"}
               </Button>
             ) : null}
           </div>
@@ -149,8 +146,8 @@ export function AssignmentReportDetailPage({
             report.report_status === "READY"
               ? "default"
               : report.report_status === "FAILED"
-                ? "destructive"
-                : "secondary"
+              ? "destructive"
+              : "secondary"
           }
         >
           {report.report_status ?? "DRAFT"}
@@ -179,18 +176,10 @@ export function AssignmentReportDetailPage({
 
       {(report.report_status === "READY" ||
         report.report_status === "PROCESSING") && (
-        <>
-          {teamArchetype && (
-            <TeamArchetypeCard
-              teamArchetype={teamArchetype}
-              memberCount={analyzedMemberCount}
-            />
-          )}
-          <GroupContributionTab
-            group={groupForTab}
-            reportStatus={report.report_status}
-          />
-        </>
+        <GroupContributionTab
+          group={groupForTab}
+          reportStatus={report.report_status}
+        />
       )}
     </div>
   );

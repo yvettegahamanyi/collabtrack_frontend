@@ -17,6 +17,9 @@ import {
   sanitizeLlmReasoning,
   scoreConfidenceLabel,
   scoreConfidenceTextClass,
+  studentClusterBadgeVariant,
+  studentClusterDescription,
+  studentClusterPlatformLabel,
 } from "@/lib/groups";
 import {
   useMemberParticipation,
@@ -121,6 +124,40 @@ export function ParticipationScoreModal({
                   {contributorTierLabel(score.contributor_tier)}
                 </Badge>
               </div>
+              {score.student_cluster && (
+                <div className="mt-4 rounded-lg border bg-background p-3">
+                  <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                    Contribution style
+                  </p>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <Badge
+                      variant={studentClusterBadgeVariant(
+                        score.student_cluster.cluster_key
+                      )}
+                    >
+                      {score.student_cluster.cluster_label}
+                    </Badge>
+                  </div>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {studentClusterDescription(score.student_cluster.cluster_key)}
+                  </p>
+                  {score.student_cluster.active_platforms &&
+                    score.student_cluster.active_platforms.length > 0 && (
+                      <p className="mt-2 text-xs text-muted-foreground">
+                        Active platforms for this team:{" "}
+                        {score.student_cluster.active_platforms
+                          .map(studentClusterPlatformLabel)
+                          .join(", ")}
+                      </p>
+                    )}
+                  {typeof score.student_cluster.composite_score === "number" && (
+                    <p className="mt-1 text-xs tabular-nums text-muted-foreground">
+                      Composite score:{" "}
+                      {score.student_cluster.composite_score.toFixed(2)}
+                    </p>
+                  )}
+                </div>
+              )}
               {Object.keys(score.features).length > 0 && (
                 <dl className="mt-4 grid gap-2 sm:grid-cols-2">
                   {Object.entries(score.features).map(([key, value]) => (

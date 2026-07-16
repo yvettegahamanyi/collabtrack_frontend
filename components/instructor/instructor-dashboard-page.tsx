@@ -13,7 +13,6 @@ import { useState } from "react";
 
 import { CreateClassDialog } from "@/components/classes/create-class-dialog";
 import { FailedReportsDialog } from "@/components/instructor/failed-reports-dialog";
-import { TeamClassificationChart } from "@/components/instructor/team-classification-chart";
 import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -39,9 +38,6 @@ export function InstructorDashboardPage() {
   const summary = dashboard?.summary;
   const recentReports = dashboard?.recent_reports ?? [];
   const failedReports = dashboard?.failed_reports ?? [];
-  const teamClassifications = dashboard?.team_classifications ?? [];
-  const classifiedGroupCount = dashboard?.classified_group_count ?? 0;
-  const unclassifiedGroupCount = dashboard?.unclassified_group_count ?? 0;
   const assignmentsWithoutReports =
     dashboard?.assignments_without_reports ?? [];
 
@@ -55,10 +51,7 @@ export function InstructorDashboardPage() {
           ))}
         </div>
         <Skeleton className="h-64 w-full rounded-xl" />
-        <div className="grid gap-6 lg:grid-cols-3">
-          <Skeleton className="h-80 w-full rounded-xl lg:col-span-2" />
-          <Skeleton className="h-80 w-full rounded-xl" />
-        </div>
+        <Skeleton className="h-48 w-full rounded-xl" />
       </div>
     );
   }
@@ -172,83 +165,51 @@ export function InstructorDashboardPage() {
             </CardContent>
           </Card>
 
-          <div className="grid gap-6 lg:grid-cols-3">
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <CardTitle>Team Classifications</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Distribution of collaboration patterns across groups with
-                  participation scores.
-                  {classifiedGroupCount > 0
-                    ? ` ${classifiedGroupCount} group${
-                        classifiedGroupCount === 1 ? "" : "s"
-                      } classified.`
-                    : ""}
-                </p>
-              </CardHeader>
-              <CardContent>
-                <TeamClassificationChart
-                  data={teamClassifications}
-                  classifiedGroupCount={classifiedGroupCount}
-                  unclassifiedGroupCount={unclassifiedGroupCount}
-                />
-              </CardContent>
-            </Card>
+          <Card className="flex flex-col justify-between bg-primary text-primary-foreground">
+            <CardHeader>
+              <CardTitle className="text-primary-foreground">
+                Quick Actions
+              </CardTitle>
+              <p className="text-sm text-primary-foreground/80">
+                Jump to common tasks for managing classes and contribution
+                reports.
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Link href="/instructor/classes" className="block">
+                <Button variant="secondary" className="w-full">
+                  Manage classes
+                </Button>
+              </Link>
 
-            <Card className="flex flex-col justify-between bg-primary text-primary-foreground">
-              <CardHeader>
-                <CardTitle className="text-primary-foreground">
-                  Quick Actions
-                </CardTitle>
-                <p className="text-sm text-primary-foreground/80">
-                  Jump to common tasks for managing classes and contribution
-                  reports.
-                </p>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Link href="/instructor/classes" className="block">
-                  <Button variant="secondary" className="w-full">
-                    Manage classes
-                  </Button>
-                </Link>
-                {/* <Button
-                  variant="secondary"
-                  className="w-full"
-                  onClick={() => setCreateClassOpen(true)}
-                >
-                  <PlusIcon />
-                  New class
-                </Button> */}
-
-                {assignmentsWithoutReports.length > 0 && (
-                  <div className="space-y-2 border-t border-primary-foreground/20 pt-4">
-                    <p className="text-xs font-semibold tracking-wide text-primary-foreground/80 uppercase">
-                      Assignments without reports
-                    </p>
-                    <ul className="space-y-2">
-                      {assignmentsWithoutReports
-                        .slice(0, 4)
-                        .map((assignment) => (
-                          <li key={assignment.id}>
-                            <Link
-                              href={`/instructor/assignments/${assignment.id}`}
-                              className="block rounded-md bg-primary-foreground/10 px-3 py-2 text-sm transition-colors hover:bg-primary-foreground/15"
-                            >
-                              <span className="font-medium">
-                                {assignment.title}
-                              </span>
-                              <span className="mt-0.5 block text-xs text-primary-foreground/70">
-                                {assignment.class_name}
-                              </span>
-                            </Link>
-                          </li>
-                        ))}
-                    </ul>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+              {assignmentsWithoutReports.length > 0 && (
+                <div className="space-y-2 border-t border-primary-foreground/20 pt-4">
+                  <p className="text-xs font-semibold tracking-wide text-primary-foreground/80 uppercase">
+                    Assignments without reports
+                  </p>
+                  <ul className="space-y-2">
+                    {assignmentsWithoutReports
+                      .slice(0, 4)
+                      .map((assignment) => (
+                        <li key={assignment.id}>
+                          <Link
+                            href={`/instructor/assignments/${assignment.id}`}
+                            className="block rounded-md bg-primary-foreground/10 px-3 py-2 text-sm transition-colors hover:bg-primary-foreground/15"
+                          >
+                            <span className="font-medium">
+                              {assignment.title}
+                            </span>
+                            <span className="mt-0.5 block text-xs text-primary-foreground/70">
+                              {assignment.class_name}
+                            </span>
+                          </Link>
+                        </li>
+                      ))}
+                  </ul>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </>
       )}
 
