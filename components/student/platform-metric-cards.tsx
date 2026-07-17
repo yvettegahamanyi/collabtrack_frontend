@@ -11,20 +11,20 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import {
-  contributorTierBadgeVariant,
-  contributorTierLabel,
   participationFeatureLabel,
   scoreConfidenceLabel,
   scoreConfidenceTextClass,
+  studentClusterBadgeVariant,
 } from "@/lib/groups";
 import {
   meetingActivityLabel,
   type PlatformPercentages,
 } from "@/lib/student-dashboard";
+import type { StudentCluster } from "@/types/participation";
 
 interface PlatformMetricCardsProps {
   contributionScore: number | null;
-  contributorTier: string | null;
+  studentCluster: StudentCluster | null | undefined;
   scoreConfidence: number | null;
   topContributionArea: string | null;
   platforms: PlatformPercentages;
@@ -82,7 +82,7 @@ function MetricCard({
 
 export function PlatformMetricCards({
   contributionScore,
-  contributorTier,
+  studentCluster,
   scoreConfidence,
   topContributionArea,
   platforms,
@@ -116,10 +116,12 @@ export function PlatformMetricCards({
               {scoreConfidenceLabel(scoreConfidence)}
             </p>
           )}
-          {contributorTier && (
+          {studentCluster?.cluster_label && (
             <div className="mt-3 flex justify-center">
-              <Badge variant={contributorTierBadgeVariant(contributorTier)}>
-                {contributorTierLabel(contributorTier)}
+              <Badge
+                variant={studentClusterBadgeVariant(studentCluster.cluster_key)}
+              >
+                {studentCluster.cluster_label}
               </Badge>
             </div>
           )}

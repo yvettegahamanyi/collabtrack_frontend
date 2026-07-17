@@ -29,7 +29,6 @@ import {
   canGenerateParticipationScores,
   contributorTierLabel,
   memberInitials,
-  outlierTypeLabel,
   scoreConfidenceTextClass,
   studentClusterBadgeVariant,
 } from "@/lib/groups";
@@ -73,7 +72,6 @@ export function GroupContributionTab({
     scores.map((score) => [score.user_id, score])
   );
   const hasScores = scores.length > 0;
-  const hasOutlierInsights = scores.some((score) => score.outlier != null);
   const hasStudentClusterInsights = scores.some(
     (score) => score.student_cluster != null
   );
@@ -158,9 +156,6 @@ export function GroupContributionTab({
       "Doc Comments",
       ...(hasScores ? ["Participation Score", "Contributor Tier"] : []),
       ...(hasStudentClusterInsights ? ["Contribution Style"] : []),
-      ...(hasOutlierInsights
-        ? ["Outlier Flag", "Outlier Type", "Anomaly Score"]
-        : []),
       ...(hasMeetingEngagement
         ? ["Attendance", "Speaking", "Chat", "Meeting Leads"]
         : []),
@@ -185,15 +180,6 @@ export function GroupContributionTab({
           : []),
         ...(hasStudentClusterInsights
           ? [score?.student_cluster?.cluster_label ?? ""]
-          : []),
-        ...(hasOutlierInsights
-          ? [
-              score?.outlier?.is_outlier ? "Yes" : score ? "No" : "",
-              score?.outlier
-                ? outlierTypeLabel(score.outlier.outlier_type)
-                : "",
-              score?.outlier ? score.outlier.anomaly_score.toFixed(3) : "",
-            ]
           : []),
         ...(hasMeetingEngagement
           ? [
@@ -482,30 +468,6 @@ export function GroupContributionTab({
                               )}
                             </TableCell>
                           )}
-                          {/* {hasOutlierInsights && (
-                            <TableCell>
-                              {score?.outlier ? (
-                                <div className="flex flex-col gap-1">
-                                  <Badge
-                                    variant={outlierBadgeVariant(
-                                      score.outlier.outlier_type,
-                                      score.outlier.is_outlier
-                                    )}
-                                    className="w-fit text-[10px]"
-                                  >
-                                    {outlierTypeLabel(score.outlier.outlier_type)}
-                                  </Badge>
-                                  {score.outlier.is_outlier && (
-                                    <span className="text-[11px] tabular-nums text-muted-foreground">
-                                      {score.outlier.anomaly_score.toFixed(2)}
-                                    </span>
-                                  )}
-                                </div>
-                              ) : (
-                                "—"
-                              )}
-                            </TableCell>
-                          )} */}
                           <TableCell className="px-4 py-3 text-right font-medium tabular-nums">
                             {gh?.total_commits ?? (
                               <span className="font-normal text-muted-foreground">

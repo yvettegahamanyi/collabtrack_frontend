@@ -102,12 +102,6 @@ export type GroupReposResponse = ApiResponse<GroupGithubRepo[]>;
 export type GroupDocumentsResponse = ApiResponse<GroupGoogleDoc[]>;
 export type SyncGroupResponse = ApiResponse<SyncGroupData>;
 
-export interface OutlierDetection {
-  is_outlier: boolean;
-  anomaly_score: number;
-  outlier_type: "typical" | "free_rider" | "over_contributor" | "unusual_profile" | string;
-}
-
 export interface StudentCluster {
   cluster_id: number;
   cluster_key: string;
@@ -132,7 +126,6 @@ export interface ParticipationScore {
   contributor_tier: "strong" | "average" | "below" | string;
   features: Record<string, number>;
   generated_at: string;
-  outlier?: OutlierDetection | null;
   student_cluster?: StudentCluster | null;
   llm_rationale?: LLMRationale | null;
 }

@@ -24,7 +24,6 @@ export interface ActivePlatforms {
 
 export interface StudentPlatformProfile extends PlatformPercentages {
   contributorTier: string | null;
-  outlierType: string | null;
 }
 
 export type PlatformLevel = "low" | "average" | "high";
@@ -260,19 +259,17 @@ export function buildParticipationInsights(
 
   const messages: string[] = [];
   const isBelowTier = profile.contributorTier === "below";
-  const isFreeRider = profile.outlierType === "free_rider";
-  const isOverContributor = profile.outlierType === "over_contributor";
   const allAverage =
     platformLevels.length > 0 &&
     platformLevels.every((item) => item.level === "average");
 
-  if (isBelowTier || isFreeRider || lowPlatforms.length > 0) {
+  if (isBelowTier || lowPlatforms.length > 0) {
     for (const { platform } of lowPlatforms) {
       messages.push(
         `Your ${PLATFORM_LABELS[platform]} participation is lower than your teammates. ${LOW_SUGGESTIONS[platform]}`
       );
     }
-    if (lowPlatforms.length === 0 && (isBelowTier || isFreeRider)) {
+    if (lowPlatforms.length === 0 && isBelowTier) {
       messages.push(
         "Your overall contribution is below your teammates. Try increasing activity across GitHub, docs, and meetings."
       );
@@ -280,9 +277,7 @@ export function buildParticipationInsights(
   }
 
   const carryingLoad =
-    isOverContributor ||
-    veryHighPlatforms.length > 0 ||
-    highPlatforms.length >= 2;
+    veryHighPlatforms.length > 0 || highPlatforms.length >= 2;
 
   if (carryingLoad) {
     const dominantPlatforms =

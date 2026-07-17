@@ -100,7 +100,7 @@ export function StudentDashboardPage() {
     ? mlParticipationScorePercent(ownScore.predicted_score)
     : null;
 
-  const contributorTier = ownScore?.contributor_tier ?? null;
+  const studentCluster = ownScore?.student_cluster ?? null;
   const scoreConfidence = ownScore?.llm_rationale?.confidence ?? null;
   const topContributionArea = ownScore?.llm_rationale?.top_area ?? null;
 
@@ -168,7 +168,7 @@ export function StudentDashboardPage() {
         <>
           <PlatformMetricCards
             contributionScore={contributionScore}
-            contributorTier={contributorTier}
+            studentCluster={studentCluster}
             scoreConfidence={scoreConfidence}
             topContributionArea={topContributionArea}
             platforms={currentPlatforms}
@@ -194,7 +194,7 @@ export function StudentDashboardPage() {
             )}
 
             <ParticipationInsightsCard
-              contributorTier={contributorTier}
+              studentCluster={studentCluster}
               contributionScore={contributionScore}
               llmRationale={ownScore?.llm_rationale}
               groupId={selectedGroupId}

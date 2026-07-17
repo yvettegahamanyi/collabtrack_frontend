@@ -47,34 +47,6 @@ export function contributorTierBadgeVariant(
   }
 }
 
-export function outlierTypeLabel(type: string): string {
-  switch (type) {
-    case "free_rider":
-      return "Free-rider risk";
-    case "over_contributor":
-      return "Over-contributor";
-    case "unusual_profile":
-      return "Unusual profile";
-    default:
-      return "Typical";
-  }
-}
-
-export function outlierBadgeVariant(
-  outlierType: string,
-  isOutlier: boolean
-): "default" | "secondary" | "outline" | "destructive" {
-  if (!isOutlier) return "outline";
-  switch (outlierType) {
-    case "free_rider":
-      return "destructive";
-    case "over_contributor":
-      return "default";
-    default:
-      return "secondary";
-  }
-}
-
 export function studentClusterDescription(clusterKey: string): string {
   switch (clusterKey) {
     case "free_rider":

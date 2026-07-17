@@ -7,15 +7,14 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { groupPath } from "@/lib/constants";
 import {
-  contributorTierBadgeVariant,
-  contributorTierLabel,
   participationFeatureLabel,
   sanitizeLlmReasoning,
+  studentClusterBadgeVariant,
 } from "@/lib/groups";
-import type { LLMRationale } from "@/types/participation";
+import type { LLMRationale, StudentCluster } from "@/types/participation";
 
 interface ParticipationInsightsCardProps {
-  contributorTier: string | null;
+  studentCluster: StudentCluster | null | undefined;
   contributionScore: number | null;
   llmRationale: LLMRationale | null | undefined;
   groupId: string;
@@ -24,7 +23,7 @@ interface ParticipationInsightsCardProps {
 }
 
 export function ParticipationInsightsCard({
-  contributorTier,
+  studentCluster,
   contributionScore,
   llmRationale,
   groupId,
@@ -41,10 +40,12 @@ export function ParticipationInsightsCard({
           <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
             Your classification
           </p>
-          {contributorTier ? (
+          {studentCluster?.cluster_label ? (
             <div className="flex flex-wrap items-center gap-2">
-              <Badge variant={contributorTierBadgeVariant(contributorTier)}>
-                {contributorTierLabel(contributorTier)}
+              <Badge
+                variant={studentClusterBadgeVariant(studentCluster.cluster_key)}
+              >
+                {studentCluster.cluster_label}
               </Badge>
               {contributionScore !== null && (
                 <span className="text-sm text-muted-foreground">
