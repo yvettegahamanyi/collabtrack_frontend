@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { SparklesIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,7 +13,6 @@ import {
   sanitizeLlmReasoning,
 } from "@/lib/groups";
 import type { LLMRationale } from "@/types/participation";
-import { SparklesIcon } from "lucide-react";
 
 interface ParticipationInsightsCardProps {
   contributorTier: string | null;

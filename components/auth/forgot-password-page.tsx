@@ -111,11 +111,11 @@ export function ForgotPasswordPage() {
           priority
           style={{ width: 52, height: "auto" }}
         />
-        <h1 className="mt-3 text-2xl font-semibold text-primary">{APP_NAME}</h1>
+        <h1 className="font-heading mt-3 text-2xl font-bold text-primary">{APP_NAME}</h1>
         <p className="text-sm text-muted-foreground">Reset your password</p>
       </div>
 
-      <Card className="shadow-lg">
+      <Card className="surface-card shadow-lg">
         <CardContent>
           {step === "email" && (
             <form onSubmit={handleRequestCode} className="space-y-4">

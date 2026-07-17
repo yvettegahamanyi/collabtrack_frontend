@@ -16,7 +16,7 @@ interface StatCardProps {
 
 export function StatCard({ label, value, icon: Icon, hint }: StatCardProps) {
   return (
-    <Card>
+    <Card className="surface-card">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardDescription>{label}</CardDescription>

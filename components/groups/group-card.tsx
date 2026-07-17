@@ -47,7 +47,7 @@ export function GroupCard({
   const overflow = members.length - visibleMembers.length;
 
   return (
-    <Card className="transition-shadow hover:shadow-md">
+    <Card className="surface-card-interactive">
       <CardContent className="space-y-4">
         <div className="flex items-start justify-between gap-2">
           <Badge variant={statusBadgeVariant(group.assignment_status)}>

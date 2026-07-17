@@ -29,7 +29,7 @@ export function Logo({
         style={{ width: size, height: "auto" }}
       />
       {showWordmark && (
-        <span className="text-lg font-semibold tracking-tight text-foreground">
+        <span className="font-heading text-lg font-semibold tracking-tight text-foreground">
           {APP_NAME}
         </span>
       )}

@@ -9,6 +9,7 @@ import { CreateClassDialog } from "@/components/classes/create-class-dialog";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useClasses, useDeleteClass } from "@/service/use-classes";
 import type { ApiError } from "@/types";
@@ -70,18 +71,17 @@ export function ClassesPage() {
       )}
 
       {!isLoading && !isError && classes.length === 0 && (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
-            <BookOpenIcon className="size-10 text-muted-foreground" />
-            <p className="text-muted-foreground">
-              No classes yet. Create your first class to get started.
-            </p>
+        <EmptyState
+          icon={BookOpenIcon}
+          title="No classes yet"
+          description="Create your first class to add assignments and generate contribution reports."
+          action={
             <Button onClick={() => setCreateOpen(true)}>
               <PlusIcon />
               Create Class
             </Button>
-          </CardContent>
-        </Card>
+          }
+        />
       )}
 
       {!isLoading && !isError && classes.length > 0 && (
@@ -89,7 +89,7 @@ export function ClassesPage() {
           {classes.map((courseClass) => (
             <Card
               key={courseClass.id}
-              className="flex flex-col transition-shadow hover:shadow-md"
+              className="surface-card flex flex-col transition-shadow hover:shadow-md"
             >
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg leading-snug">

@@ -78,14 +78,8 @@ export function MeetingEngagementSummary({
         },
       },
       {
-        accessorKey: "meeting_lead_count",
-        header: "Lead count",
-        meta: { align: "right", exportLabel: "Lead count" },
-      },
-      {
         id: "sessions",
-        accessorFn: (row) =>
-          `${row.sessions_attended}/${row.total_sessions}`,
+        accessorFn: (row) => `${row.sessions_attended}/${row.total_sessions}`,
         header: "Sessions",
         meta: {
           align: "right",
@@ -112,7 +106,9 @@ export function MeetingEngagementSummary({
             Aggregated across {report.total_sessions} session
             {report.total_sessions === 1 ? "" : "s"}
             {report.last_updated &&
-              ` · Last updated ${new Date(report.last_updated).toLocaleString()}`}
+              ` · Last updated ${new Date(
+                report.last_updated
+              ).toLocaleString()}`}
           </p>
         )}
       </CardHeader>

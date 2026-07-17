@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRightIcon, PlusIcon } from "lucide-react";
+import { ChevronRightIcon, PlusIcon, UsersIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -11,6 +11,7 @@ import { GroupCard } from "@/components/groups/group-card";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { groupPath, ROUTES } from "@/lib/constants";
 import { sortGroupsByNewest, splitGroups } from "@/lib/groups";
@@ -64,10 +65,12 @@ export function GroupsPage({ role, canCreate = false }: GroupsPageProps) {
     router.push(groupPath(group.id, "members", role));
   };
 
-  const emptyMessage =
+  const emptyTitle =
+    role === "instructor" ? "No groups yet" : "No active groups yet";
+  const emptyDescription =
     role === "instructor"
-      ? "No groups yet. Accept an invitation link to join a project group."
-      : "No active groups yet. Create one to get started.";
+      ? "Accept an invitation link to join a project group as an instructor."
+      : "Create a group or accept an invitation to start collaborating.";
 
   return (
     <div className="space-y-6">
@@ -110,20 +113,19 @@ export function GroupsPage({ role, canCreate = false }: GroupsPageProps) {
               Active Groups
             </h2>
             {active.length === 0 ? (
-              <Card>
-                <CardContent className="py-10 text-center">
-                  <p className="text-muted-foreground">{emptyMessage}</p>
-                  {canCreate && (
-                    <Button
-                      className="mt-4"
-                      onClick={() => setCreateOpen(true)}
-                    >
+              <EmptyState
+                icon={UsersIcon}
+                title={emptyTitle}
+                description={emptyDescription}
+                action={
+                  canCreate ? (
+                    <Button onClick={() => setCreateOpen(true)}>
                       <PlusIcon />
                       Create New Group
                     </Button>
-                  )}
-                </CardContent>
-              </Card>
+                  ) : undefined
+                }
+              />
             ) : (
               <div className="grid gap-4 md:grid-cols-2">
                 {active.map((group) => (

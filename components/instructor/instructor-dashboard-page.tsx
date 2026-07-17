@@ -17,6 +17,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatRelativeTime } from "@/lib/groups";
 import {
@@ -82,22 +83,17 @@ export function InstructorDashboardPage() {
       />
 
       {hasNoClasses ? (
-        <Card className="border-dashed">
-          <CardContent className="flex flex-col items-center gap-3 py-16 text-center">
-            <BookOpenIcon className="size-10 text-muted-foreground" />
-            <div>
-              <h2 className="text-lg font-semibold">No classes yet</h2>
-              <p className="mt-1 max-w-md text-sm text-muted-foreground">
-                Create a class, add assignments, and generate contribution
-                reports to see insights here.
-              </p>
-            </div>
+        <EmptyState
+          icon={BookOpenIcon}
+          title="No classes yet"
+          description="Create a class, add assignments, and generate contribution reports to see insights here."
+          action={
             <Button onClick={() => setCreateClassOpen(true)}>
               <PlusIcon />
               Create Class
             </Button>
-          </CardContent>
-        </Card>
+          }
+        />
       ) : (
         <>
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -135,7 +131,7 @@ export function InstructorDashboardPage() {
             />
           </div>
 
-          <Card>
+          <Card className="surface-card">
             <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0 pb-3">
               <div>
                 <CardTitle className="text-lg">Recent Reports</CardTitle>
@@ -151,10 +147,12 @@ export function InstructorDashboardPage() {
             </CardHeader>
             <CardContent>
               {recentReports.length === 0 ? (
-                <div className="rounded-lg border border-dashed py-10 text-center text-sm text-muted-foreground">
-                  No reports yet. Open an assignment and upload attendance to
-                  create your first group report.
-                </div>
+                <EmptyState
+                  icon={FileTextIcon}
+                  title="No reports yet"
+                  description="Open an assignment and upload attendance to create your first group report."
+                  className="py-10"
+                />
               ) : (
                 <div className="divide-y rounded-lg border">
                   {recentReports.map((report) => (
@@ -165,7 +163,7 @@ export function InstructorDashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="flex flex-col justify-between bg-primary text-primary-foreground">
+          <Card className="surface-card flex flex-col justify-between bg-primary text-primary-foreground shadow-md">
             <CardHeader>
               <CardTitle className="text-primary-foreground">
                 Quick Actions
@@ -282,9 +280,13 @@ function SummaryCard({
   return (
     <Card
       className={cn(
-        isAttention && "border-destructive/30 bg-destructive/5",
+        "surface-card overflow-hidden",
+        !isAttention &&
+          "bg-gradient-to-br from-primary/5 via-card to-secondary/10",
+        isAttention &&
+          "border-destructive/30 bg-gradient-to-br from-destructive/10 via-card to-card",
         isClickable &&
-          "cursor-pointer transition-shadow hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          "surface-card-interactive cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
       )}
       onClick={onClick}
       onKeyDown={

@@ -67,23 +67,25 @@ export default function LoginPage() {
 
   return (
     <AuthLayout>
-      <div className="mb-8 flex flex-col items-center text-center">
-        <Image
-          src="/images/collabTrackLogo.png"
-          alt={`${APP_NAME} logo`}
-          width={52}
-          height={52}
-          priority
-          style={{ width: 52, height: "auto" }}
-        />
-        <h1 className="mt-3 text-2xl font-semibold text-primary">{APP_NAME}</h1>
-        <p className="text-sm text-muted-foreground">
-          Academic Analytics Portal
-        </p>
-      </div>
-
-      <Card className="shadow-lg">
+      <Card className="px-2 py-8 shadow-lg">
         <CardContent>
+          <div className="mb-7 flex flex-col items-center text-center">
+            <Image
+              src="/images/collabTrackLogo.png"
+              alt={`${APP_NAME} logo`}
+              width={48}
+              height={48}
+              priority
+              style={{ width: 48, height: "auto" }}
+            />
+            <h1 className="font-heading mt-3 text-xl font-semibold text-primary">
+              {APP_NAME}
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Academic Analytics Portal
+            </p>
+          </div>
+
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-1.5">
               <Label

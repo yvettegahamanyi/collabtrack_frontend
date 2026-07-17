@@ -1,13 +1,19 @@
 "use client";
 
-import { DownloadIcon, PuzzleIcon, Trash2Icon } from "lucide-react";
+import { DownloadIcon, PuzzleIcon, SaveIcon, Trash2Icon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { LinkResourcesSection } from "@/components/groups/link-resources-section";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -85,66 +91,92 @@ export function GroupOverviewTab({ group, onDeleted }: GroupOverviewTabProps) {
   return (
     <div className="space-y-6">
       <div className="grid gap-6 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <CardHeader>
+        <Card className="surface-card lg:col-span-2">
+          <CardHeader className="border-b border-border/60 pb-4">
             <CardTitle>Group Details</CardTitle>
+            <CardDescription>
+              Update your group name, description, and assignment status.
+            </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6 pt-6">
             {isOwner ? (
               <>
-                <div className="space-y-1.5">
-                  <Label htmlFor="edit-name">Group name</Label>
-                  <Input
-                    id="edit-name"
-                    value={groupName}
-                    onChange={(e) => setGroupName(e.target.value)}
-                    disabled={updateGroup.isPending}
-                  />
+                <div className="space-y-4 rounded-xl border border-border/60 bg-muted/20 p-4 sm:p-5">
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="edit-name"
+                      className="text-xs font-semibold tracking-wide text-muted-foreground uppercase"
+                    >
+                      Group name
+                    </Label>
+                    <Input
+                      id="edit-name"
+                      value={groupName}
+                      onChange={(e) => setGroupName(e.target.value)}
+                      disabled={updateGroup.isPending}
+                      className="h-11 bg-background"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="edit-description"
+                      className="text-xs font-semibold tracking-wide text-muted-foreground uppercase"
+                    >
+                      Description
+                    </Label>
+                    <textarea
+                      id="edit-description"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      disabled={updateGroup.isPending}
+                      rows={4}
+                      className="flex min-h-[112px] w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                      Assignment status
+                    </Label>
+                    <Select
+                      value={assignmentStatus}
+                      onValueChange={(value) =>
+                        setAssignmentStatus(value as AssignmentStatus)
+                      }
+                      disabled={updateGroup.isPending}
+                    >
+                      <SelectTrigger className="h-11 w-full bg-background">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ACTIVE">Active</SelectItem>
+                        <SelectItem value="DONE">Done</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="edit-description">Description</Label>
-                  <textarea
-                    id="edit-description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    disabled={updateGroup.isPending}
-                    rows={4}
-                    className="flex min-h-[96px] w-full rounded-md border border-input bg-muted/50 px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:opacity-50"
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label>Assignment status</Label>
-                  <Select
-                    value={assignmentStatus}
-                    onValueChange={(value) =>
-                      setAssignmentStatus(value as AssignmentStatus)
-                    }
-                    disabled={updateGroup.isPending}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="ACTIVE">Active</SelectItem>
-                      <SelectItem value="DONE">Done</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex gap-2">
-                  <Button onClick={handleSave} disabled={updateGroup.isPending}>
-                    {updateGroup.isPending ? "Saving…" : "Save Changes"}
-                  </Button>
+
+                <div className="flex flex-col-reverse gap-3 border-t border-border/60 pt-5 sm:flex-row sm:items-center sm:justify-between">
                   <Button
-                    variant="destructive"
+                    variant="outline"
+                    className="border-destructive/25 text-destructive hover:bg-destructive/5 hover:text-destructive"
                     onClick={() => setDeleteDialogOpen(true)}
                     disabled={deleteGroup.isPending}
                   >
-                    Delete Group
+                    <Trash2Icon />
+                    Delete group
+                  </Button>
+                  <Button
+                    className="sm:min-w-36"
+                    onClick={handleSave}
+                    disabled={updateGroup.isPending}
+                  >
+                    <SaveIcon />
+                    {updateGroup.isPending ? "Saving…" : "Save changes"}
                   </Button>
                 </div>
               </>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-4 rounded-xl border border-border/60 bg-muted/20 p-4 sm:p-5">
                 <div>
                   <p className="text-xs font-semibold uppercase text-muted-foreground">
                     Status
@@ -174,15 +206,17 @@ export function GroupOverviewTab({ group, onDeleted }: GroupOverviewTabProps) {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <PuzzleIcon className="size-4 text-primary" />
+        <Card className="surface-card overflow-hidden bg-gradient-to-b from-secondary/15 via-card to-card">
+          <CardHeader className="border-b border-border/60 pb-4">
+            <CardTitle className="flex items-center gap-2.5">
+              <span className="flex size-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <PuzzleIcon className="size-4" />
+              </span>
               Google Meet Extension
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4 text-sm">
-            <p className="text-muted-foreground">
+          <CardContent className="space-y-5 text-sm">
+            <p className="leading-relaxed text-muted-foreground">
               Install the CollabTrack Chrome extension to capture meeting
               transcripts and chat from Google Meet, then upload the exported
               files when generating contribution reports.
@@ -191,27 +225,29 @@ export function GroupOverviewTab({ group, onDeleted }: GroupOverviewTabProps) {
             <a
               href="/collabtrack-extension.zip"
               download
-              className={cn(buttonVariants(), "w-full")}
+              className={cn(buttonVariants({ size: "lg" }), "w-full shadow-sm")}
             >
               <DownloadIcon className="size-4" />
-              Download Extension
+              Download extension
             </a>
 
-            <div className="space-y-2">
-              <p className="text-xs font-semibold uppercase text-muted-foreground">
+            <div className="p-4">
+              <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
                 Installation steps
               </p>
-              <ol className="list-decimal space-y-1.5 pl-4 text-xs text-muted-foreground">
+              <ol className="mt-3 list-decimal space-y-2 pl-4 text-xs leading-relaxed text-muted-foreground">
                 <li>Download and unzip the extension file above</li>
-                <li>Open Chrome and go to <code>chrome://extensions</code></li>
+                <li>
+                  Open Chrome and go to <code>chrome://extensions</code>
+                </li>
                 <li>Enable Developer Mode (toggle in the top right)</li>
                 <li>
                   Click Load unpacked and select the unzipped folder that
                   contains <code>manifest.json</code>
                 </li>
                 <li>
-                  Join your Google Meet, enable captions (Ctrl+Shift+C), and open
-                  chat during the meeting
+                  Join your Google Meet, enable captions (Ctrl+Shift+C), and
+                  open chat during the meeting
                 </li>
                 <li>
                   Click the CollabTrack extension icon after the meeting to
@@ -220,9 +256,9 @@ export function GroupOverviewTab({ group, onDeleted }: GroupOverviewTabProps) {
               </ol>
             </div>
 
-            <p className="text-xs text-muted-foreground">
-              After exporting, upload both files in the contribution report
-              wizard for this group.
+            <p className="text-xs leading-relaxed text-muted-foreground">
+              After exporting, upload both files in the meeting session for this
+              group.
             </p>
           </CardContent>
         </Card>

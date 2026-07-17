@@ -1,14 +1,17 @@
 "use client";
 
 import Link from "next/link";
+import { BarChart3Icon, UsersIcon } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { GroupContributionComparisonChart } from "@/components/student/group-contribution-comparison-chart";
 import { GroupSelector } from "@/components/student/group-selector";
 import { ParticipationInsightsCard } from "@/components/student/participation-insights-card";
 import { PlatformMetricCards } from "@/components/student/platform-metric-cards";
+import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ROUTES } from "@/lib/constants";
 import {
@@ -123,35 +126,31 @@ export function StudentDashboardPage() {
 
   if (groups.length === 0) {
     return (
-      <Card>
-        <CardContent className="space-y-4 py-12 text-center">
-          <p className="text-muted-foreground">
-            You are not in any groups yet.
-          </p>
+      <EmptyState
+        icon={UsersIcon}
+        title="No groups yet"
+        description="Join or create a group to start tracking your contribution across GitHub, docs, and meetings."
+        action={
           <Button nativeButton={false} render={<Link href={ROUTES.studentGroups} />}>
             Go to My Groups
           </Button>
-        </CardContent>
-      </Card>
+        }
+      />
     );
   }
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight text-primary">
-            Welcome, {firstName}!
-          </h1>
-          <div className="mt-1">
-            <GroupSelector
-              groups={groups}
-              value={selectedGroupId}
-              onChange={handleGroupChange}
-            />
-          </div>
-        </div>
-      </div>
+      <PageHeader
+        title={`Welcome, ${firstName}!`}
+        subContent={
+          <GroupSelector
+            groups={groups}
+            value={selectedGroupId}
+            onChange={handleGroupChange}
+          />
+        }
+      />
 
       {isLoading ? (
         <>
@@ -183,8 +182,13 @@ export function StudentDashboardPage() {
               <GroupContributionComparisonChart data={comparisonRows} />
             ) : (
               <Card className="lg:col-span-2">
-                <CardContent className="py-12 text-center text-sm text-muted-foreground">
-                  No member contribution data available yet.
+                <CardContent>
+                  <EmptyState
+                    icon={BarChart3Icon}
+                    title="No contribution data yet"
+                    description="Member comparison will appear once your group syncs GitHub, docs, or meeting activity."
+                    className="py-10"
+                  />
                 </CardContent>
               </Card>
             )}

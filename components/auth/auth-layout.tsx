@@ -7,11 +7,13 @@ interface AuthLayoutProps {
 
 export function AuthLayout({ children, className }: AuthLayoutProps) {
   return (
-    <div className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-background p-4">
-      {/* Decorative brand glows */}
-      <div className="pointer-events-none absolute -top-24 -left-24 size-80 rounded-full bg-secondary/30 blur-3xl" />
-      <div className="pointer-events-none absolute -right-24 -bottom-24 size-80 rounded-full bg-secondary/30 blur-3xl" />
-      <div className={cn("relative z-10 w-full max-w-md", className)}>
+    <div className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-background p-4 sm:p-6">
+      <div
+        className={cn(
+          "animate-in fade-in-0 slide-in-from-bottom-4 w-full max-w-md duration-700",
+          className
+        )}
+      >
         {children}
       </div>
     </div>
