@@ -136,9 +136,9 @@ export function LandingPage() {
           <Link href={ROUTES.privacy} className="hover:text-foreground">
             Privacy Policy
           </Link>
-          <Link href={ROUTES.terms} className="hover:text-foreground">
+          {/* <Link href={ROUTES.terms} className="hover:text-foreground">
             Terms of Service
-          </Link>
+          </Link> */}
         </div>
       </footer>
     </div>

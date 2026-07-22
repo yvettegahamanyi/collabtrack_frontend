@@ -34,10 +34,17 @@ export default function PrivacyPage() {
         <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-6">
           <Logo />
           <div className="flex items-center gap-2">
-            <Button variant="ghost" nativeButton={false} render={<Link href={ROUTES.login} />}>
+            <Button
+              variant="ghost"
+              nativeButton={false}
+              render={<Link href={ROUTES.login} />}
+            >
               Sign in
             </Button>
-            <Button nativeButton={false} render={<Link href={ROUTES.register} />}>
+            <Button
+              nativeButton={false}
+              render={<Link href={ROUTES.register} />}
+            >
               Register
             </Button>
           </div>
@@ -56,10 +63,7 @@ export default function PrivacyPage() {
         </div>
 
         <div className="grid gap-10 lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-14">
-          <nav
-            aria-label="Privacy policy sections"
-            className="hidden lg:block"
-          >
+          <nav aria-label="Privacy policy sections" className="hidden lg:block">
             <p className="mb-3 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
               On this page
             </p>
@@ -90,9 +94,9 @@ export default function PrivacyPage() {
             <Link href={ROUTES.home} className="hover:text-foreground">
               Home
             </Link>
-            <Link href={ROUTES.terms} className="hover:text-foreground">
+            {/* <Link href={ROUTES.terms} className="hover:text-foreground">
               Terms of Service
-            </Link>
+            </Link> */}
             <Link href={ROUTES.login} className="hover:text-foreground">
               Sign in
             </Link>

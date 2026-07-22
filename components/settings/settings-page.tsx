@@ -40,10 +40,7 @@ function initials(name: string) {
     .toUpperCase();
 }
 
-export function SettingsPage({
-  role,
-  showIntegrations,
-}: SettingsPageProps) {
+export function SettingsPage({ role, showIntegrations }: SettingsPageProps) {
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
   const { data, isLoading } = useProfile();
@@ -53,8 +50,7 @@ export function SettingsPage({
     showIntegrations ??
     (user?.role === "student" || user?.role === "instructor");
 
-  const showMoodleIntegration =
-    (role ?? user?.role) === "instructor";
+  const showMoodleIntegration = (role ?? user?.role) === "instructor";
 
   const [name, setName] = useState(user?.name ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
@@ -276,9 +272,10 @@ function SecurityBanner() {
           <div>
             <p className="font-semibold">Your Data is Secure</p>
             <p className="mt-1 max-w-2xl text-sm text-primary-foreground/85">
-              We utilize bank-grade encryption for all stored transcripts and
-              third-party API tokens. Academic integrity and privacy are our top
-              priorities.
+              We encrypt third-party OAuth tokens at rest, protect data in
+              transit with HTTPS, and store meeting uploads in secure object
+              storage. Academic integrity and privacy guide how we design
+              CollabTrack.
             </p>
           </div>
         </div>
@@ -286,7 +283,13 @@ function SecurityBanner() {
           variant="secondary"
           className="shrink-0 bg-primary-foreground text-primary hover:bg-primary-foreground/90"
           nativeButton={false}
-          render={<Link href={ROUTES.privacy} target="_blank" rel="noopener noreferrer" />}
+          render={
+            <Link
+              href={ROUTES.privacy}
+              target="_blank"
+              rel="noopener noreferrer"
+            />
+          }
         >
           Privacy Policy
         </Button>

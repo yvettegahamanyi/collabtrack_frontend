@@ -62,10 +62,12 @@ export function PrivacyPolicyContent() {
       <Section id="introduction" title="1. Introduction">
         <p>
           {APP_NAME} (&ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;our&rdquo;)
-          is an academic analytics platform that helps students and instructors
-          measure individual contributions to group projects. We connect to
-          collaboration tools such as GitHub and Google Workspace, and analyze
-          meeting participation data to produce fair contribution reports.
+          is an academic analytics platform that was developed under the
+          supervision of African Leadership University. CollabTrack helps
+          students and instructors measure individual contributions to group
+          projects. We connect to collaboration tools such as GitHub and Google
+          Workspace, and analyze meeting participation data to produce fair
+          contribution reports.
         </p>
         <p>
           This Privacy Policy explains what personal information we collect, how
@@ -200,7 +202,7 @@ export function PrivacyPolicyContent() {
             "Sync and aggregate collaboration activity from connected platforms",
             "Generate participation dashboards and contribution reports",
             "Send transactional emails such as password-reset codes and report-ready notifications",
-            "Improve scoring models using anonymized benchmark datasets (admin-controlled)",
+            "Improve scoring & classification models using anonymized data from your contributions (admin-controlled)",
             "Maintain security, prevent abuse, and troubleshoot the service",
             "Comply with legal obligations and enforce our terms of use",
           ]}

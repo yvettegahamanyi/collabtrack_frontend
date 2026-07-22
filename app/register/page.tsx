@@ -157,16 +157,16 @@ export default function RegisterPage() {
                 htmlFor="accept-terms"
                 className="text-sm leading-snug font-normal text-muted-foreground"
               >
-                I agree to the{" "}
-                <Link
+                I Have read the
+                {/* <Link
                   href={ROUTES.terms}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-medium text-primary hover:underline"
                 >
                   Terms of Service
-                </Link>{" "}
-                and{" "}
+                </Link>
+                and */}
                 <Link
                   href={ROUTES.privacy}
                   target="_blank"
@@ -199,9 +199,9 @@ export default function RegisterPage() {
           <Link href={ROUTES.privacy} className="hover:text-foreground">
             Privacy
           </Link>
-          <Link href={ROUTES.terms} className="hover:text-foreground">
+          {/* <Link href={ROUTES.terms} className="hover:text-foreground">
             Terms
-          </Link>
+          </Link> */}
         </span>
       </div>
     </AuthLayout>

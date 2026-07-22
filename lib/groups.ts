@@ -51,10 +51,14 @@ export function studentClusterDescription(clusterKey: string): string {
   switch (clusterKey) {
     case "free_rider":
       return "Contribution is well below the group average across measured channels.";
+    case "below_average_contributor":
+      return "Contribution is below the group average across the platforms this team used.";
     case "normal_contributor":
       return "Contribution is around the group average across measured channels.";
     case "over_contributor":
       return "Contribution is clearly above the group average across measured channels.";
+    case "exceptional_contributor":
+      return "Contribution is far above the group average across the platforms this team used.";
     case "insufficient_data":
       return "Not enough measured activity on any platform to classify this student.";
     default:
@@ -81,9 +85,13 @@ export function studentClusterBadgeVariant(
   switch (clusterKey) {
     case "free_rider":
       return "destructive";
+    case "below_average_contributor":
+      return "outline";
     case "normal_contributor":
       return "secondary";
     case "over_contributor":
+      return "default";
+    case "exceptional_contributor":
       return "default";
     case "insufficient_data":
       return "outline";

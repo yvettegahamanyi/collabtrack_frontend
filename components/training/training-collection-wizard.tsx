@@ -98,12 +98,6 @@ const datasetRowColumns: ColumnDef<DatasetRow>[] = [
     header: "Docs",
     meta: { align: "right" },
   },
-  {
-    id: "benchmark_score",
-    accessorFn: (row) => row.benchmark_score.toFixed(3),
-    header: "Benchmark",
-    meta: { align: "right" },
-  },
 ];
 
 interface MeetingDraft {
@@ -175,7 +169,6 @@ function downloadDatasetCsv(result: TrainingCollectionDetail) {
     "chat_participation_ratio",
     "docs_contribution_share",
     "comment_activity",
-    "benchmark_score",
   ];
   const rows = result.dataset_rows.map((row) =>
     [
@@ -189,7 +182,6 @@ function downloadDatasetCsv(result: TrainingCollectionDetail) {
       row.chat_participation_ratio,
       row.docs_contribution_share,
       row.comment_activity,
-      row.benchmark_score,
     ].join(",")
   );
   const blob = new Blob([[headers.join(","), ...rows].join("\n")], {
