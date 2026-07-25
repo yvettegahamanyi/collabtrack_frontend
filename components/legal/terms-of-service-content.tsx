@@ -1,6 +1,6 @@
 import { APP_NAME, ROUTES } from "@/lib/constants";
 
-const LAST_UPDATED = "July 9, 2026";
+const LAST_UPDATED = "July 25, 2026";
 
 function Section({
   id,
@@ -83,19 +83,10 @@ export function TermsOfServiceContent() {
           credentials and for all activity under your account.
         </p>
 
-        <Subheading>3.2 Instructor-provisioned accounts</Subheading>
+        <Subheading>3.2 Account suspension</Subheading>
         <p>
-          An instructor may create an account for you using your name and email.
-          If that happens, you must sign in, change any temporary password when
-          prompted, and review these Terms and our Privacy Policy before
-          continuing to use the Service.
-        </p>
-
-        <Subheading>3.3 Account suspension</Subheading>
-        <p>
-          We or your institution&apos;s administrator may suspend or deactivate
-          accounts that violate these Terms, pose a security risk, or are no
-          longer authorized for use.
+          We may suspend or deactivate accounts that violate these Terms, pose a
+          security risk, or are no longer authorized for use.
         </p>
       </Section>
 
@@ -105,13 +96,30 @@ export function TermsOfServiceContent() {
           contributions to group projects by aggregating activity from linked
           collaboration tools and uploaded meeting participation data. The
           Service may include dashboards, contribution reports, automated
-          scoring, and AI-generated explanations of participation metrics.
+          scoring, and contribution style classification.
         </p>
         <p>
-          Reports and scores are provided for academic review and discussion.
-          They are analytical tools, not official grades, disciplinary findings,
-          or legal determinations. Instructors remain responsible for final
-          academic judgments.
+          {APP_NAME} is{" "}
+          <strong className="font-semibold text-foreground">
+            decision support
+          </strong>
+          , not an automated grader. Reports and scores describe{" "}
+          <strong className="font-semibold text-foreground">
+            relative within-group patterns
+          </strong>{" "}
+          of measured collaboration activity. Scores are{" "}
+          <strong className="font-semibold text-foreground">rule-bound</strong>{" "}
+          and accompanied by a rationale meant to{" "}
+          <strong className="font-semibold text-foreground">
+            prompt a conversation
+          </strong>
+          . Outputs are{" "}
+          <strong className="font-semibold text-foreground">
+            evidence to interpret alongside the submitted work
+          </strong>
+          , not a verdict, official grade, disciplinary finding, or legal
+          determination. Instructors remain responsible for final academic
+          judgments.
         </p>
       </Section>
 
@@ -126,6 +134,7 @@ export function TermsOfServiceContent() {
             "Reverse engineer, scrape, or overload the Service in ways that impair others",
             "Share login credentials or attempt to bypass authentication or role restrictions",
             "Use the Service to harass, discriminate against, or unfairly target others",
+            "Use the generated score and contribution style to make decisions about student's performance",
           ]}
         />
         <p>
@@ -136,9 +145,9 @@ export function TermsOfServiceContent() {
 
       <Section id="integrations" title="6. Third-Party Integrations">
         <p>
-          The Service may connect to third-party platforms such as GitHub and
-          Google. Your use of those integrations is also subject to the third
-          party&apos;s own terms and privacy policies.
+          The Service may connect to third-party platforms such as GitHub,
+          Google and Moodle. Your use of those integrations is also subject to
+          the third party&apos;s own terms and privacy policies.
         </p>
         <p>
           By connecting an integration, you authorize {APP_NAME} to access the
@@ -167,10 +176,11 @@ export function TermsOfServiceContent() {
 
       <Section id="intellectual-property" title="8. Intellectual Property">
         <p>
-          {APP_NAME}, including its software, branding, scoring models, and
-          documentation, is owned by us or our licensors and is protected by
-          applicable intellectual property laws. These Terms do not grant you
-          any ownership rights in the Service itself.
+          {APP_NAME}, including its software, branding, contribution style
+          classification model, and documentation, is under the protection of
+          African Leadership University and is protected by applicable
+          intellectual property laws.mThese Terms do not grant you any ownership
+          rights in the Service itself.
         </p>
         <p>
           Feedback you submit may be used by us to improve the Service without
@@ -226,12 +236,6 @@ export function TermsOfServiceContent() {
           PROFITS, GOODWILL, OR ACADEMIC OUTCOMES ARISING FROM YOUR USE OF THE
           SERVICE.
         </p>
-        <p>
-          Our total liability for any claim relating to the Service will not
-          exceed the greater of the amount you paid us in the twelve months
-          before the claim or one hundred U.S. dollars (USD $100), except where
-          such limitation is prohibited by law.
-        </p>
       </Section>
 
       <Section id="indemnity" title="13. Indemnification">
@@ -252,16 +256,7 @@ export function TermsOfServiceContent() {
         </p>
       </Section>
 
-      <Section id="governing-law" title="15. Governing Law">
-        <p>
-          These Terms are governed by the laws applicable where {APP_NAME} is
-          operated, without regard to conflict-of-law principles. If your
-          institution provides the Service under a separate agreement, that
-          agreement may govern instead where it expressly overrides these Terms.
-        </p>
-      </Section>
-
-      <Section id="contact" title="16. Contact">
+      <Section id="contact" title="15. Contact">
         <p>
           Questions about these Terms can be sent to{" "}
           <a
