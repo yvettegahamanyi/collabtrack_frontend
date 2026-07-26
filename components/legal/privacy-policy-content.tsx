@@ -301,19 +301,14 @@ export function PrivacyPolicyContent() {
               )
             </>,
             <>
-              <>
-                <strong className="text-foreground">Moodle</strong>: Moodle LMS
-                via API (
-                <PolicyLink href="https://moodle.org/privacy/">
-                  Moodle Privacy Policy
-                </PolicyLink>
-                ) Activity, and related APIs via OAuth (
-                <PolicyLink href="https://policies.google.com/privacy">
-                  Google Privacy Policy
-                </PolicyLink>
-                )
-              </>
-              ,<></>
+              <strong className="text-foreground">Moodle</strong>: Moodle LMS
+              for Collecting Groups information and Synching grades via API (
+              <PolicyLink href="https://moodle.org/privacy/">
+                Moodle Privacy Policy
+              </PolicyLink>
+              )
+            </>,
+            <>
               <strong className="text-foreground">Google Gemini</strong>:
               AI-assisted participation scoring on aggregated features
             </>,
@@ -426,11 +421,7 @@ export function PrivacyPolicyContent() {
       <Section id="children" title="11. Academic Use">
         <p>
           {APP_NAME} is intended for use in academic and educational settings by
-          students, instructors, and administrators who are at least 16 years
-          old or the minimum age required by their institution. We do not
-          knowingly collect personal information from children under 13. If you
-          believe we have collected such information, contact us so we can
-          delete it.
+          students, instructors, and administrators.
         </p>
       </Section>
 
