@@ -163,13 +163,13 @@ export function PrivacyPolicyContent() {
 
         <Subheading>2.5 Derived analytics and automated scoring</Subheading>
         <p>
-          {APP_NAME} calculates participation metrics and contribution scores
-          from the data above. This includes normalized behavioral features,
-          contributor tiers, machine-learning benchmark scores, and optional
-          AI-generated rationales that explain a score. For AI scoring, we send
-          aggregated, pseudonymized feature data (for example, &ldquo;Member
-          A&rdquo;) to Google Gemini—not your raw meeting transcripts or full
-          document contents.
+          {APP_NAME} &nbsp; calculates participation metrics and contribution
+          scores from the data above. This includes normalized behavioral
+          features, contributor tiers, machine-learning benchmark scores, and
+          optional AI-generated rationales that explain a score. For AI scoring,
+          we send aggregated, pseudonymized feature data (for example,
+          &ldquo;Member A&rdquo;) to Google Gemini—not your raw meeting
+          transcripts or full document contents.
         </p>
 
         <Subheading>2.6 Technical and session data</Subheading>
@@ -285,7 +285,7 @@ export function PrivacyPolicyContent() {
         <List
           items={[
             <>
-              <strong className="text-foreground">GitHub</strong> — repository
+              <strong className="text-foreground">GitHub</strong>: repository
               activity via OAuth (
               <PolicyLink href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">
                 GitHub Privacy Statement
@@ -293,7 +293,7 @@ export function PrivacyPolicyContent() {
               )
             </>,
             <>
-              <strong className="text-foreground">Google</strong> — Docs, Drive
+              <strong className="text-foreground">Google</strong>: Docs, Drive
               Activity, and related APIs via OAuth (
               <PolicyLink href="https://policies.google.com/privacy">
                 Google Privacy Policy
@@ -301,18 +301,35 @@ export function PrivacyPolicyContent() {
               )
             </>,
             <>
-              <strong className="text-foreground">Google Gemini</strong> —
+              <>
+                <strong className="text-foreground">Moodle</strong>: Moodle LMS
+                via API (
+                <PolicyLink href="https://moodle.org/privacy/">
+                  Moodle Privacy Policy
+                </PolicyLink>
+                ) Activity, and related APIs via OAuth (
+                <PolicyLink href="https://policies.google.com/privacy">
+                  Google Privacy Policy
+                </PolicyLink>
+                )
+              </>
+              ,<></>
+              <strong className="text-foreground">Google Gemini</strong>:
               AI-assisted participation scoring on aggregated features
             </>,
             <>
               <strong className="text-foreground">
                 Cloud hosting and storage
-              </strong>{" "}
-              — application hosting, PostgreSQL database, and secure file
-              storage for meeting uploads
+              </strong>
+              : application hosting, PostgreSQL database, and secure file
+              storage for meeting uploads all managed by Railway(
+              <PolicyLink href="https://railway.com/legal/privacy">
+                Google Privacy Policy
+              </PolicyLink>
+              )
             </>,
             <>
-              <strong className="text-foreground">Email delivery</strong> —
+              <strong className="text-foreground">Email delivery</strong>:
               password reset and notification emails via SMTP or Resend
             </>,
           ]}
