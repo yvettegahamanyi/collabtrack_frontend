@@ -165,6 +165,14 @@ export function participationFeatureLabel(key: string): string {
   return PARTICIPATION_FEATURE_LABELS[key] ?? key.replaceAll("_", " ");
 }
 
+/** Format a 0–1 participation score/share as % (matches backend 4-decimal precision). */
+export function formatParticipationShare(value: number): string {
+  const pct = value * 100;
+  const fixed = pct.toFixed(4);
+  const trimmed = fixed.replace(/(\.\d*?[1-9])0+$/, "$1").replace(/\.0+$/, "");
+  return `${trimmed}%`;
+}
+
 export function scoreConfidenceTextClass(confidence: number): string {
   if (confidence >= 0.8) {
     return "text-green-600 dark:text-green-400";
@@ -173,6 +181,25 @@ export function scoreConfidenceTextClass(confidence: number): string {
     return "text-amber-600 dark:text-amber-400";
   }
   return "text-red-600 dark:text-red-400";
+}
+
+/** Equal-split reference: 100% / group size (matches backend fair_share). */
+export function participationFairShare(memberCount: number): number {
+  return memberCount > 0 ? 1 / memberCount : 0;
+}
+
+/** Score color by share vs fair split — not model confidence. */
+export function participationScoreTextClass(
+  score: number,
+  memberCount: number
+): string {
+  if (memberCount <= 0) {
+    return "text-foreground";
+  }
+  if (score < participationFairShare(memberCount)) {
+    return "text-amber-600 dark:text-amber-400";
+  }
+  return "text-green-600 dark:text-green-400";
 }
 
 export function scoreConfidenceLabel(confidence: number): string {

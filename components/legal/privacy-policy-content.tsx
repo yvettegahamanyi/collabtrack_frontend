@@ -165,11 +165,11 @@ export function PrivacyPolicyContent() {
         <p>
           {APP_NAME} &nbsp; calculates participation metrics and contribution
           scores from the data above. This includes normalized behavioral
-          features, contributor tiers, machine-learning benchmark scores, and
-          optional AI-generated rationales that explain a score. For AI scoring,
-          we send aggregated, pseudonymized feature data (for example,
-          &ldquo;Member A&rdquo;) to Google Gemini—not your raw meeting
-          transcripts or full document contents.
+          features, contribution style, and optional AI-generated rationales
+          that explain a score. For AI scoring, we send aggregated,
+          pseudonymized feature data (for example, &ldquo;Member A&rdquo;) to
+          Google Gemini—not your raw meeting transcripts or full document
+          contents.
         </p>
 
         <Subheading>2.6 Technical and session data</Subheading>

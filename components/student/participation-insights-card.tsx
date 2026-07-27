@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { groupPath } from "@/lib/constants";
 import {
+  formatParticipationShare,
   participationFeatureLabel,
   sanitizeLlmReasoning,
   studentClusterBadgeVariant,
@@ -49,7 +50,7 @@ export function ParticipationInsightsCard({
               </Badge>
               {contributionScore !== null && (
                 <span className="text-sm text-muted-foreground">
-                  {contributionScore}% overall score
+                  {formatParticipationShare(contributionScore)} overall score
                 </span>
               )}
             </div>

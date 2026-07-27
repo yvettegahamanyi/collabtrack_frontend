@@ -27,9 +27,9 @@ import {
 import { ROUTES } from "@/lib/constants";
 import {
   canGenerateParticipationScores,
-  contributorTierLabel,
   memberInitials,
-  scoreConfidenceTextClass,
+  formatParticipationShare,
+  participationScoreTextClass,
   studentClusterBadgeVariant,
 } from "@/lib/groups";
 import {
@@ -71,6 +71,7 @@ export function GroupContributionTab({
   const scoresByUserId = Object.fromEntries(
     scores.map((score) => [score.user_id, score])
   );
+  const scoredMemberCount = scores.length;
   const hasScores = scores.length > 0;
   const hasStudentClusterInsights = scores.some(
     (score) => score.student_cluster != null
@@ -154,7 +155,7 @@ export function GroupContributionTab({
       "GitHub Comments",
       "Doc Edits",
       "Doc Comments",
-      ...(hasScores ? ["Participation Score", "Contributor Tier"] : []),
+      ...(hasScores ? ["Participation Score"] : []),
       ...(hasStudentClusterInsights ? ["Contribution Style"] : []),
       ...(hasMeetingEngagement
         ? ["Attendance", "Speaking", "Chat", "Meeting Leads"]
@@ -173,10 +174,7 @@ export function GroupContributionTab({
         m.google_docs?.edits ?? "",
         m.google_docs?.comments ?? "",
         ...(hasScores
-          ? [
-              score ? `${Math.round(score.predicted_score * 100)}%` : "",
-              score ? contributorTierLabel(score.contributor_tier) : "",
-            ]
+          ? [score ? formatParticipationShare(score.predicted_score) : ""]
           : []),
         ...(hasStudentClusterInsights
           ? [score?.student_cluster?.cluster_label ?? ""]
@@ -348,10 +346,10 @@ export function GroupContributionTab({
                 Swipe horizontally to see all metrics.
               </p>
               <div className="-mx-4 px-4 sm:-mx-6 sm:px-6">
-                <Table className="min-w-4xl">
+                <Table className="min-w-max">
                   <TableHeader>
                     <TableRow className="border-b-0 hover:bg-transparent">
-                      <TableHead className="sticky left-0 z-10 min-w-44 bg-muted/50 px-4 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.06)]">
+                      <TableHead className="min-w-36 px-4 whitespace-normal">
                         Member
                       </TableHead>
                       {hasScores && (
@@ -416,7 +414,7 @@ export function GroupContributionTab({
                           className="group cursor-pointer transition-colors hover:bg-muted/40"
                           onClick={() => setSelectedMember(member)}
                         >
-                          <TableCell className="sticky left-0 z-10 min-w-44 bg-card px-4 py-3 whitespace-normal shadow-[4px_0_8px_-4px_rgba(0,0,0,0.06)] group-hover:bg-muted/40">
+                          <TableCell className="min-w-36 px-4 py-3 whitespace-normal">
                             <div className="flex items-center gap-3">
                               <Avatar size="sm" className="shrink-0">
                                 <AvatarFallback>
@@ -437,15 +435,12 @@ export function GroupContributionTab({
                             <TableCell className="px-4 py-3 text-right">
                               {score ? (
                                 <span
-                                  className={`text-base font-semibold tabular-nums ${
-                                    score.llm_rationale?.confidence != null
-                                      ? scoreConfidenceTextClass(
-                                          score.llm_rationale.confidence
-                                        )
-                                      : "text-foreground"
-                                  }`}
+                                  className={`text-base font-semibold tabular-nums ${participationScoreTextClass(
+                                    score.predicted_score,
+                                    scoredMemberCount
+                                  )}`}
                                 >
-                                  {formatRatio(score.predicted_score)}
+                                  {formatParticipationShare(score.predicted_score)}
                                 </span>
                               ) : (
                                 <span className="text-muted-foreground">—</span>

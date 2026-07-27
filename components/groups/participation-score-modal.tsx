@@ -1,5 +1,6 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -7,13 +8,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  contributorTierBadgeVariant,
-  contributorTierLabel,
+  formatParticipationShare,
   llmFlagLabel,
   participationFeatureLabel,
+  participationScoreTextClass,
   sanitizeLlmReasoning,
   scoreConfidenceLabel,
   scoreConfidenceTextClass,
@@ -24,6 +24,7 @@ import {
 import {
   useMemberParticipation,
   useMemberParticipationScore,
+  useGroupParticipationScores,
 } from "@/service/use-participation";
 import type {
   GithubSyncEvent,
@@ -73,11 +74,13 @@ export function ParticipationScoreModal({
     isLoading: scoreLoading,
     isError: scoreError,
   } = useMemberParticipationScore(groupId, userId ?? "");
+  const { data: groupScoresData } = useGroupParticipationScores(groupId);
 
   const participation = data?.data ?? fallback;
   const score = scoreData?.data;
   const rationale = score?.llm_rationale;
   const scoreConfidence = rationale?.confidence;
+  const scoredMemberCount = groupScoresData?.data.scores.length ?? 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -87,14 +90,13 @@ export function ParticipationScoreModal({
             Participation — {participation?.name ?? memberName ?? "Member"}
           </DialogTitle>
           <DialogDescription className="text-sm leading-relaxed">
-            Activity metrics and ML participation score from synced integrations.
+            Activity metrics and ML participation score from synced
+            integrations.
           </DialogDescription>
         </DialogHeader>
 
         <div className="max-h-[70vh] space-y-5 overflow-y-auto px-6 py-6">
-          {scoreLoading && (
-            <Skeleton className="h-24 w-full" />
-          )}
+          {scoreLoading && <Skeleton className="h-24 w-full" />}
 
           {score && (
             <div className="rounded-xl border bg-primary/5 p-4">
@@ -104,25 +106,28 @@ export function ParticipationScoreModal({
                     ML participation score
                   </p>
                   <p
-                    className={`text-3xl font-bold tabular-nums ${
-                      scoreConfidence != null
-                        ? scoreConfidenceTextClass(scoreConfidence)
-                        : "text-primary"
-                    }`}
+                    className={`text-3xl font-bold tabular-nums ${participationScoreTextClass(
+                      score.predicted_score,
+                      scoredMemberCount
+                    )}`}
                   >
-                    {Math.round(score.predicted_score * 100)}%
+                    {formatParticipationShare(score.predicted_score)}
                   </p>
                   {scoreConfidence != null && (
                     <p className="mt-1 text-xs text-muted-foreground">
-                      {scoreConfidenceLabel(scoreConfidence)} (
-                      {Math.round(scoreConfidence * 100)}%) — how certain the
+                      <span
+                        className={scoreConfidenceTextClass(scoreConfidence)}
+                      >
+                        {scoreConfidenceLabel(scoreConfidence)}
+                      </span>{" "}
+                      ({Math.round(scoreConfidence * 100)}%) — how certain the
                       model is that this score fits the data
                     </p>
                   )}
                 </div>
-                <Badge variant={contributorTierBadgeVariant(score.contributor_tier)}>
+                {/* <Badge variant={contributorTierBadgeVariant(score.contributor_tier)}>
                   {contributorTierLabel(score.contributor_tier)}
-                </Badge>
+                </Badge> */}
               </div>
               {score.student_cluster && (
                 <div className="mt-4 rounded-lg border bg-background p-3">
@@ -139,7 +144,9 @@ export function ParticipationScoreModal({
                     </Badge>
                   </div>
                   <p className="mt-2 text-sm text-muted-foreground">
-                    {studentClusterDescription(score.student_cluster.cluster_key)}
+                    {studentClusterDescription(
+                      score.student_cluster.cluster_key
+                    )}
                   </p>
                   {score.student_cluster.active_platforms &&
                     score.student_cluster.active_platforms.length > 0 && (
@@ -150,7 +157,8 @@ export function ParticipationScoreModal({
                           .join(", ")}
                       </p>
                     )}
-                  {typeof score.student_cluster.composite_score === "number" && (
+                  {typeof score.student_cluster.composite_score ===
+                    "number" && (
                     <p className="mt-1 text-xs tabular-nums text-muted-foreground">
                       Composite score:{" "}
                       {score.student_cluster.composite_score.toFixed(2)}
@@ -169,7 +177,7 @@ export function ParticipationScoreModal({
                         {featureLabel(key)}
                       </dt>
                       <dd className="font-semibold tabular-nums">
-                        {Math.round(value * 100)}%
+                        {formatParticipationShare(value)}
                       </dd>
                     </div>
                   ))}
@@ -183,7 +191,9 @@ export function ParticipationScoreModal({
               <h3 className="mb-3 text-sm font-semibold">Score analysis</h3>
               {rationale.top_area && (
                 <p className="mb-2 text-sm">
-                  <span className="text-muted-foreground">Strongest area: </span>
+                  <span className="text-muted-foreground">
+                    Strongest area:{" "}
+                  </span>
                   <span className="font-medium">
                     {featureLabel(rationale.top_area)}
                   </span>
@@ -229,11 +239,25 @@ export function ParticipationScoreModal({
           {participation && (
             <>
               <div className="flex flex-wrap gap-2">
-                <Badge variant={participation.github_connected ? "secondary" : "outline"}>
-                  GitHub {participation.github_connected ? "connected" : "not connected"}
+                <Badge
+                  variant={
+                    participation.github_connected ? "secondary" : "outline"
+                  }
+                >
+                  GitHub{" "}
+                  {participation.github_connected
+                    ? "connected"
+                    : "not connected"}
                 </Badge>
-                <Badge variant={participation.google_connected ? "secondary" : "outline"}>
-                  Google {participation.google_connected ? "connected" : "not connected"}
+                <Badge
+                  variant={
+                    participation.google_connected ? "secondary" : "outline"
+                  }
+                >
+                  Google{" "}
+                  {participation.google_connected
+                    ? "connected"
+                    : "not connected"}
                 </Badge>
                 {participation.github_login && (
                   <Badge variant="outline">@{participation.github_login}</Badge>
@@ -251,11 +275,26 @@ export function ParticipationScoreModal({
                 items={
                   participation.github
                     ? [
-                        { label: "Total commits", value: participation.github.total_commits },
-                        { label: "Lines changed", value: participation.github.lines_changed },
-                        { label: "PRs created", value: participation.github.prs_created },
-                        { label: "PRs reviewed", value: participation.github.prs_reviewed },
-                        { label: "Comments", value: participation.github.comments },
+                        {
+                          label: "Total commits",
+                          value: participation.github.total_commits,
+                        },
+                        {
+                          label: "Lines changed",
+                          value: participation.github.lines_changed,
+                        },
+                        {
+                          label: "PRs created",
+                          value: participation.github.prs_created,
+                        },
+                        {
+                          label: "PRs reviewed",
+                          value: participation.github.prs_reviewed,
+                        },
+                        {
+                          label: "Comments",
+                          value: participation.github.comments,
+                        },
                       ]
                     : []
                 }
@@ -269,7 +308,10 @@ export function ParticipationScoreModal({
                 items={
                   participation.google_docs
                     ? [
-                        { label: "Edits", value: participation.google_docs.edits },
+                        {
+                          label: "Edits",
+                          value: participation.google_docs.edits,
+                        },
                         {
                           label: "Comments",
                           value: participation.google_docs.comments,
@@ -286,19 +328,27 @@ export function ParticipationScoreModal({
                   items={[
                     {
                       label: "Attendance",
-                      value: `${Math.round(participation.meeting_engagement.attendance_ratio * 100)}%`,
+                      value: `${Math.round(
+                        participation.meeting_engagement.attendance_ratio * 100
+                      )}%`,
                     },
                     {
                       label: "Speaking",
-                      value: `${Math.round(participation.meeting_engagement.speaking_ratio * 100)}%`,
+                      value: `${Math.round(
+                        participation.meeting_engagement.speaking_ratio * 100
+                      )}%`,
                     },
                     {
                       label: "Chat",
-                      value: `${Math.round(participation.meeting_engagement.chat_participation * 100)}%`,
+                      value: `${Math.round(
+                        participation.meeting_engagement.chat_participation *
+                          100
+                      )}%`,
                     },
                     {
                       label: "Meeting leads",
-                      value: participation.meeting_engagement.meeting_lead_count,
+                      value:
+                        participation.meeting_engagement.meeting_lead_count,
                     },
                   ]}
                 />
@@ -334,7 +384,8 @@ function GithubEventsSection({ events }: { events: GithubSyncEvent[] }) {
     <div className="rounded-xl border bg-muted/20 p-4">
       <h3 className="mb-3 text-sm font-semibold">GitHub — sync breakdown</h3>
       <p className="mb-3 text-xs text-muted-foreground">
-        Raw events from the GitHub API that contributed to this member&apos;s score.
+        Raw events from the GitHub API that contributed to this member&apos;s
+        score.
       </p>
       <ul className="max-h-56 space-y-2 overflow-y-auto text-xs">
         {events.map((event, index) => (
@@ -364,7 +415,8 @@ function GithubEventsSection({ events }: { events: GithubSyncEvent[] }) {
               </p>
             )}
             <p className="text-muted-foreground">
-              source: {event.source_id ?? "—"} · repo: {event.owner}/{event.repo}
+              source: {event.source_id ?? "—"} · repo: {event.owner}/
+              {event.repo}
             </p>
           </li>
         ))}
@@ -376,10 +428,12 @@ function GithubEventsSection({ events }: { events: GithubSyncEvent[] }) {
 function GoogleDocsEventsSection({ events }: { events: GoogleDocSyncEvent[] }) {
   return (
     <div className="rounded-xl border bg-muted/20 p-4">
-      <h3 className="mb-3 text-sm font-semibold">Google Docs — sync breakdown</h3>
+      <h3 className="mb-3 text-sm font-semibold">
+        Google Docs — sync breakdown
+      </h3>
       <p className="mb-3 text-xs text-muted-foreground">
-        Raw events from the Google Drive API that contributed to this member&apos;s
-        score.
+        Raw events from the Google Drive API that contributed to this
+        member&apos;s score.
       </p>
       <ul className="max-h-56 space-y-2 overflow-y-auto text-xs">
         {events.map((event, index) => (
@@ -425,7 +479,9 @@ function MetricsSection({
     <div className="rounded-xl border bg-muted/20 p-4">
       <h3 className="mb-3 text-sm font-semibold">{title}</h3>
       {empty ? (
-        <p className="text-sm text-muted-foreground">No data — not connected or not synced.</p>
+        <p className="text-sm text-muted-foreground">
+          No data — not connected or not synced.
+        </p>
       ) : (
         <dl className="grid gap-2 sm:grid-cols-2">
           {items.map((item) => (

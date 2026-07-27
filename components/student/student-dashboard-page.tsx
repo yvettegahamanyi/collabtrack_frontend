@@ -17,7 +17,6 @@ import { ROUTES } from "@/lib/constants";
 import {
   buildContributionComparison,
   getMemberRawCounts,
-  mlParticipationScorePercent,
   platformPercentagesFromScoreFeatures,
 } from "@/lib/student-dashboard";
 import {
@@ -96,9 +95,7 @@ export function StudentDashboardPage() {
     ? getMemberRawCounts(currentMember)
     : { githubCommits: 0, docEdits: 0 };
 
-  const contributionScore = ownScore
-    ? mlParticipationScorePercent(ownScore.predicted_score)
-    : null;
+  const contributionScore = ownScore?.predicted_score ?? null;
 
   const studentCluster = ownScore?.student_cluster ?? null;
   const scoreConfidence = ownScore?.llm_rationale?.confidence ?? null;
@@ -170,6 +167,7 @@ export function StudentDashboardPage() {
             contributionScore={contributionScore}
             studentCluster={studentCluster}
             scoreConfidence={scoreConfidence}
+            scoredMemberCount={scoresData?.data.scores.length ?? 0}
             topContributionArea={topContributionArea}
             platforms={currentPlatforms}
             githubCommits={rawCounts.githubCommits}

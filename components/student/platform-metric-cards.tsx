@@ -11,7 +11,9 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import {
+  formatParticipationShare,
   participationFeatureLabel,
+  participationScoreTextClass,
   scoreConfidenceLabel,
   scoreConfidenceTextClass,
   studentClusterBadgeVariant,
@@ -23,9 +25,11 @@ import {
 import type { StudentCluster } from "@/types/participation";
 
 interface PlatformMetricCardsProps {
+  /** ML participation score as a 0–1 share. */
   contributionScore: number | null;
   studentCluster: StudentCluster | null | undefined;
   scoreConfidence: number | null;
+  scoredMemberCount: number;
   topContributionArea: string | null;
   platforms: PlatformPercentages;
   githubCommits: number;
@@ -84,6 +88,7 @@ export function PlatformMetricCards({
   contributionScore,
   studentCluster,
   scoreConfidence,
+  scoredMemberCount,
   topContributionArea,
   platforms,
   githubCommits,
@@ -96,12 +101,17 @@ export function PlatformMetricCards({
         <CardContent className="text-center">
           <p
             className={`text-4xl font-bold tabular-nums ${
-              contributionScore !== null && scoreConfidence != null
-                ? scoreConfidenceTextClass(scoreConfidence)
+              contributionScore !== null
+                ? participationScoreTextClass(
+                    contributionScore,
+                    scoredMemberCount
+                  )
                 : "text-primary"
             }`}
           >
-            {contributionScore !== null ? `${contributionScore}%` : "—"}
+            {contributionScore !== null
+              ? formatParticipationShare(contributionScore)
+              : "—"}
           </p>
           <p className="mt-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase">
             My Contribution Score
@@ -113,7 +123,9 @@ export function PlatformMetricCards({
           )}
           {scoresGenerated && scoreConfidence != null && (
             <p className="mt-1 text-xs text-muted-foreground">
-              {scoreConfidenceLabel(scoreConfidence)}
+              <span className={scoreConfidenceTextClass(scoreConfidence)}>
+                {scoreConfidenceLabel(scoreConfidence)}
+              </span>
             </p>
           )}
           {studentCluster?.cluster_label && (

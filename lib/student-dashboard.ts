@@ -377,7 +377,7 @@ export function platformPercentagesFromScoreFeatures(
 }
 
 export function mlParticipationScorePercent(predictedScore: number): number {
-  return Math.round(predictedScore * 100);
+  return predictedScore * 100;
 }
 
 export function meetingActivityLabel(meetingPct: number): string {
