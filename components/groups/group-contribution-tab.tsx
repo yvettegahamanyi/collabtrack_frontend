@@ -58,7 +58,9 @@ export function GroupContributionTab({
     data: scoresData,
     isLoading: scoresLoading,
     refetch: refetchScores,
-  } = useGroupParticipationScores(group.id);
+  } = useGroupParticipationScores(group.id, {
+    pollWhileEmpty: reportStatus === "PROCESSING",
+  });
   const syncGroup = useSyncGroup(group.id);
   const generateScores = useGenerateParticipationScores(group.id);
   const [selectedMember, setSelectedMember] =
@@ -67,6 +69,8 @@ export function GroupContributionTab({
   const contributions = data?.data;
   const members = contributions?.members ?? [];
   const contributionWarnings = contributions?.warnings ?? [];
+  const scoreWarnings = scoresData?.data.warnings ?? [];
+  const displayWarnings = [...contributionWarnings, ...scoreWarnings];
   const scores = scoresData?.data.scores ?? [];
   const scoresByUserId = Object.fromEntries(
     scores.map((score) => [score.user_id, score])
@@ -281,7 +285,7 @@ export function GroupContributionTab({
         </p>
       )}
 
-      {contributionWarnings.length > 0 && (
+      {displayWarnings.length > 0 && (
         <div className="rounded-lg border border-amber-300 bg-amber-50 p-4 dark:border-amber-900/60 dark:bg-amber-950/30">
           <div className="flex items-start gap-3">
             <AlertTriangleIcon className="mt-0.5 size-4 shrink-0 text-amber-600 dark:text-amber-400" />
@@ -290,7 +294,7 @@ export function GroupContributionTab({
                 Some data could not be matched
               </p>
               <ul className="list-disc space-y-1 pl-4 text-sm text-amber-800 dark:text-amber-300">
-                {contributionWarnings.map((warning, index) => (
+                {displayWarnings.map((warning, index) => (
                   <li key={index}>{warning}</li>
                 ))}
               </ul>

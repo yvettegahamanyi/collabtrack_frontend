@@ -105,11 +105,21 @@ export function useSyncGroup(groupId: string) {
   });
 }
 
-export function useGroupParticipationScores(groupId: string) {
+export function useGroupParticipationScores(
+  groupId: string,
+  options?: { pollWhileEmpty?: boolean }
+) {
   return useQuery({
     queryKey: queryKeys.participation.scores(groupId),
     queryFn: () => participationService.getGroupParticipationScores(groupId),
     enabled: Boolean(groupId),
+    refetchInterval: (query) => {
+      if (!options?.pollWhileEmpty) {
+        return false;
+      }
+      const scores = query.state.data?.data.scores ?? [];
+      return scores.length === 0 ? 5000 : false;
+    },
   });
 }
 
