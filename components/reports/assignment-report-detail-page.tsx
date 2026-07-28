@@ -29,11 +29,12 @@ export function AssignmentReportDetailPage({
   groupId,
 }: AssignmentReportDetailPageProps) {
   const { data, isLoading, isError } = useReport(assignmentId, groupId);
+  const report = data?.data;
   const notifySupervisor = useNotifySupervisor(assignmentId, groupId);
   const syncMoodleGrades = useSyncMoodleGrades(assignmentId, groupId);
-  const { data: scoresData } = useGroupParticipationScores(groupId);
-
-  const report = data?.data;
+  const { data: scoresData } = useGroupParticipationScores(groupId, {
+    pollWhileEmpty: report?.report_status === "PROCESSING",
+  });
   const hasParticipationScores = (scoresData?.data.scores.length ?? 0) > 0;
   const canSyncMoodleGrades =
     Boolean(report?.moodle_grade_sync_available) && hasParticipationScores;

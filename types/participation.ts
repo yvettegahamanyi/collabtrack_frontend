@@ -132,7 +132,7 @@ export interface ParticipationScore {
 
 export interface ParticipationScoresSummary {
   group_id: string;
-  generated_at: string;
+  generated_at: string | null;
   scores: ParticipationScore[];
   warnings?: string[];
 }
